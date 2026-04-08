@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Output (generated, user-specific)
+output/
+generated_resumes/
+
+# Data (user-specific, not tracked)
+data/
+reports/
+jds/
+interview-prep/
+batch/tracker-additions/*.tsv
+batch/logs/
+batch/batch-state.tsv
+batch/batch-input.tsv
+
+# User config (contains personal info)
+config/profile.yml
+modes/_profile.md
+portals.yml
+cv.md
+article-digest.md
+resume.tex
+
+# Binaries
+tectonic
+
+# Environment
+.env
+.env.*
+!.env.example
+.app_env_tmp
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Python cache (legacy)
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Temporary files
+/tmp/
+*.tmp

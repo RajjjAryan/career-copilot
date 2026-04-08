@@ -1,0 +1,38 @@
+# Career-Ops — Canonical States
+# Source of truth for application statuses.
+# The status field in applications.md must contain EXACTLY
+# one of these values (case-insensitive). No markdown bold,
+# no dates, no extra text.
+
+states:
+  - id: evaluated
+    label: Evaluated
+    description: Offer evaluated with report, pending decision
+
+  - id: applied
+    label: Applied
+    description: Application submitted
+
+  - id: responded
+    label: Responded
+    description: Company has responded (not yet interview)
+
+  - id: interview
+    label: Interview
+    description: Active interview process
+
+  - id: offer
+    label: Offer
+    description: Offer received
+
+  - id: rejected
+    label: Rejected
+    description: Rejected by company
+
+  - id: discarded
+    label: Discarded
+    description: Discarded by candidate or offer closed
+
+  - id: skip
+    label: SKIP
+    description: Doesn't fit, don't apply

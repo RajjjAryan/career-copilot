@@ -1,0 +1,29 @@
+name: Bug Report
+description: Report a bug or unexpected behavior
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the bug and what you expected to happen
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: How can we reproduce the issue?
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Check VERSION file or run `cat VERSION`
+  - type: dropdown
+    id: ai-tool
+    attributes:
+      label: AI Tool
+      options:
+        - GitHub Copilot CLI
+        - Claude Code
+        - Other

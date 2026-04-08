@@ -1,0 +1,51 @@
+# Career-Ops Profile Configuration
+# Copy this file to config/profile.yml and fill in your details.
+# This is the single source of truth for your personal data across all modes.
+
+candidate:
+  full_name: "Your Name"
+  email: "you@example.com"
+  phone: "+1-555-0123"
+  location: "City, Country"
+  linkedin: "linkedin.com/in/yourname"
+  portfolio_url: "https://yoursite.dev"
+  github: "github.com/yourname"
+
+target_roles:
+  primary:
+    - "Senior Backend Engineer"
+    - "Staff Platform Engineer"
+  archetypes:
+    - name: "Backend/Systems Engineer"
+      level: "Senior/Staff"
+      fit: "primary"
+    - name: "DevOps/SRE"
+      level: "Senior"
+      fit: "secondary"
+    - name: "Solutions Architect"
+      level: "Mid-Senior"
+      fit: "adjacent"
+
+narrative:
+  headline: "Backend engineer building high-scale distributed systems"
+  exit_story: "Your professional story — what makes you unique"
+  superpowers:
+    - "Distributed systems at scale"
+    - "Performance optimization"
+    - "Cross-functional collaboration"
+  proof_points:
+    - name: "Project Name"
+      url: "https://example.com/project"
+      hero_metric: "Reduced latency by 40%"
+
+compensation:
+  target_range: "$150K-200K"
+  currency: "USD"
+  minimum: "$120K"
+  location_flexibility: "Remote preferred"
+
+location:
+  country: "India"
+  city: "Gurugram"
+  timezone: "IST"
+  visa_status: "No sponsorship needed"
