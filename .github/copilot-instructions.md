@@ -96,8 +96,10 @@ These files define system behavior. They can be updated, improved, or extended b
 | `templates/cv-template.html` | HTML/CSS | ATS-optimized CV layout with Space Grotesk + DM Sans fonts | System |
 | `templates/states.yml` | YAML | Canonical application statuses (Evaluated → SKIP) | System |
 | `generate-pdf.mjs` | Node.js ESM | Playwright-based HTML→PDF with ATS normalization | System |
+| `analyze-patterns.mjs` | Node.js ESM | Pattern analysis across applications (JSON output) | System |
 | `article-digest.md` | Markdown | Published articles, talks, open-source with proof URLs | User-only |
 | `interview-prep/story-bank.md` | Markdown | STAR+Reflection stories indexed by competency | User-only |
+| `jds/` | Directory | Local JD files (referenced as `local:jds/{file}` in pipeline.md) | User-managed |
 | `reports/` | Directory | Evaluation reports: `{num}-{slug}-{date}.md` | Generated |
 | `output/` | Directory | Generated PDFs: `{num}-{slug}-{date}.pdf` | Generated |
 | `batch/logs/` | Directory | Batch processing run logs | Generated |
@@ -105,7 +107,25 @@ These files define system behavior. They can be updated, improved, or extended b
 
 ---
 
-## 4. First Run Onboarding
+## 4. Update Check
+
+On the first message of each session, run the update checker silently:
+
+```bash
+node update-system.mjs check
+```
+
+Parse the JSON output:
+- `{"status": "update-available", ...}` → tell the user: "career-ops update available (v{local} → v{remote}). Your data (CV, profile, tracker, reports) will NOT be touched. Want me to update?" If yes → `node update-system.mjs apply`. If no → `node update-system.mjs dismiss`.
+- `{"status": "up-to-date"}` → say nothing
+- `{"status": "dismissed"}` → say nothing
+- `{"status": "offline"}` → say nothing
+
+The user can also say "check for updates" or "update career-ops" at any time. To rollback: `node update-system.mjs rollback`.
+
+---
+
+## 5. First Run Onboarding
 
 When the user first interacts with this project, **check for required files** before doing anything else. If any are missing, guide the user through setup step by step.
 
@@ -123,34 +143,76 @@ When the user first interacts with this project, **check for required files** be
 ### Onboarding Flow
 
 **Step 1 — CV Creation**
-- Ask the user for their resume or work history.
-- If they have a `resume.tex` or existing document, parse it and convert to `cv.md`.
-- Structure: Contact → Summary → Experience → Skills → Education → Certifications → Publications.
-- Ensure metrics are concrete and quantified where possible.
+If `cv.md` is missing, ask:
+> "I don't have your CV yet. You can either:
+> 1. Paste your CV here and I'll convert it to markdown
+> 2. Paste your LinkedIn URL and I'll extract the key info
+> 3. Tell me about your experience and I'll draft a CV for you
+>
+> Which do you prefer?"
+
+Create `cv.md` from whatever they provide. Structure: Contact → Summary → Experience → Skills → Education → Certifications → Publications. Ensure metrics are concrete and quantified where possible. If they have a `resume.tex` or existing document, parse it and convert.
 
 **Step 2 — Profile Configuration**
-- Copy `config/profile.example.yml` → `config/profile.yml`.
-- Walk the user through each section: name, contact, target roles, archetypes, narrative, compensation, location.
-- Validate that archetype definitions match their career goals.
+If `config/profile.yml` is missing, copy from `config/profile.example.yml` and ask:
+> "I need a few details to personalize the system:
+> - Your full name and email
+> - Your location and timezone
+> - What roles are you targeting? (e.g., 'Senior Backend Engineer', 'AI Product Manager')
+> - Your salary target range
+>
+> I'll set everything up for you."
+
+Fill in `config/profile.yml` with their answers. For archetypes and targeting narrative, store user-specific mapping in `modes/_profile.md` or `config/profile.yml` rather than editing `modes/_shared.md`.
 
 **Step 3 — Portal Setup**
-- If `portals.yml` doesn't exist, ask the user which companies they're targeting.
-- Create `portals.yml` with career page URLs grouped by category.
+If `portals.yml` is missing:
+> "I'll set up the job scanner with 45+ pre-configured companies. Want me to customize the search keywords for your target roles?"
+
+Copy `templates/portals.example.yml` → `portals.yml`. If they gave target roles in Step 2, update `title_filter.positive` to match.
 
 **Step 4 — Tracker Initialization**
-- Verify `data/applications.md` has the correct header row.
-- Verify `data/pipeline.md` has the Pending/Processed sections.
+If `data/applications.md` doesn't exist, create it:
+```markdown
+# Applications Tracker
 
-**Step 5 — Get to Know the User**
-- Ask about their job search priorities, dealbreakers, preferred company sizes, remote preferences.
-- Capture responses in `modes/_profile.md` for future reference.
-- This step is conversational — don't rush it.
+| # | Date | Company | Role | Score | Status | PDF | Report | Notes |
+|---|------|---------|------|-------|--------|-----|--------|-------|
+```
 
-**After onboarding**, confirm readiness and suggest the first action (e.g., "Paste a JD to evaluate" or "Want me to scan your portals?").
+Verify `data/pipeline.md` has the Pending/Processed sections.
+
+**Step 5 — Get to Know the User (important for quality)**
+
+After the basics are set up, proactively ask for more context:
+> "The basics are ready. But the system works much better when it knows you well. Can you tell me more about:
+> - What makes you unique? What's your 'superpower' that other candidates don't have?
+> - What kind of work excites you? What drains you?
+> - Any deal-breakers? (e.g., no on-site, no startups under 20 people, no Java shops)
+> - Your best professional achievement — the one you'd lead with in an interview
+> - Any projects, articles, or case studies you've published?
+>
+> The more context you give me, the better I filter. Think of it as onboarding a recruiter — the first week I need to learn about you, then I become invaluable."
+
+Store insights in `config/profile.yml` (under narrative), `modes/_profile.md`, or in `article-digest.md` for proof points. Never put user-specific archetypes or framing into `modes/_shared.md`.
+
+**After every evaluation, learn.** If the user says "this score is too high, I wouldn't apply here" or "you missed that I have experience in X", update your understanding in `modes/_profile.md`, `config/profile.yml`, or `article-digest.md`. The system should get smarter with every interaction.
+
+**Step 6 — Ready**
+Once all files exist, confirm:
+> "You're all set! You can now:
+> - Paste a job URL to evaluate it
+> - Ask me to scan your portals for new jobs
+> - Ask me to batch process multiple offers
+>
+> Everything is customizable — just ask me to change anything."
+
+Then suggest automation:
+> "Want me to scan for new offers periodically? Just say 'scan every 3 days' and I'll remind you when it's time."
 
 ---
 
-## 5. Skill Modes — Intent Routing
+## 6. Skill Modes — Intent Routing
 
 When the user sends a message, match their intent to the appropriate mode file. Read the mode file first, then execute its workflow.
 
@@ -170,6 +232,7 @@ When the user sends a message, match their intent to the appropriate mode file. 
 | "Scan portals" / "check for new jobs" | Portal scanner | `modes/scan.md` |
 | "Process pipeline" / "process my URLs" | URL inbox processing | `modes/pipeline.md` |
 | "Batch process" / "evaluate all" / "process batch" | Parallel batch processing | `modes/batch.md` |
+| "Analyze patterns" / "rejection patterns" / "improve targeting" | Rejection pattern analysis | `modes/patterns.md` |
 
 ### Routing Rules
 
@@ -183,7 +246,7 @@ When the user sends a message, match their intent to the appropriate mode file. 
 
 ---
 
-## 6. CV Source of Truth
+## 7. CV Source of Truth
 
 ### Rules
 
@@ -196,7 +259,7 @@ When the user sends a message, match their intent to the appropriate mode file. 
 
 ---
 
-## 7. Ethical Use
+## 8. Ethical Use
 
 This system exists to help the user find the **right** job, not to spam applications.
 
@@ -212,7 +275,20 @@ This system exists to help the user find the **right** job, not to spam applicat
 
 ---
 
-## 8. Stack & Conventions
+## 9. Offer Verification — MANDATORY
+
+**NEVER trust `web_search` or `web_fetch` to verify if an offer is still active.** ALWAYS use Playwright MCP:
+1. `browser_navigate` to the URL
+2. `browser_snapshot` to read content
+3. Only footer/navbar without JD = closed. Title + description + Apply button = active.
+
+If the page loads but shows "This position has been filled" or "Job no longer available", mark as `Discarded` with note "Offer closed".
+
+**Exception for batch workers (`task` sub-agents):** Playwright MCP tools may not be available to sub-agents dispatched via the `task` tool. In that case, use `web_fetch` as a fallback and mark the report header with `**Verification:** unconfirmed (batch mode)`. The user can verify manually later.
+
+---
+
+## 10. Stack & Conventions
 
 ### Technology Stack
 
@@ -245,7 +321,7 @@ To determine the next report number:
 
 ---
 
-## 9. TSV Format for Tracker Additions
+## 11. TSV Format for Tracker Additions
 
 When adding a row to `data/applications.md`, use this exact format:
 
@@ -269,7 +345,13 @@ When adding a row to `data/applications.md`, use this exact format:
 
 ### Batch Tracker Additions
 
-For batch processing, write individual TSV fragments to `batch/tracker-additions/` with filename `{num}-{slug}.tsv`. These are merged into `data/applications.md` after batch completion.
+For batch processing, write individual TSV fragments to `batch/tracker-additions/` with filename `{num}-{slug}.tsv`. Single line, 9 tab-separated columns:
+
+```
+{num}\t{date}\t{company}\t{role}\t{status}\t{score}/5\t{pdf_emoji}\t[{num}](reports/{num}-{slug}-{date}.md)\t{note}
+```
+
+**Column order note:** In TSV fragments, `status` comes BEFORE `score`. In `data/applications.md`, `score` comes BEFORE `status`. The `merge-tracker.mjs` script handles this column swap automatically.
 
 ### Pipeline Integrity Rules
 
@@ -281,7 +363,7 @@ For batch processing, write individual TSV fragments to `batch/tracker-additions
 
 ---
 
-## 10. Canonical Application States
+## 12. Canonical Application States
 
 Defined in `templates/states.yml`. The `Status` field in `data/applications.md` must contain **exactly one** of these values. No markdown bold, no dates, no extra text in the status field.
 
@@ -305,7 +387,7 @@ Defined in `templates/states.yml`. The `Status` field in `data/applications.md` 
 
 ---
 
-## 11. Copilot CLI Tool Mapping
+## 13. Copilot CLI Tool Mapping
 
 Use the correct tool for each operation. This mapping ensures efficient, reliable execution.
 
@@ -362,6 +444,7 @@ Use the correct tool for each operation. This mapping ensures efficient, reliabl
 | Task | Tool | Usage |
 |---|---|---|
 | Generate PDF from HTML | `bash` | `node generate-pdf.mjs output/{file}.html output/{file}.pdf --format=a4` |
+| Analyze patterns | `bash` | `node analyze-patterns.mjs` — outputs JSON with rejection patterns, score trends, gaps |
 | Install dependencies | `bash` | `npm install` or `npx playwright install chromium` |
 | Check for updates | `bash` | `node update-system.mjs check` |
 | Git operations | `bash` | Commit, status, diff (always use `--no-pager`) |
@@ -385,7 +468,7 @@ Use the correct tool for each operation. This mapping ensures efficient, reliabl
 
 ---
 
-## 12. Personalization
+## 14. Personalization
 
 The agent can customize the system based on user requests. All personalization follows the data contract — user preferences go in `modes/_profile.md` and `config/profile.yml`.
 
@@ -413,7 +496,21 @@ The agent can customize the system based on user requests. All personalization f
 
 ---
 
-## 13. Workflow Quick Reference
+## 15. Language Modes
+
+Default modes are in `modes/` (English). The system supports additional language-specific mode directories:
+
+- Place translated modes in `modes/{lang}/` (e.g., `modes/de/`, `modes/fr/`, `modes/es/`)
+- Each language directory should contain its own `_shared.md` and relevant mode files
+- Set `language.modes_dir: modes/de` in `config/profile.yml` to use a specific language by default
+
+**When to switch:** If the user is targeting jobs in a non-English market, lives in a region where another language dominates, or explicitly asks for translated output — use the corresponding language directory. If the user applies to English-language roles (even at non-English companies), use the default English modes.
+
+**To create modes in a new language:** Ask the agent to translate the mode files. Store translations in the appropriate `modes/{lang}/` directory.
+
+---
+
+## 16. Workflow Quick Reference
 
 ### Auto-Pipeline (JD → Report → PDF → Track)
 
@@ -451,9 +548,21 @@ The agent can customize the system based on user requests. All personalization f
 7. Update data/scan-history.tsv
 ```
 
+### Pattern Analysis
+
+```
+1. Read modes/patterns.md for workflow
+2. Run node analyze-patterns.mjs for structured data
+3. Analyze rejection reasons, score distributions, skill gaps
+4. Cross-reference with config/profile.yml archetypes
+5. Generate actionable recommendations
+6. Save pattern analysis report to reports/pattern-analysis-{date}.md
+7. Suggest profile/targeting updates to user
+```
+
 ---
 
-## 14. Error Handling & Edge Cases
+## 17. Error Handling & Edge Cases
 
 | Scenario | Action |
 |---|---|
@@ -470,22 +579,23 @@ The agent can customize the system based on user requests. All personalization f
 
 ---
 
-## 15. Session Startup Checklist
+## 18. Session Startup Checklist
 
 Every time a new session begins, before processing any user request:
 
-1. **Check onboarding status** — verify `cv.md`, `config/profile.yml`, `modes/_profile.md`, `portals.yml` exist.
-2. **Read profile** — load `config/profile.yml` to understand user context.
-3. **Read shared rules** — load `modes/_shared.md` for scoring and archetype definitions.
-4. **Read user overrides** — load `modes/_profile.md` if it exists.
-5. **Check tracker** — glance at `data/applications.md` to know the current report count and recent activity.
-6. **Route intent** — match user message to the appropriate mode (§5).
+1. **Run update check** — `node update-system.mjs check` silently. Notify user only if an update is available (see §4).
+2. **Check onboarding status** — verify `cv.md`, `config/profile.yml`, `modes/_profile.md`, `portals.yml` exist.
+3. **Read profile** — load `config/profile.yml` to understand user context.
+4. **Read shared rules** — load `modes/_shared.md` for scoring and archetype definitions.
+5. **Read user overrides** — load `modes/_profile.md` if it exists.
+6. **Check tracker** — glance at `data/applications.md` to know the current report count and recent activity.
+7. **Route intent** — match user message to the appropriate mode (§6).
 
 If any critical file is missing, guide the user through onboarding before proceeding.
 
 ---
 
-## 16. Report & Output File Structure
+## 19. Report & Output File Structure
 
 ### Evaluation Report (`reports/{num}-{slug}-{date}.md`)
 
@@ -522,7 +632,7 @@ If any critical file is missing, guide the user through onboarding before procee
 
 ---
 
-## 17. Important Reminders
+## 20. Important Reminders
 
 - **Read mode files before executing.** This instructions file defines routing and conventions. The actual workflow logic lives in each `modes/*.md` file.
 - **Never modify user-layer files without being asked.** This includes `cv.md`, `config/profile.yml`, and everything in `data/`, `reports/`, `output/`.

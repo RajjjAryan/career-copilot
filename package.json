@@ -10,6 +10,7 @@
     "dedup": "node dedup-tracker.mjs",
     "merge": "node merge-tracker.mjs",
     "pdf": "node generate-pdf.mjs",
+    "patterns": "node analyze-patterns.mjs",
     "sync-check": "node cv-sync-check.mjs",
     "liveness": "node check-liveness.mjs",
     "update:check": "node update-system.mjs check",

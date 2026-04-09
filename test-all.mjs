@@ -193,6 +193,7 @@ const essentialScripts = [
   'generate-pdf.mjs', 'doctor.mjs', 'verify-pipeline.mjs',
   'merge-tracker.mjs', 'dedup-tracker.mjs', 'normalize-statuses.mjs',
   'check-liveness.mjs', 'cv-sync-check.mjs', 'update-system.mjs',
+  'analyze-patterns.mjs',
 ];
 
 for (const script of essentialScripts) {
