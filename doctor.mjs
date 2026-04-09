@@ -42,21 +42,34 @@ function checkDependencies() {
 }
 
 async function checkPlaywright() {
+  // Step 1: Check if the playwright package can be imported
+  let chromium;
   try {
-    const { chromium } = await import('playwright');
+    const pw = await import('playwright');
+    chromium = pw.chromium;
+  } catch {
+    return {
+      pass: false,
+      label: 'Playwright package not available',
+      fix: 'Run: npm install',
+    };
+  }
+
+  // Step 2: Check if the Chromium browser binary is installed
+  try {
     const execPath = chromium.executablePath();
     if (existsSync(execPath)) {
-      return { pass: true, label: 'Playwright chromium installed' };
+      return { pass: true, label: `Playwright Chromium browser installed (${execPath})` };
     }
     return {
       pass: false,
-      label: 'Playwright chromium not installed',
+      label: 'Playwright Chromium browser not installed',
       fix: 'Run: npx playwright install chromium',
     };
   } catch {
     return {
       pass: false,
-      label: 'Playwright chromium not installed',
+      label: 'Playwright Chromium browser not installed',
       fix: 'Run: npx playwright install chromium',
     };
   }
