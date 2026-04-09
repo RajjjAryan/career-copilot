@@ -235,6 +235,22 @@ See [docs/CUSTOMIZATION.md](docs/CUSTOMIZATION.md) for details.
 
 See [LEGAL_DISCLAIMER.md](LEGAL_DISCLAIMER.md) for full details.
 
+## Contributing
+
+Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+Check out the [good first issues](https://github.com/RajjjAryan/career-copilot/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) to get started.
+
+## Contributors
+
+<a href="https://github.com/RajjjAryan/career-copilot/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=RajjjAryan/career-copilot" />
+</a>
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=RajjjAryan/career-copilot&type=Date)](https://star-history.com/#RajjjAryan/career-copilot&Date)
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
