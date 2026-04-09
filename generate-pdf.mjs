@@ -4,23 +4,28 @@
  * generate-pdf.mjs — HTML → PDF via Playwright
  *
  * Usage:
- *   node generate-pdf.mjs <input.html> <output.pdf> [--format=letter|a4]
+ *   node career-ops/generate-pdf.mjs <input.html> <output.pdf> [--format=letter|a4]
  *
- * Requires: playwright installed (npm install).
- * Uses Chromium headless to render HTML and produce ATS-parseable PDF.
- * Includes ATS text normalization for Unicode compatibility.
+ * Requires: @playwright/test (or playwright) installed.
+ * Uses Chromium headless to render the HTML and produce a clean, ATS-parseable PDF.
  */
 
 import { chromium } from 'playwright';
 import { resolve, dirname } from 'path';
-import { readFile, writeFile } from 'fs/promises';
+import { readFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
  * Normalize text for ATS compatibility by converting problematic Unicode.
+ *
+ * ATS parsers and legacy systems often fail on em-dashes, smart quotes,
+ * zero-width characters, and non-breaking spaces. These cause mojibake,
+ * parsing errors, or display issues. See issue #1.
+ *
  * Only touches body text — preserves CSS, JS, tag attributes, and URLs.
+ * Returns { html, replacements } so the caller can log what was changed.
  */
 function normalizeTextForATS(html) {
   const replacements = {};
@@ -67,6 +72,8 @@ function normalizeTextForATS(html) {
 
 async function generatePDF() {
   const args = process.argv.slice(2);
+
+  // Parse arguments
   let inputPath, outputPath, format = 'a4';
 
   for (const arg of args) {
@@ -87,6 +94,7 @@ async function generatePDF() {
   inputPath = resolve(inputPath);
   outputPath = resolve(outputPath);
 
+  // Validate format
   const validFormats = ['a4', 'letter'];
   if (!validFormats.includes(format)) {
     console.error(`Invalid format "${format}". Use: ${validFormats.join(', ')}`);
@@ -97,14 +105,22 @@ async function generatePDF() {
   console.log(`📁 Output: ${outputPath}`);
   console.log(`📏 Format: ${format.toUpperCase()}`);
 
+  // Read HTML to inject font paths as absolute file:// URLs
   let html = await readFile(inputPath, 'utf-8');
 
-  // Resolve font paths relative to project fonts/
+  // Resolve font paths relative to career-ops/fonts/
   const fontsDir = resolve(__dirname, 'fonts');
-  html = html.replace(/url\(['"]?\.\/fonts\//g, `url('file://${fontsDir}/`);
-  html = html.replace(/file:\/\/([^'")]+)\.woff2['"]\)/g, `file://$1.woff2')`);
+  html = html.replace(
+    /url\(['"]?\.\/fonts\//g,
+    `url('file://${fontsDir}/`
+  );
+  // Close any unclosed quotes from the replacement
+  html = html.replace(
+    /file:\/\/([^'")]+)\.woff2['"]\)/g,
+    `file://$1.woff2')`
+  );
 
-  // ATS normalization
+  // Normalize text for ATS compatibility (issue #1)
   const normalized = normalizeTextForATS(html);
   html = normalized.html;
   const totalReplacements = Object.values(normalized.replacements).reduce((a, b) => a + b, 0);
@@ -116,22 +132,33 @@ async function generatePDF() {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
 
+  // Set content with file base URL for any relative resources
   await page.setContent(html, {
     waitUntil: 'networkidle',
     baseURL: `file://${dirname(inputPath)}/`,
   });
 
+  // Wait for fonts to load
   await page.evaluate(() => document.fonts.ready);
 
+  // Generate PDF
   const pdfBuffer = await page.pdf({
     format: format,
     printBackground: true,
-    margin: { top: '0.6in', right: '0.6in', bottom: '0.6in', left: '0.6in' },
+    margin: {
+      top: '0.6in',
+      right: '0.6in',
+      bottom: '0.6in',
+      left: '0.6in',
+    },
     preferCSSPageSize: false,
   });
 
+  // Write PDF
+  const { writeFile } = await import('fs/promises');
   await writeFile(outputPath, pdfBuffer);
 
+  // Count pages (approximate from PDF structure)
   const pdfString = pdfBuffer.toString('latin1');
   const pageCount = (pdfString.match(/\/Type\s*\/Page[^s]/g) || []).length;
 

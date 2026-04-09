@@ -1,114 +1,102 @@
-<!-- THIS FILE IS YOURS. It will NEVER be auto-updated. -->
-<!-- Copy this file to modes/_profile.md and fill in your details. -->
-<!-- Everything here overrides defaults in modes/_shared.md -->
+# User Profile Context -- career-ops
 
-# _profile.md — Your Career Profile
-
----
+<!-- ============================================================
+     THIS FILE IS YOURS. It will NEVER be auto-updated.
+     
+     Customize everything here: your archetypes, narrative,
+     proof points, negotiation scripts, location policy.
+     
+     The system reads _shared.md (updatable) first, then this
+     file (your overrides). Your customizations always win.
+     ============================================================ -->
 
 ## Your Target Roles
 
-<!-- List the archetypes you're targeting. Be specific about what each type of employer "buys" when they hire you. -->
+<!-- Replace these with YOUR target roles. Examples:
+     - Senior Backend Engineer / Staff Platform Engineer
+     - AI Product Manager / Technical PM
+     - Data Engineer / ML Engineer
+     - DevOps / SRE / Platform
+     Whatever you're optimizing for. -->
 
-| Archetype | Thematic Axes | What They Buy |
+| Archetype | Thematic axes | What they buy |
 |-----------|---------------|---------------|
-| Backend / Systems Engineer | Scalability, reliability, data-intensive systems | Someone who's built and operated systems at scale — not just designed them |
-| AI / ML Engineer | Applied ML, production inference, MLOps | Someone who ships models to prod, not just trains them in notebooks |
-| <!-- Add more rows as needed --> | | |
-
----
+| **AI Platform / LLMOps Engineer** | Evaluation, observability, reliability, pipelines | Someone who puts AI in production with metrics |
+| **Agentic Workflows / Automation** | HITL, tooling, orchestration, multi-agent | Someone who builds reliable agent systems |
+| **Technical AI Product Manager** | GenAI/Agents, PRDs, discovery, delivery | Someone who translates business to AI product |
+| **AI Solutions Architect** | Hyperautomation, enterprise, integrations | Someone who designs end-to-end AI architectures |
+| **AI Forward Deployed Engineer** | Client-facing, fast delivery, prototyping | Someone who delivers AI solutions to clients fast |
+| **AI Transformation Lead** | Change management, adoption, org enablement | Someone who leads AI transformation in an org |
 
 ## Your Adaptive Framing
 
-<!-- When the JD matches a specific archetype, which parts of your experience should be emphasized?
-     "Proof Sources" should reference specific sections of your cv.md (e.g., "cv.md: Zomato section, bullet 3") -->
+<!-- Map YOUR projects to each archetype. Example:
+     | Platform / LLMOps | My monitoring dashboard project | article-digest.md |
+     | Agentic | My chatbot with HITL escalation | cv.md section 3 | -->
 
-| If Role Is... | Emphasize... | Proof Sources |
-|---------------|-------------|---------------|
-| Backend / Systems | System design, API architecture, database optimization | cv.md: [your relevant section] |
-| AI / ML | Model deployment, pipeline optimization, experiment tracking | cv.md: [your relevant section] |
-| DevOps / SRE | Infrastructure automation, observability, incident response | cv.md: [your relevant section] |
-| Frontend / Full-Stack | UI architecture, performance, accessibility | cv.md: [your relevant section] |
-| <!-- Add rows --> | | |
-
----
+| If the role is... | Emphasize about you... | Proof point sources |
+|-------------------|------------------------|---------------------|
+| Platform / LLMOps | Production systems builder, observability, evals | article-digest.md + cv.md |
+| Agentic / Automation | Multi-agent orchestration, HITL, reliability | article-digest.md + cv.md |
+| Technical AI PM | Product discovery, PRDs, metrics | cv.md + article-digest.md |
+| Solutions Architect | System design, integrations, enterprise-ready | article-digest.md + cv.md |
+| Forward Deployed Engineer | Fast delivery, client-facing, prototype to prod | cv.md + article-digest.md |
+| AI Transformation Lead | Change management, team enablement, adoption | cv.md + article-digest.md |
 
 ## Your Exit Narrative
 
-<!-- Why are you looking? Keep it honest, concise, and forward-looking.
-     This narrative is woven into cover letters, outreach messages, and interview prep.
-     Example: "After 3 years scaling Acme's payments platform from $10M to $500M ARR,
-     I'm looking for a role where I can apply distributed systems expertise to a new domain —
-     ideally climate tech or developer tools." -->
+<!-- Replace with YOUR story. This frames everything. -->
 
-> [Write your narrative here. 2-3 sentences max.]
-
----
+Use the candidate's exit story from `config/profile.yml` to frame ALL content:
+- **In PDF Summaries:** Bridge from past to future
+- **In STAR stories:** Reference proof points from article-digest.md
+- **In Draft Answers:** The transition narrative appears in the first response
 
 ## Your Cross-cutting Advantage
 
-<!-- What makes you unique across ALL target roles? This is your "superpower" —
-     the thing that makes you not just qualified but distinctly valuable.
-     Example: "I combine deep backend systems experience with hands-on ML deployment,
-     letting me bridge the gap between data science teams and production infrastructure." -->
+<!-- What's your "signature move"? What do you do that others can't? -->
 
-> [Write your cross-cutting advantage here. 1-2 sentences.]
-
----
+Frame profile as **"Technical builder with real-world proof"** that adapts framing to the role.
 
 ## Your Portfolio / Demo
 
-<!-- Links to projects, repos, demos, or articles that showcase your work.
-     These get referenced in cover letters, outreach, and interview prep. -->
+<!-- If you have a live demo, dashboard, or public project:
+     url: https://yoursite.dev/demo
+     password: demo-2026
+     when_to_share: "LLMOps, AI Platform roles" -->
 
-| Project | URL | Relevant For | One-line Description |
-|---------|-----|-------------|---------------------|
-| <!-- Project name --> | <!-- URL --> | <!-- Which archetypes? --> | <!-- What does it prove? --> |
-| <!-- Add rows --> | | | |
-
----
+If you have a live demo/dashboard (check profile.yml), offer access in applications for relevant roles.
 
 ## Your Comp Targets
 
-<!-- General guidance for compensation evaluation. The system will ALWAYS use web_search
-     for real market data — these targets help calibrate whether an offer is below/at/above your range. -->
+<!-- Research comp ranges for YOUR target roles -->
 
-- **Minimum acceptable base**: $___k (below this, auto-flag as red flag)
-- **Target base**: $___k
-- **Stretch base**: $___k (would accept lower equity/benefits for this)
-- **Currency**: USD / EUR / INR / other
-- **Include in comp analysis**: base, equity, bonus, benefits, PTO, remote stipend
-
----
+**General guidance:**
+- Use WebSearch for current market data (Glassdoor, Levels.fyi, Blind)
+- Frame by role title, not by skills
+- Contractor rates are typically 30-50% higher than employee base
 
 ## Your Negotiation Scripts
 
-<!-- Pre-written responses for common negotiation scenarios. Customize these to your voice. -->
+<!-- Adapt to YOUR situation, currency, location -->
 
-### When asked "What are your salary expectations?"
+**Salary expectations:**
+> "Based on market data for this role, I'm targeting [RANGE from profile.yml]. I'm flexible on structure -- what matters is the total package and the opportunity."
 
-> "I'm focused on finding the right role and team fit. Based on my research for [role] in [market],
-> I'd expect the total comp to be in the range of $X–$Y. I'm happy to discuss specifics
-> once we've confirmed mutual fit."
+**Geographic discount pushback:**
+> "The roles I'm competitive for are output-based, not location-based. My track record doesn't change based on postal code."
 
-### When offered a geographic discount
-
-> "I understand location-based adjustments are common, but my output and impact are location-independent.
-> I'd like to discuss comp based on the value I bring to the role rather than my zip code."
-
-### When the offer is below target
-
-> "I appreciate the offer. Based on market data for this role and my experience level,
-> I was expecting something closer to $X. Is there flexibility on [base/equity/signing bonus]?"
-
----
+**When offered below target:**
+> "I'm comparing with opportunities in the [higher range]. I'm drawn to [company] because of [reason]. Can we explore [target]?"
 
 ## Your Location Policy
 
-<!-- Your preferences for remote, hybrid, on-site work. This affects scoring in evaluations. -->
+<!-- Adapt to YOUR situation -->
 
-- **Preferred**: Remote / Hybrid / On-site
-- **Willing to relocate**: Yes / No / For the right role
-- **Current location**: [City, Country]
-- **Time zones I can work in**: [e.g., UTC-5 to UTC+1]
-- **Deal-breakers**: [e.g., "Full on-site with no flex", "Mandatory relocation within 30 days"]
+**In forms:**
+- Follow your actual availability from profile.yml
+- Specify timezone overlap in free-text fields
+
+**In evaluations (scoring):**
+- Remote dimension for hybrid outside your country: score **3.0** (not 1.0)
+- Only score 1.0 if JD says "must be on-site 4-5 days/week, no exceptions"

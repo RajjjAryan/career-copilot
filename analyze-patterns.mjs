@@ -1,420 +1,547 @@
-#!/usr/bin/env node
+/**
+ * analyze-patterns.mjs — Rejection Pattern Detector for career-ops
+ *
+ * Parses applications.md + all linked reports, extracts dimensions
+ * (archetype, seniority, remote, gaps, scores), classifies outcomes,
+ * and outputs structured JSON with actionable patterns.
+ *
+ * Run: node analyze-patterns.mjs          (JSON to stdout)
+ *      node analyze-patterns.mjs --summary (human-readable table)
+ *      node analyze-patterns.mjs --min-threshold 3
+ */
 
-// analyze-patterns.mjs — Structured pattern analysis of application history
-//
-// Reads data/applications.md and reports/*.md, outputs a JSON object to stdout
-// with aggregated metrics, gap/match frequency analysis, and recommendations.
-//
-// Usage: node analyze-patterns.mjs
-// Dependencies: Node.js built-in modules only (fs, path)
+import { readFileSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-import { readFileSync, readdirSync, existsSync } from "fs";
-import { join, basename } from "path";
+const CAREER_OPS = dirname(fileURLToPath(import.meta.url));
+const APPS_FILE = existsSync(join(CAREER_OPS, 'data/applications.md'))
+  ? join(CAREER_OPS, 'data/applications.md')
+  : join(CAREER_OPS, 'applications.md');
+const REPORTS_DIR = join(CAREER_OPS, 'reports');
 
-const ROOT = new URL(".", import.meta.url).pathname;
-const APPLICATIONS_PATH = join(ROOT, "data", "applications.md");
-const REPORTS_DIR = join(ROOT, "reports");
+// --- CLI args ---
+const args = process.argv.slice(2);
+const summaryMode = args.includes('--summary');
+const minThresholdIdx = args.indexOf('--min-threshold');
+const MIN_THRESHOLD = minThresholdIdx !== -1 ? parseInt(args[minThresholdIdx + 1]) || 5 : 5;
 
-// ─── Tracker Parsing ────────────────────────────────────────────────────────
+// --- Status normalization (mirrors verify-pipeline.mjs) ---
+const ALIASES = {
+  'evaluada': 'evaluated', 'condicional': 'evaluated', 'hold': 'evaluated',
+  'evaluar': 'evaluated', 'verificar': 'evaluated',
+  'aplicado': 'applied', 'enviada': 'applied', 'aplicada': 'applied',
+  'applied': 'applied', 'sent': 'applied',
+  'respondido': 'responded',
+  'entrevista': 'interview',
+  'oferta': 'offer',
+  'rechazado': 'rejected', 'rechazada': 'rejected',
+  'descartado': 'discarded', 'descartada': 'discarded',
+  'cerrada': 'discarded', 'cancelada': 'discarded',
+  'no aplicar': 'skip', 'no_aplicar': 'skip', 'monitor': 'skip', 'geo blocker': 'skip',
+};
 
-function parseApplicationsTable(content) {
-  const lines = content.split("\n").filter((l) => l.trim().startsWith("|"));
-  if (lines.length < 2) return [];
-
-  const headerLine = lines[0];
-  const headers = headerLine
-    .split("|")
-    .map((h) => h.trim())
-    .filter(Boolean);
-
-  // Skip header and separator rows
-  const dataLines = lines.slice(2);
-
-  return dataLines
-    .map((line) => {
-      const cells = line
-        .split("|")
-        .map((c) => c.trim())
-        .filter(Boolean);
-      if (cells.length < 2) return null;
-
-      const row = {};
-      headers.forEach((h, i) => {
-        row[h] = cells[i] || "";
-      });
-      return row;
-    })
-    .filter(Boolean);
+function normalizeStatus(raw) {
+  const clean = raw.replace(/\*\*/g, '').trim().toLowerCase()
+    .replace(/\s+\d{4}-\d{2}-\d{2}.*$/, '').trim();
+  return ALIASES[clean] || clean;
 }
 
-function extractScore(scoreStr) {
-  if (!scoreStr) return null;
-  const match = scoreStr.match(/(\d+(?:\.\d+)?)\s*\/\s*5/);
-  return match ? parseFloat(match[1]) : null;
+function classifyOutcome(status) {
+  const s = normalizeStatus(status);
+  if (['interview', 'offer', 'responded', 'applied'].includes(s)) return 'positive';
+  if (['rejected', 'discarded'].includes(s)) return 'negative';
+  if (['skip'].includes(s)) return 'self_filtered';
+  return 'pending'; // evaluated
 }
 
-function normalizeStatus(status) {
-  if (!status) return "Unknown";
-  const s = status.trim().toLowerCase();
-  const mapping = {
-    evaluated: "Evaluated",
-    "pdf generated": "PDF Generated",
-    applied: "Applied",
-    interview: "Interview",
-    offer: "Offer",
-    rejected: "Rejected",
-    declined: "Declined",
-    ghosted: "Ghosted",
+// --- Parse applications.md ---
+function parseTracker() {
+  if (!existsSync(APPS_FILE)) return [];
+  const content = readFileSync(APPS_FILE, 'utf-8');
+  const entries = [];
+  for (const line of content.split('\n')) {
+    if (!line.startsWith('|')) continue;
+    const parts = line.split('|').map(s => s.trim());
+    if (parts.length < 9) continue;
+    const num = parseInt(parts[1]);
+    if (isNaN(num)) continue;
+    entries.push({
+      num, date: parts[2], company: parts[3], role: parts[4],
+      score: parts[5], status: parts[6], pdf: parts[7], report: parts[8],
+      notes: parts[9] || '',
+    });
+  }
+  return entries;
+}
+
+// --- Parse a single report file ---
+function parseReport(reportPath) {
+  if (!existsSync(reportPath)) return null;
+  const content = readFileSync(reportPath, 'utf-8');
+  const report = {
+    archetype: null,
+    seniority: null,
+    remote: null,
+    teamSize: null,
+    comp: null,
+    domain: null,
+    scores: {},
+    gaps: [],
   };
-  return mapping[s] || status.trim();
-}
 
-// ─── Report Parsing ─────────────────────────────────────────────────────────
+  // Strip bold markers for easier matching
+  const plain = content.replace(/\*\*/g, '');
 
-const GAP_KEYWORDS = [
-  "gap",
-  "missing",
-  "no evidence",
-  "not listed",
-  "not mentioned",
-  "zero experience",
-  "absence",
-  "lacking",
-  "weak",
-  "limited experience",
-  "no exposure",
-];
+  // Extract Block A table (Role Summary) — works with both EN and ES headers
+  const blockARegex = /\|\s*(?:Archetype|Arquetipo)\s*\|\s*(.*?)\s*\|/i;
+  const seniorityRegex = /\|\s*(?:Seniority|Nivel|Level)\s*\|\s*(.*?)\s*\|/i;
+  const remoteRegex = /\|\s*(?:Remote|Remoto|Location)\s*\|\s*(.*?)\s*\|/i;
+  const teamRegex = /\|\s*(?:Team|Team size|Equipo)\s*\|\s*(.*?)\s*\|/i;
+  const compRegex = /\|\s*(?:Comp|Salary|Salario|Listed salary)\s*\|\s*(.*?)\s*\|/i;
+  const domainRegex = /\|\s*(?:Domain|Dominio|Industry)\s*\|\s*(.*?)\s*\|/i;
 
-const MATCH_KEYWORDS = [
-  "strong match",
-  "direct match",
-  "solid match",
-  "excellent",
-  "strong",
-  "proven",
-  "extensive",
-  "deep experience",
-  "demonstrated",
-];
+  const archMatch = plain.match(blockARegex);
+  if (archMatch) report.archetype = archMatch[1].trim();
 
-function readReportFiles() {
-  if (!existsSync(REPORTS_DIR)) return [];
+  const senMatch = plain.match(seniorityRegex);
+  if (senMatch) report.seniority = senMatch[1].trim();
 
-  return readdirSync(REPORTS_DIR)
-    .filter((f) => f.endsWith(".md") && f !== ".gitkeep")
-    .map((f) => {
-      try {
-        return {
-          filename: f,
-          content: readFileSync(join(REPORTS_DIR, f), "utf-8"),
-        };
-      } catch {
-        return null;
-      }
-    })
-    .filter(Boolean);
-}
+  const remMatch = plain.match(remoteRegex);
+  if (remMatch) report.remote = remMatch[1].trim();
 
-function extractSection(content, sectionPattern) {
-  const regex = new RegExp(
-    `(?:^|\\n)#+\\s*${sectionPattern}[^\\n]*\\n([\\s\\S]*?)(?=\\n#+\\s|$)`,
-    "i"
-  );
-  const match = content.match(regex);
-  return match ? match[1].trim() : "";
-}
+  const teamMatch = plain.match(teamRegex);
+  if (teamMatch) report.teamSize = teamMatch[1].trim();
 
-function extractGapsFromReport(content) {
-  const gaps = [];
+  const compMatch = plain.match(compRegex);
+  if (compMatch) report.comp = compMatch[1].trim();
 
-  // Look for "Gaps" or "Top 3 Gaps" sections
-  const gapSection =
-    extractSection(content, "(?:Top \\d+ )?Gaps") ||
-    extractSection(content, "Gaps & Mitigation");
+  const domainMatch = plain.match(domainRegex);
+  if (domainMatch) report.domain = domainMatch[1].trim();
 
-  if (gapSection) {
-    // Extract numbered items or table rows
-    const bulletMatches = gapSection.match(
-      /(?:^\d+\.\s*\*\*(.+?)\*\*|^\|\s*(.+?)\s*\|)/gm
-    );
-    if (bulletMatches) {
-      for (const m of bulletMatches) {
-        const bold = m.match(/\*\*(.+?)\*\*/);
-        if (bold) gaps.push(bold[1].trim());
+  // Extract scoring table — look for table with "Global" row (using plain, bold already stripped)
+  const scoreRegex = /\|\s*(?:CV Match|Match con CV)\s*\|\s*([\d.]+)\/5\s*\|/i;
+  const northStarRegex = /\|\s*(?:North Star)\s*\|\s*([\d.]+)\/5\s*\|/i;
+  const compScoreRegex = /\|\s*(?:Comp)\s*\|\s*([\d.]+)\/5\s*\|/i;
+  const culturalRegex = /\|\s*(?:Cultural signals|Cultural)\s*\|\s*([\d.]+)\/5\s*\|/i;
+  const redFlagsRegex = /\|\s*(?:Red flags)\s*\|\s*([-+]?[\d.]+)\s*\|/i;
+  const globalRegex = /\|\s*(?:Global)\s*\|\s*([\d.]+)\/5\s*\|/i;
+
+  const cvScoreMatch = plain.match(scoreRegex);
+  if (cvScoreMatch) report.scores.cvMatch = parseFloat(cvScoreMatch[1]);
+
+  const nsMatch = plain.match(northStarRegex);
+  if (nsMatch) report.scores.northStar = parseFloat(nsMatch[1]);
+
+  const csMatch = plain.match(compScoreRegex);
+  if (csMatch) report.scores.comp = parseFloat(csMatch[1]);
+
+  const culMatch = plain.match(culturalRegex);
+  if (culMatch) report.scores.cultural = parseFloat(culMatch[1]);
+
+  const rfMatch = plain.match(redFlagsRegex);
+  if (rfMatch) report.scores.redFlags = parseFloat(rfMatch[1]);
+
+  const glMatch = plain.match(globalRegex);
+  if (glMatch) report.scores.global = parseFloat(glMatch[1]);
+
+  // Extract gaps table
+  const gapTableRegex = /\|\s*Gap\s*\|\s*Severity\s*\|.*?\n\|[-|\s]+\n([\s\S]*?)(?:\n\n|\n##|\n\*\*|$)/i;
+  const gapTableMatch = content.match(gapTableRegex);
+  if (gapTableMatch) {
+    const gapRows = gapTableMatch[1].split('\n').filter(r => r.startsWith('|'));
+    for (const row of gapRows) {
+      const cols = row.split('|').map(s => s.trim()).filter(Boolean);
+      if (cols.length >= 2) {
+        report.gaps.push({
+          description: cols[0],
+          severity: cols[1].toLowerCase(),
+          mitigation: cols[2] || '',
+        });
       }
     }
   }
 
-  // Fallback: scan for gap keywords in full content
-  if (gaps.length === 0) {
-    const lines = content.split("\n");
-    for (const line of lines) {
-      const lower = line.toLowerCase();
-      if (GAP_KEYWORDS.some((kw) => lower.includes(kw))) {
-        const bold = line.match(/\*\*(.+?)\*\*/);
-        if (bold && bold[1].length < 80) {
-          gaps.push(bold[1].trim());
+  return report;
+}
+
+// --- Classify remote policy into buckets ---
+function classifyRemote(raw) {
+  if (!raw) return 'unknown';
+  const lower = raw.toLowerCase();
+  // Order matters: check geo-restricted before general remote
+  if (/\b(us[- ]?only|canada[- ]?only|residents only|usa only|us residents|canada residents)\b/.test(lower)) return 'geo-restricted';
+  if (/\bargentina\s+remote\s+only\b/.test(lower)) return 'geo-restricted';
+  if (/\b(hybrid|on-?site|office|columbus|cape town|relocat)\b/.test(lower)) return 'hybrid/onsite';
+  if (/\b(global|anywhere|worldwide|no restrict|70\+|work from anywhere)\b/.test(lower)) return 'global remote';
+  if (/\b(remote|latam|americas|brazil|fully remote)\b/.test(lower)) return 'regional remote';
+  return 'unknown';
+}
+
+// --- Classify company size ---
+function classifyCompanySize(teamSize) {
+  if (!teamSize) return 'unknown';
+  const lower = teamSize.toLowerCase();
+  // Extract numbers
+  const nums = lower.match(/[\d,]+/g);
+  if (nums) {
+    const max = Math.max(...nums.map(n => parseInt(n.replace(/,/g, ''))));
+    if (max <= 50) return 'startup';
+    if (max <= 500) return 'scaleup';
+    return 'enterprise';
+  }
+  if (/\b(small|elite|tiny|founding)\b/.test(lower)) return 'startup';
+  if (/\b(large|enterprise|global)\b/.test(lower)) return 'enterprise';
+  return 'unknown';
+}
+
+// --- Extract hard blocker keywords from gaps ---
+function extractBlockerType(gap) {
+  const desc = gap.description.toLowerCase();
+  const sev = gap.severity.toLowerCase();
+  if (sev.includes('nice') || sev.includes('soft')) return null; // skip soft gaps
+  if (/\b(residency|us[- ]only|canada|location|visa|geo|country|region)\b/.test(desc)) return 'geo-restriction';
+  if (/\b(javascript|typescript|python|ruby|java|go|rust|node|react|angular|vue|django|flask|rails)\b/.test(desc)) return 'stack-mismatch';
+  if (/\b(senior|staff|lead|principal|director|manager|head)\b/.test(desc)) return 'seniority-mismatch';
+  if (/\b(hybrid|on-?site|office|relocat)\b/.test(desc)) return 'onsite-requirement';
+  return 'other';
+}
+
+// --- Main analysis ---
+function analyze() {
+  const entries = parseTracker();
+
+  if (entries.length === 0) {
+    return { error: 'No applications found in tracker.' };
+  }
+
+  // Enrich entries with report data and classification
+  const enriched = entries.map(e => {
+    const reportMatch = e.report.match(/\]\(([^)]+)\)/);
+    const reportPath = reportMatch ? join(CAREER_OPS, reportMatch[1]) : null;
+    const reportData = reportPath ? parseReport(reportPath) : null;
+    const outcome = classifyOutcome(e.status);
+    const score = parseFloat(e.score) || 0;
+
+    // Fallback: if report didn't have Remote field, try the notes column
+    const remoteSource = reportData?.remote || e.notes || '';
+    const teamSource = reportData?.teamSize || '';
+
+    return {
+      ...e,
+      normalizedStatus: normalizeStatus(e.status),
+      outcome,
+      score,
+      report: reportData,
+      remoteBucket: classifyRemote(remoteSource),
+      companySize: classifyCompanySize(teamSource),
+    };
+  });
+
+  // Count entries beyond "Evaluated"
+  const beyondEvaluated = enriched.filter(e => e.normalizedStatus !== 'evaluated');
+  if (beyondEvaluated.length < MIN_THRESHOLD) {
+    return {
+      error: `Not enough data: ${beyondEvaluated.length}/${MIN_THRESHOLD} applications beyond "Evaluated". Keep applying and come back later.`,
+      current: beyondEvaluated.length,
+      threshold: MIN_THRESHOLD,
+    };
+  }
+
+  // --- Funnel ---
+  const funnel = {};
+  for (const e of enriched) {
+    const s = e.normalizedStatus;
+    funnel[s] = (funnel[s] || 0) + 1;
+  }
+
+  // --- Score comparison by outcome ---
+  const scoresByOutcome = { positive: [], negative: [], self_filtered: [], pending: [] };
+  for (const e of enriched) {
+    if (e.score > 0) scoresByOutcome[e.outcome].push(e.score);
+  }
+
+  const scoreStats = (arr) => {
+    if (arr.length === 0) return { avg: 0, min: 0, max: 0, count: 0 };
+    const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
+    return {
+      avg: Math.round(avg * 100) / 100,
+      min: Math.min(...arr),
+      max: Math.max(...arr),
+      count: arr.length,
+    };
+  };
+
+  const scoreComparison = {
+    positive: scoreStats(scoresByOutcome.positive),
+    negative: scoreStats(scoresByOutcome.negative),
+    self_filtered: scoreStats(scoresByOutcome.self_filtered),
+    pending: scoreStats(scoresByOutcome.pending),
+  };
+
+  // --- Archetype breakdown ---
+  const archetypeMap = new Map();
+  for (const e of enriched) {
+    const arch = e.report?.archetype || 'Unknown';
+    if (!archetypeMap.has(arch)) archetypeMap.set(arch, { total: 0, positive: 0, negative: 0, self_filtered: 0, pending: 0 });
+    const entry = archetypeMap.get(arch);
+    entry.total++;
+    entry[e.outcome]++;
+  }
+  const archetypeBreakdown = [...archetypeMap.entries()].map(([archetype, data]) => ({
+    archetype,
+    ...data,
+    conversionRate: data.total > 0 ? Math.round((data.positive / data.total) * 100) : 0,
+  })).sort((a, b) => b.total - a.total);
+
+  // --- Blocker analysis ---
+  const blockerCounts = new Map();
+  const totalWithGaps = enriched.filter(e => e.report?.gaps?.length > 0);
+  for (const e of enriched) {
+    if (!e.report?.gaps) continue;
+    for (const gap of e.report.gaps) {
+      const type = extractBlockerType(gap);
+      if (!type) continue;
+      blockerCounts.set(type, (blockerCounts.get(type) || 0) + 1);
+    }
+  }
+  const blockerAnalysis = [...blockerCounts.entries()]
+    .map(([blocker, frequency]) => ({
+      blocker,
+      frequency,
+      percentage: Math.round((frequency / enriched.length) * 100),
+    }))
+    .sort((a, b) => b.frequency - a.frequency);
+
+  // --- Remote policy breakdown ---
+  const remoteMap = new Map();
+  for (const e of enriched) {
+    const policy = e.remoteBucket;
+    if (!remoteMap.has(policy)) remoteMap.set(policy, { total: 0, positive: 0, negative: 0, self_filtered: 0, pending: 0 });
+    const entry = remoteMap.get(policy);
+    entry.total++;
+    entry[e.outcome]++;
+  }
+  const remotePolicy = [...remoteMap.entries()].map(([policy, data]) => ({
+    policy,
+    ...data,
+    conversionRate: data.total > 0 ? Math.round((data.positive / data.total) * 100) : 0,
+  })).sort((a, b) => b.total - a.total);
+
+  // --- Company size breakdown ---
+  const sizeMap = new Map();
+  for (const e of enriched) {
+    const size = e.companySize;
+    if (!sizeMap.has(size)) sizeMap.set(size, { total: 0, positive: 0, negative: 0, self_filtered: 0, pending: 0 });
+    const entry = sizeMap.get(size);
+    entry.total++;
+    entry[e.outcome]++;
+  }
+  const companySizeBreakdown = [...sizeMap.entries()].map(([size, data]) => ({
+    size,
+    ...data,
+    conversionRate: data.total > 0 ? Math.round((data.positive / data.total) * 100) : 0,
+  })).sort((a, b) => b.total - a.total);
+
+  // --- Score threshold analysis ---
+  const positiveScores = scoresByOutcome.positive.filter(s => s > 0);
+  const minPositiveScore = positiveScores.length > 0 ? Math.min(...positiveScores) : 0;
+  const scoreThreshold = {
+    recommended: minPositiveScore > 0 ? Math.floor(minPositiveScore * 10) / 10 : 3.5,
+    reasoning: positiveScores.length > 0
+      ? `Lowest score among positive outcomes is ${minPositiveScore}. No applications below this score led to progress.`
+      : 'Not enough positive outcome data to determine threshold.',
+    positiveRange: positiveScores.length > 0
+      ? `${Math.min(...positiveScores)} - ${Math.max(...positiveScores)}`
+      : 'N/A',
+  };
+
+  // --- Tech stack gaps (from negative + self_filtered outcomes) ---
+  const stackGapCounts = new Map();
+  for (const e of enriched) {
+    if (e.outcome !== 'negative' && e.outcome !== 'self_filtered') continue;
+    if (!e.report?.gaps) continue;
+    for (const gap of e.report.gaps) {
+      // Extract tech keywords from gap descriptions
+      const techs = gap.description.match(/\b(JavaScript|TypeScript|Python|Ruby|Java|Go|Rust|Node\.?js|React|Angular|Vue\.?js|Django|Flask|Rails|PHP|Laravel|Symfony|Kotlin|Swift|C\+\+|C#|\.NET|MongoDB|MySQL|PostgreSQL|Redis|GraphQL|REST|AWS|GCP|Azure|Docker|Kubernetes|Terraform|Supabase|Inngest|React Native)\b/gi);
+      if (techs) {
+        for (const tech of techs) {
+          const normalized = tech.charAt(0).toUpperCase() + tech.slice(1);
+          stackGapCounts.set(normalized, (stackGapCounts.get(normalized) || 0) + 1);
         }
       }
     }
   }
+  const techStackGaps = [...stackGapCounts.entries()]
+    .map(([skill, frequency]) => ({ skill, frequency }))
+    .sort((a, b) => b.frequency - a.frequency)
+    .slice(0, 15);
 
-  return gaps;
-}
+  // --- Generate recommendations ---
+  const recommendations = [];
 
-function extractMatchesFromReport(content) {
-  const matches = [];
-
-  // Look for "Matches" or "Top 3 CV Matches" sections
-  const matchSection =
-    extractSection(content, "(?:Top \\d+ )?(?:CV )?Match(?:es)?") || "";
-
-  if (matchSection) {
-    const bulletMatches = matchSection.match(
-      /(?:^\d+\.\s*\*\*(.+?)\*\*|^\|\s*(.+?)\s*\|)/gm
-    );
-    if (bulletMatches) {
-      for (const m of bulletMatches) {
-        const bold = m.match(/\*\*(.+?)\*\*/);
-        if (bold) matches.push(bold[1].trim());
-      }
-    }
+  // Geo-restriction recommendation
+  const geoBlocker = blockerAnalysis.find(b => b.blocker === 'geo-restriction');
+  if (geoBlocker && geoBlocker.percentage >= 20) {
+    recommendations.push({
+      action: `Tighten location filters in portals.yml -- ${geoBlocker.percentage}% of applications hit a geo-restriction blocker`,
+      reasoning: `${geoBlocker.frequency} of ${enriched.length} offers are location-restricted (US/Canada-only). These are wasted evaluation effort.`,
+      impact: 'high',
+    });
   }
 
-  // Fallback: scan for match keywords
-  if (matches.length === 0) {
-    const lines = content.split("\n");
-    for (const line of lines) {
-      const lower = line.toLowerCase();
-      if (MATCH_KEYWORDS.some((kw) => lower.includes(kw))) {
-        const bold = line.match(/\*\*(.+?)\*\*/);
-        if (bold && bold[1].length < 80) {
-          matches.push(bold[1].trim());
-        }
-      }
-    }
+  // Stack mismatch recommendation
+  const stackBlocker = blockerAnalysis.find(b => b.blocker === 'stack-mismatch');
+  if (stackBlocker && stackBlocker.percentage >= 15) {
+    const topGaps = techStackGaps.slice(0, 3).map(g => g.skill).join(', ');
+    recommendations.push({
+      action: `Filter out roles requiring ${topGaps} as primary stack -- ${stackBlocker.percentage}% hit stack mismatch`,
+      reasoning: `Core stack gaps (${topGaps}) are the most common technical blockers in negative outcomes.`,
+      impact: 'high',
+    });
   }
 
-  return matches;
-}
-
-// ─── Frequency Counting ─────────────────────────────────────────────────────
-
-function countFrequencies(items) {
-  const freq = {};
-  for (const item of items) {
-    const key = item.toLowerCase();
-    freq[key] = (freq[key] || 0) + 1;
+  // Score threshold recommendation
+  if (minPositiveScore > 3.0) {
+    recommendations.push({
+      action: `Set minimum score threshold at ${scoreThreshold.recommended}/5 before generating PDFs`,
+      reasoning: `No positive outcomes below ${minPositiveScore}/5. Scores below this are wasted effort.`,
+      impact: 'medium',
+    });
   }
-  return Object.entries(freq)
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count);
-}
 
-// ─── Score Bucketing ─────────────────────────────────────────────────────────
+  // Best archetype recommendation
+  const bestArchetype = archetypeBreakdown.filter(a => a.total >= 2).sort((a, b) => b.conversionRate - a.conversionRate)[0];
+  if (bestArchetype && bestArchetype.conversionRate > 0) {
+    recommendations.push({
+      action: `Double down on "${bestArchetype.archetype}" roles (${bestArchetype.conversionRate}% conversion rate)`,
+      reasoning: `${bestArchetype.positive} of ${bestArchetype.total} applications in this archetype led to positive outcomes.`,
+      impact: 'medium',
+    });
+  }
 
-function bucketScores(scores) {
-  const buckets = {
-    "4.5+": 0,
-    "4.0-4.4": 0,
-    "3.5-3.9": 0,
-    "<3.5": 0,
+  // Remote policy recommendation
+  const bestRemote = remotePolicy.filter(r => r.total >= 2).sort((a, b) => b.conversionRate - a.conversionRate)[0];
+  const worstRemote = remotePolicy.filter(r => r.total >= 2 && r.conversionRate === 0)[0];
+  if (worstRemote) {
+    recommendations.push({
+      action: `Avoid "${worstRemote.policy}" roles (0% conversion across ${worstRemote.total} applications)`,
+      reasoning: `None of the ${worstRemote.total} applications with "${worstRemote.policy}" policy led to progress.`,
+      impact: 'medium',
+    });
+  }
+
+  // Date range
+  const dates = enriched.map(e => e.date).filter(Boolean).sort();
+
+  return {
+    metadata: {
+      total: enriched.length,
+      dateRange: { from: dates[0], to: dates[dates.length - 1] },
+      analysisDate: new Date().toISOString().split('T')[0],
+      byOutcome: {
+        positive: enriched.filter(e => e.outcome === 'positive').length,
+        negative: enriched.filter(e => e.outcome === 'negative').length,
+        self_filtered: enriched.filter(e => e.outcome === 'self_filtered').length,
+        pending: enriched.filter(e => e.outcome === 'pending').length,
+      },
+    },
+    funnel,
+    scoreComparison,
+    archetypeBreakdown,
+    blockerAnalysis,
+    remotePolicy,
+    companySizeBreakdown,
+    scoreThreshold,
+    techStackGaps,
+    recommendations,
   };
-
-  for (const s of scores) {
-    if (s >= 4.5) buckets["4.5+"]++;
-    else if (s >= 4.0) buckets["4.0-4.4"]++;
-    else if (s >= 3.5) buckets["3.5-3.9"]++;
-    else buckets["<3.5"]++;
-  }
-
-  return buckets;
 }
 
-// ─── Recommendations Engine ─────────────────────────────────────────────────
-
-function generateRecommendations(result) {
-  const recs = [];
-
-  // Recommend addressing top gaps
-  if (result.top_gaps.length > 0) {
-    const topGap = result.top_gaps[0];
-    recs.push(
-      `Address your #1 recurring gap: "${topGap.name}" (mentioned ${topGap.count} time${topGap.count > 1 ? "s" : ""}). ` +
-        `Consider building a portfolio project or upskilling to close this gap.`
-    );
+// --- Summary mode (human-readable) ---
+function printSummary(result) {
+  if (result.error) {
+    console.log(`\n${result.error}\n`);
+    return;
   }
 
-  if (result.top_gaps.length > 1) {
-    const criticalGaps = result.top_gaps.filter((g) => g.count >= 2);
-    if (criticalGaps.length > 0) {
-      recs.push(
-        `${criticalGaps.length} gap${criticalGaps.length > 1 ? "s appear" : " appears"} in multiple evaluations: ` +
-          `${criticalGaps.map((g) => `"${g.name}"`).join(", ")}. Prioritize these for upskilling.`
-      );
+  const { metadata, funnel, scoreComparison, archetypeBreakdown, blockerAnalysis, remotePolicy, scoreThreshold, techStackGaps, recommendations } = result;
+
+  console.log(`\n${'='.repeat(60)}`);
+  console.log(`  Pattern Analysis — ${metadata.analysisDate}`);
+  console.log(`  ${metadata.total} applications (${metadata.dateRange.from} to ${metadata.dateRange.to})`);
+  console.log(`${'='.repeat(60)}\n`);
+
+  // Funnel
+  console.log('CONVERSION FUNNEL');
+  console.log('-'.repeat(40));
+  const funnelOrder = ['evaluated', 'applied', 'responded', 'interview', 'offer', 'rejected', 'discarded', 'skip'];
+  for (const status of funnelOrder) {
+    if (funnel[status]) {
+      const pct = Math.round((funnel[status] / metadata.total) * 100);
+      console.log(`  ${status.padEnd(15)} ${String(funnel[status]).padStart(3)} (${pct}%)`);
     }
   }
 
-  // Score-based recommendations
-  if (result.avg_score !== null) {
-    if (result.avg_score < 3.5) {
-      recs.push(
-        `Your average score is ${result.avg_score.toFixed(1)}/5 (Weak). Consider narrowing your target roles to archetypes where you score higher.`
-      );
-    } else if (result.avg_score < 4.0) {
-      recs.push(
-        `Your average score is ${result.avg_score.toFixed(1)}/5 (Decent). Focus on roles aligned with your strongest matches to push into the 4.0+ range.`
-      );
+  // Score comparison
+  console.log('\nSCORE BY OUTCOME');
+  console.log('-'.repeat(40));
+  for (const [group, stats] of Object.entries(scoreComparison)) {
+    if (stats.count > 0) {
+      console.log(`  ${group.padEnd(15)} avg ${stats.avg}/5  (${stats.count} entries, range ${stats.min}-${stats.max})`);
     }
   }
 
-  // Rejection/ghosted ratio
-  const rejected = result.by_status["Rejected"] || 0;
-  const ghosted = result.by_status["Ghosted"] || 0;
-  const total = result.total_applications;
-  if (total > 0) {
-    const failRate = (rejected + ghosted) / total;
-    if (failRate > 0.5) {
-      recs.push(
-        `${Math.round(failRate * 100)}% of applications ended in rejection or ghosting. Review your targeting criteria and consider focusing on roles where your score is 4.0+.`
-      );
+  // Blockers
+  if (blockerAnalysis.length > 0) {
+    console.log('\nTOP BLOCKERS');
+    console.log('-'.repeat(40));
+    for (const b of blockerAnalysis) {
+      console.log(`  ${b.blocker.padEnd(20)} ${String(b.frequency).padStart(2)}x (${b.percentage}% of all)`);
     }
   }
 
-  // Pipeline health
-  const applied = result.by_status["Applied"] || 0;
-  const interview = result.by_status["Interview"] || 0;
-  if (applied > 0 && interview === 0) {
-    recs.push(
-      `You have ${applied} applications submitted but no interviews yet. Consider revising your CV or cover letter approach.`
-    );
+  // Remote policy
+  console.log('\nREMOTE POLICY');
+  console.log('-'.repeat(40));
+  for (const r of remotePolicy) {
+    console.log(`  ${r.policy.padEnd(20)} ${String(r.total).padStart(2)} total, ${r.positive} positive (${r.conversionRate}%)`);
   }
 
-  // Leverage strengths
-  if (result.top_matches.length > 0) {
-    const topMatch = result.top_matches[0];
-    recs.push(
-      `Your strongest match area is "${topMatch.name}" (${topMatch.count} mention${topMatch.count > 1 ? "s" : ""}). ` +
-        `Lean into this strength when targeting new roles.`
-    );
-  }
-
-  // Ensure at least one recommendation
-  if (recs.length === 0) {
-    if (total === 0) {
-      recs.push(
-        "No applications tracked yet. Start by evaluating a few JDs to build your pipeline."
-      );
-    } else {
-      recs.push(
-        "Continue applying to roles matching your strongest archetypes. Track outcomes to refine your strategy."
-      );
+  // Tech gaps
+  if (techStackGaps.length > 0) {
+    console.log('\nTOP TECH STACK GAPS (negative outcomes)');
+    console.log('-'.repeat(40));
+    for (const g of techStackGaps.slice(0, 10)) {
+      console.log(`  ${g.skill.padEnd(20)} ${g.frequency}x`);
     }
   }
 
-  return recs;
+  // Score threshold
+  console.log(`\nSCORE THRESHOLD: ${scoreThreshold.recommended}/5`);
+  console.log(`  ${scoreThreshold.reasoning}`);
+
+  // Recommendations
+  if (recommendations.length > 0) {
+    console.log(`\nRECOMMENDATIONS`);
+    console.log('='.repeat(60));
+    for (let i = 0; i < recommendations.length; i++) {
+      const r = recommendations[i];
+      console.log(`  ${i + 1}. [${r.impact.toUpperCase()}] ${r.action}`);
+      console.log(`     ${r.reasoning}`);
+    }
+  }
+
+  console.log('');
 }
 
-// ─── Main ───────────────────────────────────────────────────────────────────
+// --- Run ---
+const result = analyze();
 
-function main() {
-  const result = {
-    total_applications: 0,
-    by_status: {},
-    by_score_range: { "4.5+": 0, "4.0-4.4": 0, "3.5-3.9": 0, "<3.5": 0 },
-    by_company: [],
-    top_gaps: [],
-    top_matches: [],
-    avg_score: null,
-    score_trend: [],
-    recommendations: [],
-  };
-
-  // Parse applications tracker
-  let rows = [];
-  if (existsSync(APPLICATIONS_PATH)) {
-    try {
-      const content = readFileSync(APPLICATIONS_PATH, "utf-8");
-      rows = parseApplicationsTable(content);
-    } catch {
-      // File exists but can't be read — treat as empty
-    }
-  }
-
-  result.total_applications = rows.length;
-
-  if (rows.length === 0) {
-    result.recommendations = [
-      "No applications tracked yet. Start by evaluating a few JDs to build your pipeline.",
-    ];
-    console.log(JSON.stringify(result, null, 2));
-    process.exit(0);
-  }
-
-  // Aggregate by status
-  const statusCounts = {};
-  for (const row of rows) {
-    const status = normalizeStatus(row["Status"]);
-    statusCounts[status] = (statusCounts[status] || 0) + 1;
-  }
-  result.by_status = statusCounts;
-
-  // Aggregate scores
-  const scores = [];
-  const scoreTrend = [];
-  for (const row of rows) {
-    const score = extractScore(row["Score"]);
-    if (score !== null) {
-      scores.push(score);
-      const date = row["Date"] || "";
-      scoreTrend.push({ date, score });
-    }
-  }
-
-  result.by_score_range = bucketScores(scores);
-
-  if (scores.length > 0) {
-    result.avg_score =
-      Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 100) /
-      100;
-  }
-
-  // Sort trend chronologically
-  result.score_trend = scoreTrend.sort((a, b) =>
-    a.date.localeCompare(b.date)
-  );
-
-  // Collect companies
-  const companies = new Set();
-  for (const row of rows) {
-    const company = row["Company"] || "";
-    if (company) companies.add(company.trim());
-  }
-  result.by_company = [...companies].sort();
-
-  // Parse reports for gaps and matches
-  const allGaps = [];
-  const allMatches = [];
-
-  const reports = readReportFiles();
-  for (const report of reports) {
-    // Skip pattern analysis reports to avoid self-referencing
-    if (basename(report.filename).startsWith("pattern-analysis")) continue;
-
-    const gaps = extractGapsFromReport(report.content);
-    const matches = extractMatchesFromReport(report.content);
-
-    allGaps.push(...gaps);
-    allMatches.push(...matches);
-  }
-
-  result.top_gaps = countFrequencies(allGaps).slice(0, 15);
-  result.top_matches = countFrequencies(allMatches).slice(0, 15);
-
-  // Generate recommendations
-  result.recommendations = generateRecommendations(result);
-
+if (summaryMode) {
+  printSummary(result);
+} else {
   console.log(JSON.stringify(result, null, 2));
 }
 
-main();
+if (result.error) process.exit(1);

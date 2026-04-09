@@ -1,154 +1,133 @@
-<!-- THIS FILE IS AUTO-UPDATABLE. Don't put personal data here. Your customizations go in modes/_profile.md -->
+# System Context -- career-ops
 
-# _shared.md — System Context
-
-All modes inherit these rules. Read this file first, then `_profile.md` for user overrides.
-
----
+<!-- ============================================================
+     THIS FILE IS AUTO-UPDATABLE. Don't put personal data here.
+     
+     Your customizations go in modes/_profile.md (never auto-updated).
+     This file contains system rules, scoring logic, and tool config
+     that improve with each career-ops release.
+     ============================================================ -->
 
 ## Sources of Truth
 
-| File | Purpose | Mutable? |
-|------|---------|----------|
-| `data/cv.md` | Canonical CV — all experience, metrics, skills | NO (read-only for modes) |
-| `data/article-digest.md` | Published articles, talks, OSS contributions | NO (read-only for modes) |
-| `config/profile.yml` | Technical config (portals, thresholds, paths) | YES (by user) |
-| `modes/_profile.md` | User's career narrative, targets, preferences | YES (by user) |
+| File | Path | When |
+|------|------|------|
+| cv.md | `cv.md` (project root) | ALWAYS |
+| article-digest.md | `article-digest.md` (if exists) | ALWAYS (detailed proof points) |
+| profile.yml | `config/profile.yml` | ALWAYS (candidate identity and targets) |
+| _profile.md | `modes/_profile.md` | ALWAYS (user archetypes, narrative, negotiation) |
 
----
-
-## Loading Order
-
-1. Read `modes/_shared.md` (this file)
-2. Read `modes/_profile.md` — user customizations **override** any defaults here
-3. Read `data/cv.md` + `data/article-digest.md` for factual data
-4. Proceed with mode-specific logic
+**RULE: NEVER hardcode metrics from proof points.** Read them from cv.md + article-digest.md at evaluation time.
+**RULE: For article/project metrics, article-digest.md takes precedence over cv.md.**
+**RULE: Read _profile.md AFTER this file. User customizations in _profile.md override defaults here.**
 
 ---
 
 ## Scoring System
 
-Every evaluation produces a score across 6 blocks (A–F) plus a global weighted average.
+The evaluation uses 6 blocks (A-F) with a global score of 1-5:
 
-### Dimensions
+| Dimension | What it measures |
+|-----------|-----------------|
+| Match con CV | Skills, experience, proof points alignment |
+| North Star alignment | How well the role fits the user's target archetypes (from _profile.md) |
+| Comp | Salary vs market (5=top quartile, 1=well below) |
+| Cultural signals | Company culture, growth, stability, remote policy |
+| Red flags | Blockers, warnings (negative adjustments) |
+| **Global** | Weighted average of above |
 
-| Dimension | Weight | Description |
-|-----------|--------|-------------|
-| A — CV Match | 25% | How well does the JD map to proven experience in cv.md? |
-| B — North Star Alignment | 25% | Does this role advance the candidate's stated career goals? |
-| C — Compensation | 15% | Is comp competitive vs. market data? |
-| D — Cultural Signals | 15% | Remote policy, team size, eng culture, values fit |
-| E — Red Flags | 10% | Unrealistic requirements, high turnover signals, vague JD |
-| F — Global Weighted Average | 10% | Composite score factoring all above |
-
-### Score Interpretation
-
-| Score | Label | Recommendation |
-|-------|-------|----------------|
-| 4.5 – 5.0 | **Strong** | Pursue aggressively |
-| 4.0 – 4.4 | **Good** | Worth applying |
-| 3.5 – 3.9 | **Decent** | Apply if pipeline is thin |
-| Below 3.5 | **Weak** | Recommend against — document why |
-
----
+**Score interpretation:**
+- 4.5+ → Strong match, recommend applying immediately
+- 4.0-4.4 → Good match, worth applying
+- 3.5-3.9 → Decent but not ideal, apply only if specific reason
+- Below 3.5 → Recommend against applying (see Ethical Use in CLAUDE.md)
 
 ## Archetype Detection
 
-Detect the primary archetype from JD signals before evaluation. This drives framing, keyword selection, and story mapping.
+Classify every offer into one of these types (or hybrid of 2):
 
-| Archetype | Key JD Signals |
-|-----------|----------------|
-| **Backend / Systems Engineer** | distributed systems, microservices, APIs, databases, scalability, latency, throughput, message queues, gRPC, REST |
-| **Frontend / Full-Stack** | React, Vue, Angular, UI/UX, responsive design, accessibility, design systems, SSR, Next.js, component libraries |
-| **AI / ML Engineer** | machine learning, deep learning, NLP, computer vision, PyTorch, TensorFlow, model training, inference, MLOps, LLMs |
-| **DevOps / SRE / Platform** | CI/CD, Kubernetes, Terraform, AWS/GCP/Azure, observability, incident response, SLOs, infrastructure-as-code |
-| **Product Manager** | product strategy, roadmap, stakeholder management, metrics-driven, user research, A/B testing, prioritization |
-| **Solutions Architect** | system design, client-facing, integration, migration, consulting, pre-sales, technical strategy, enterprise |
+| Archetype | Key signals in JD |
+|-----------|-------------------|
+| AI Platform / LLMOps | "observability", "evals", "pipelines", "monitoring", "reliability" |
+| Agentic / Automation | "agent", "HITL", "orchestration", "workflow", "multi-agent" |
+| Technical AI PM | "PRD", "roadmap", "discovery", "stakeholder", "product manager" |
+| AI Solutions Architect | "architecture", "enterprise", "integration", "design", "systems" |
+| AI Forward Deployed | "client-facing", "deploy", "prototype", "fast delivery", "field" |
+| AI Transformation | "change management", "adoption", "enablement", "transformation" |
 
-If archetype is ambiguous, pick the **primary** and note the secondary. The archetype drives which CV bullets to prioritize and which framing to apply from `_profile.md`.
+After detecting archetype, read `modes/_profile.md` for the user's specific framing and proof points for that archetype.
 
----
+## Global Rules
 
-## Global Rules — NEVER
+### NEVER
 
-1. **NEVER** invent experience, metrics, or skills not present in `data/cv.md`
-2. **NEVER** modify `data/cv.md` — it is the immutable source of truth
-3. **NEVER** submit applications without explicit user consent
-4. **NEVER** recommend below-market compensation — always verify with `web_search`
-5. **NEVER** generate a PDF without first reading the JD
-6. **NEVER** use corporate-speak: "passionate about", "leverage synergies", "thought leader", "ninja/rockstar", "go-getter"
-7. **NEVER** ignore the tracker — every evaluation must be registered
-8. **NEVER** fabricate interview questions, company data, or salary numbers
-9. **NEVER** hardcode metrics — always read from `data/cv.md` and `data/article-digest.md`
+1. Invent experience or metrics
+2. Modify cv.md or portfolio files
+3. Submit applications on behalf of the candidate
+4. Share phone number in generated messages
+5. Recommend comp below market rate
+6. Generate a PDF without reading the JD first
+7. Use corporate-speak
+8. Ignore the tracker (every evaluated offer gets registered)
 
-## Global Rules — ALWAYS
+### ALWAYS
 
-1. **ALWAYS** read `data/cv.md` + `modes/_profile.md` + `data/article-digest.md` before evaluating
-2. **ALWAYS** detect archetype before generating any output
-3. **ALWAYS** cite specific CV lines when claiming a match (e.g., "cv.md L42: Led migration to K8s")
-4. **ALWAYS** use `web_search` for compensation data, company research, and market trends
-5. **ALWAYS** register every evaluation in the tracker as a TSV line
-6. **ALWAYS** generate output in the **same language as the JD** (if JD is in Spanish, output in Spanish)
-7. **ALWAYS** be direct — no hedging, no filler, no unnecessary qualifiers
-8. **ALWAYS** include the JD URL in every report
-9. **ALWAYS** save reports to `reports/{###}-{company-slug}-{YYYY-MM-DD}.md`
+0. **Cover letter:** If the form allows it, ALWAYS include one. Same visual design as CV. JD quotes mapped to proof points. 1 page max.
+1. Read cv.md, _profile.md, and article-digest.md (if exists) before evaluating
+1b. **First evaluation of each session:** Run `node cv-sync-check.mjs`. If warnings, notify user.
+2. Detect the role archetype and adapt framing per _profile.md
+3. Cite exact lines from CV when matching
+4. Use WebSearch for comp and company data
+5. Register in tracker after evaluating
+6. Generate content in the language of the JD (EN default)
+7. Be direct and actionable -- no fluff
+8. Native tech English for generated text. Short sentences, action verbs, no passive voice.
+8b. Case study URLs in PDF Professional Summary (recruiter may only read this).
+9. **Tracker additions as TSV** -- NEVER edit applications.md directly. Write TSV in `batch/tracker-additions/`.
+10. **Include `**URL:**` in every report header.**
 
-### Tracker TSV Format
+### Tools
 
-Each evaluation appends a line to `data/applications.md` in this format:
+| Tool | Use |
+|------|-----|
+| WebSearch | Comp research, trends, company culture, LinkedIn contacts, fallback for JDs |
+| WebFetch | Fallback for extracting JDs from static pages |
+| Playwright | Verify offers (browser_navigate + browser_snapshot). **NEVER 2+ agents with Playwright in parallel.** |
+| Read | cv.md, _profile.md, article-digest.md, cv-template.html |
+| Write | Temporary HTML for PDF, applications.md, reports .md |
+| Edit | Update tracker |
+| Canva MCP | Optional visual CV generation. Duplicate base design, edit text, export PDF. Requires `canva_resume_design_id` in profile.yml. |
+| Bash | `node generate-pdf.mjs` |
 
-```
-| {###} | {Company} | {Role} | {Score} | {Status} | {Date} | {Report Link} | {PDF Link} | {URL} |
-```
-
-Where:
-- `{###}` = sequential number (read last entry to determine next)
-- `{Status}` = one of: Evaluated, PDF Generated, Applied, Interview, Offer, Rejected, Declined, Ghosted
-
----
-
-## Tools Reference
-
-| Tool | Use For | Example |
-|------|---------|---------|
-| `web_search` | Compensation data, company research, market trends, Glassdoor reviews | `web_search("Senior Backend Engineer salary NYC 2024")` |
-| `web_fetch` | Reading JDs from URLs, careers pages, job boards | `web_fetch(url="https://boards.greenhouse.io/...")` |
-| `view` | Reading local files (cv.md, reports, configs) | `view(path="data/cv.md")` |
-| `create` | Creating new files (reports, PDFs) | `create(path="reports/001-acme-2024-01-15.md", ...)` |
-| `edit` | Updating existing files (tracker, pipeline) | `edit(path="data/applications.md", ...)` |
-| `bash` | Running scripts, generating PDFs, file operations | `bash(command="node generate-pdf.mjs ...")` |
-| `task` | Dispatching parallel subagents for batch work | `task(agent_type="general-purpose", prompt="...")` |
+### Time-to-offer priority
+- Working demo + metrics > perfection
+- Apply sooner > learn more
+- 80/20 approach, timebox everything
 
 ---
 
-## Professional Writing Rules
+## Professional Writing & ATS Compatibility
 
-### ATS Optimization
-- Single-column layout only — no tables, no multi-column
-- Standard section headers: Summary, Experience, Education, Skills, Projects
-- No images, icons, or graphics
-- UTF-8 encoding, Unicode normalization (NFC)
-- No headers/footers with critical info (ATS may skip them)
-- Standard fonts: system fonts or widely supported web fonts
-- Dates in consistent format: Mon YYYY – Mon YYYY
+These rules apply to ALL generated text that ends up in candidate-facing documents: PDF summaries, bullets, cover letters, form answers, LinkedIn messages. They do NOT apply to internal evaluation reports.
 
-### Writing Quality
-- **Vary sentence structure**: mix compound, complex, and simple sentences
-- **Prefer specifics over abstractions**: "reduced p95 latency from 450ms to 120ms" > "improved performance"
-- **Lead with impact**: start bullets with the result, then the method
-- **Quantify everything**: if cv.md has a number, use it
+### Avoid cliché phrases
+- "passionate about" / "results-oriented" / "proven track record"
+- "leveraged" (use "used" or name the tool)
+- "spearheaded" (use "led" or "ran")
+- "facilitated" (use "ran" or "set up")
+- "synergies" / "robust" / "seamless" / "cutting-edge" / "innovative"
+- "in today's fast-paced world"
+- "demonstrated ability to" / "best practices" (name the practice)
 
-### Banned Phrases (will trigger ATS/recruiter eye-roll)
-- "passionate about"
-- "leverage/leveraging"
-- "synergy/synergies"
-- "thought leader"
-- "ninja/rockstar/guru"
-- "go-getter"
-- "team player" (show it, don't say it)
-- "detail-oriented" (show it, don't say it)
-- "fast-paced environment"
-- "wear many hats"
-- "hit the ground running"
-- "self-starter"
-- "results-driven" (show results instead)
+### Unicode normalization for ATS
+`generate-pdf.mjs` automatically normalizes em-dashes, smart quotes, and zero-width characters to ASCII equivalents for maximum ATS compatibility. But avoid generating them in the first place.
+
+### Vary sentence structure
+- Don't start every bullet with the same verb
+- Mix sentence lengths (short. Then longer with context. Short again.)
+- Don't always use "X, Y, and Z" — sometimes two items, sometimes four
+
+### Prefer specifics over abstractions
+- "Cut p95 latency from 2.1s to 380ms" beats "improved performance"
+- "Postgres + pgvector for retrieval over 12k docs" beats "designed scalable RAG architecture"
+- Name tools, projects, and customers when allowed

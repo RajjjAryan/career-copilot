@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * update-system.mjs — Safe auto-updater for career-ops (Copilot CLI Edition)
+ * update-system.mjs — Safe auto-updater for career-ops
  *
- * Updates ONLY system layer files (modes, scripts, templates).
+ * Updates ONLY system layer files (modes, scripts, dashboard, templates).
  * NEVER touches user data (cv.md, profile.yml, _profile.md, data/, reports/).
  *
  * Usage:
@@ -23,51 +23,51 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;
 
-// IMPORTANT: Update these after publishing to GitHub
-const CANONICAL_REPO = 'https://github.com/YOUR_USERNAME/career-ops.git';
-const RAW_VERSION_URL = 'https://raw.githubusercontent.com/YOUR_USERNAME/career-ops/main/VERSION';
-const RELEASES_API = 'https://api.github.com/repos/YOUR_USERNAME/career-ops/releases/latest';
+const CANONICAL_REPO = 'https://github.com/santifer/career-ops.git';
+const RAW_VERSION_URL = 'https://raw.githubusercontent.com/santifer/career-ops/main/VERSION';
+const RELEASES_API = 'https://api.github.com/repos/santifer/career-ops/releases/latest';
 
 // System layer paths — ONLY these files get updated
 const SYSTEM_PATHS = [
   'modes/_shared.md',
   'modes/_profile.template.md',
-  'modes/evaluate.md',
+  'modes/oferta.md',
   'modes/pdf.md',
   'modes/scan.md',
   'modes/batch.md',
   'modes/apply.md',
   'modes/auto-pipeline.md',
-  'modes/contact.md',
+  'modes/contacto.md',
   'modes/deep.md',
-  'modes/compare.md',
+  'modes/ofertas.md',
   'modes/pipeline.md',
   'modes/project.md',
   'modes/tracker.md',
   'modes/training.md',
-  'modes/interview-prep.md',
-  '.github/copilot-instructions.md',
+  'modes/de/',
+  'CLAUDE.md',
+  'AGENTS.md',
   'generate-pdf.mjs',
   'merge-tracker.mjs',
   'verify-pipeline.mjs',
   'dedup-tracker.mjs',
   'normalize-statuses.mjs',
   'cv-sync-check.mjs',
-  'check-liveness.mjs',
   'update-system.mjs',
-  'test-all.mjs',
-  'doctor.mjs',
   'batch/batch-prompt.md',
+  'batch/batch-runner.sh',
+  'dashboard/',
   'templates/',
   'fonts/',
+  '.claude/skills/',
   'docs/',
-  'examples/',
   'VERSION',
   'DATA_CONTRACT.md',
   'CONTRIBUTING.md',
   'README.md',
   'LICENSE',
-  '.github/ISSUE_TEMPLATE/',
+  'CITATION.cff',
+  '.github/',
   'package.json',
 ];
 
@@ -78,7 +78,7 @@ const USER_PATHS = [
   'modes/_profile.md',
   'portals.yml',
   'article-digest.md',
-  'interview-prep/',
+  'interview-prep/story-bank.md',
   'data/',
   'reports/',
   'output/',
@@ -107,6 +107,7 @@ function git(cmd) {
 // ── CHECK ───────────────────────────────────────────────────────
 
 async function check() {
+  // Respect dismiss flag
   if (existsSync(join(ROOT, '.update-dismissed'))) {
     console.log(JSON.stringify({ status: 'dismissed' }));
     return;
@@ -129,6 +130,7 @@ async function check() {
     return;
   }
 
+  // Fetch changelog from GitHub releases
   let changelog = '';
   try {
     const res = await fetch(RELEASES_API, {
@@ -139,7 +141,7 @@ async function check() {
       changelog = release.body || '';
     }
   } catch {
-    // No changelog available
+    // No changelog available, that's OK
   }
 
   console.log(JSON.stringify({
@@ -155,16 +157,18 @@ async function check() {
 async function apply() {
   const local = localVersion();
 
+  // Check for lock
   const lockFile = join(ROOT, '.update-lock');
   if (existsSync(lockFile)) {
-    console.error('Update already in progress (.update-lock exists). Delete manually if stuck.');
+    console.error('Update already in progress (.update-lock exists). If stuck, delete it manually.');
     process.exit(1);
   }
 
+  // Create lock
   writeFileSync(lockFile, new Date().toISOString());
 
   try {
-    // 1. Backup branch
+    // 1. Backup: create branch
     const backupBranch = `backup-pre-update-${local}`;
     try {
       git(`branch ${backupBranch}`);
@@ -173,7 +177,7 @@ async function apply() {
       console.log(`Backup branch already exists (${backupBranch}), continuing...`);
     }
 
-    // 2. Fetch from upstream
+    // 2. Fetch from canonical repo
     console.log('Fetching latest from upstream...');
     git(`fetch ${CANONICAL_REPO} main`);
 
@@ -185,11 +189,11 @@ async function apply() {
         git(`checkout FETCH_HEAD -- ${path}`);
         updated.push(path);
       } catch {
-        // File may not exist in remote
+        // File may not exist in remote (new additions), skip
       }
     }
 
-    // 4. Safety: verify no user files were touched
+    // 4. Validate: check NO user files were touched
     let userFileTouched = false;
     try {
       const status = git('status --porcelain');
@@ -204,7 +208,7 @@ async function apply() {
         }
       }
     } catch {
-      // git status failed
+      // git status failed, skip validation
     }
 
     if (userFileTouched) {
@@ -214,23 +218,23 @@ async function apply() {
       process.exit(1);
     }
 
-    // 5. Install new dependencies
+    // 5. Install any new dependencies
     try {
       execSync('npm install --silent', { cwd: ROOT, timeout: 60000 });
     } catch {
       console.log('npm install skipped (may need manual run)');
     }
 
-    // 6. Commit
-    const remote = localVersion();
+    // 6. Commit the update
+    const remote = localVersion(); // Re-read after checkout updated VERSION
     try {
       git('add .');
       git(`commit -m "chore: auto-update system files to v${remote}"`);
     } catch {
-      // Nothing to commit
+      // Nothing to commit (already up to date)
     }
 
-    // 7. Clean dismiss flag
+    // 7. Clean up dismiss flag if it exists
     const dismissFile = join(ROOT, '.update-dismissed');
     if (existsSync(dismissFile)) unlinkSync(dismissFile);
 
@@ -239,6 +243,7 @@ async function apply() {
     console.log(`Rollback available: node update-system.mjs rollback`);
 
   } finally {
+    // Remove lock
     if (existsSync(lockFile)) unlinkSync(lockFile);
   }
 }
@@ -246,6 +251,9 @@ async function apply() {
 // ── ROLLBACK ────────────────────────────────────────────────────
 
 function rollback() {
+  const local = localVersion();
+
+  // Find most recent backup branch
   try {
     const branches = git('branch --list "backup-pre-update-*"');
     const branchList = branches.split('\n').map(b => b.trim().replace('* ', '')).filter(Boolean);
@@ -258,6 +266,7 @@ function rollback() {
     const latest = branchList[branchList.length - 1];
     console.log(`Rolling back to: ${latest}`);
 
+    // Checkout system files from backup branch
     for (const path of SYSTEM_PATHS) {
       try {
         git(`checkout ${latest} -- ${path}`);
@@ -281,7 +290,7 @@ function rollback() {
 
 function dismiss() {
   writeFileSync(join(ROOT, '.update-dismissed'), new Date().toISOString());
-  console.log('Update check dismissed. Run "node update-system.mjs check" to re-enable.');
+  console.log('Update check dismissed. Run "node update-system.mjs check" or say "check for updates" to re-enable.');
 }
 
 // ── MAIN ────────────────────────────────────────────────────────

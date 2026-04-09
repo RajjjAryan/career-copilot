@@ -4,11 +4,11 @@
  * test-all.mjs — Comprehensive test suite for career-ops (Copilot CLI Edition)
  *
  * Run before merging any PR or pushing changes.
- * Tests: syntax, scripts, data contract, personal data, paths, mode integrity.
+ * Tests: syntax, scripts, dashboard, data contract, personal data, paths, mode integrity.
  *
  * Usage:
  *   node test-all.mjs           # Run all tests
- *   node test-all.mjs --quick   # Skip Playwright check (faster)
+ *   node test-all.mjs --quick   # Skip dashboard build (faster)
  */
 
 import { execSync } from 'child_process';
@@ -31,7 +31,7 @@ function warn(msg) { console.log(`  ⚠️  ${msg}`); warnings++; }
 function run(cmd, opts = {}) {
   try {
     return execSync(cmd, { cwd: ROOT, encoding: 'utf-8', timeout: 30000, ...opts }).trim();
-  } catch {
+  } catch (e) {
     return null;
   }
 }
@@ -41,7 +41,8 @@ function readFile(path) { return readFileSync(join(ROOT, path), 'utf-8'); }
 
 console.log('\n🧪 career-ops test suite (Copilot CLI Edition)\n');
 
-// 1. SYNTAX CHECKS
+// ── 1. SYNTAX CHECKS ────────────────────────────────────────────
+
 console.log('1. Syntax checks');
 
 const mjsFiles = readdirSync(ROOT).filter(f => f.endsWith('.mjs'));
@@ -54,15 +55,17 @@ for (const f of mjsFiles) {
   }
 }
 
-// 2. SCRIPT EXECUTION
+// ── 2. SCRIPT EXECUTION ─────────────────────────────────────────
+
 console.log('\n2. Script execution (graceful on empty data)');
 
 const scripts = [
-  { name: 'cv-sync-check.mjs', allowFail: true },
-  { name: 'verify-pipeline.mjs' },
-  { name: 'normalize-statuses.mjs' },
-  { name: 'dedup-tracker.mjs' },
-  { name: 'merge-tracker.mjs' },
+  { name: 'cv-sync-check.mjs', expectExit: 1, allowFail: true },
+  { name: 'verify-pipeline.mjs', expectExit: 0 },
+  { name: 'normalize-statuses.mjs', expectExit: 0 },
+  { name: 'dedup-tracker.mjs', expectExit: 0 },
+  { name: 'merge-tracker.mjs', expectExit: 0 },
+  { name: 'update-system.mjs check', expectExit: 0 },
 ];
 
 for (const { name, allowFail } of scripts) {
@@ -76,17 +79,33 @@ for (const { name, allowFail } of scripts) {
   }
 }
 
-// 3. DATA CONTRACT
-console.log('\n3. Data contract validation');
+// ── 3. DASHBOARD BUILD ──────────────────────────────────────────
+
+if (!QUICK) {
+  console.log('\n3. Dashboard build');
+  if (fileExists('dashboard/go.mod')) {
+    const goBuild = run('cd dashboard && go build -o /tmp/career-dashboard-test . 2>&1');
+    if (goBuild !== null) {
+      pass('Dashboard compiles');
+    } else {
+      warn('Dashboard build failed (Go may not be installed)');
+    }
+  } else {
+    warn('Dashboard directory missing — skipping build test');
+  }
+} else {
+  console.log('\n3. Dashboard build (skipped --quick)');
+}
+
+// ── 4. DATA CONTRACT ────────────────────────────────────────────
+
+console.log('\n4. Data contract validation');
 
 const systemFiles = [
   '.github/copilot-instructions.md', 'VERSION', 'DATA_CONTRACT.md',
   'modes/_shared.md', 'modes/_profile.template.md',
   'modes/evaluate.md', 'modes/pdf.md', 'modes/scan.md',
-  'modes/batch.md', 'modes/auto-pipeline.md', 'modes/pipeline.md',
-  'modes/tracker.md', 'modes/apply.md', 'modes/contact.md',
-  'modes/deep.md', 'modes/interview-prep.md', 'modes/compare.md',
-  'modes/training.md', 'modes/project.md',
+  'modes/batch.md', 'modes/auto-pipeline.md',
   'templates/states.yml', 'templates/cv-template.html',
   'config/profile.example.yml',
 ];
@@ -100,7 +119,9 @@ for (const f of systemFiles) {
 }
 
 // Check user files are NOT tracked (gitignored)
-const userFiles = ['config/profile.yml', 'modes/_profile.md', 'portals.yml'];
+const userFiles = [
+  'config/profile.yml', 'modes/_profile.md', 'portals.yml',
+];
 for (const f of userFiles) {
   const tracked = run(`git ls-files ${f}`);
   if (tracked === '' || tracked === null) {
@@ -110,16 +131,39 @@ for (const f of userFiles) {
   }
 }
 
-// 4. PERSONAL DATA LEAK CHECK
-console.log('\n4. Personal data leak check');
+// ── 5. PERSONAL DATA LEAK CHECK ─────────────────────────────────
 
-const scanExtensions = ['md', 'yml', 'html', 'mjs', 'sh', 'json'];
+console.log('\n5. Personal data leak check');
+
+const scanExtensions = ['md', 'yml', 'html', 'mjs', 'sh', 'go', 'json'];
 const allowedFiles = ['README.md', 'LICENSE', 'CITATION.cff', 'CONTRIBUTING.md',
-  'package.json', '.github/FUNDING.yml', 'test-all.mjs', 'cv.md'];
+  'package.json', '.github/FUNDING.yml', '.github/copilot-instructions.md',
+  'go.mod', 'test-all.mjs', 'AGENTS.md'];
 
-// Generic check for absolute paths
+// Check for absolute paths as personal data indicator
+let leakFound = false;
+const absResult = run(
+  `grep -rn "/Users/" --include="*.mjs" --include="*.sh" --include="*.md" --include="*.go" --include="*.yml" . 2>/dev/null | grep -v node_modules | grep -v ".git/"`,
+);
+if (absResult) {
+  for (const line of absResult.split('\n').filter(Boolean)) {
+    const file = line.split(':')[0].replace('./', '');
+    if (allowedFiles.some(a => file.includes(a))) continue;
+    if (file.includes('go.sum')) continue;
+    warn(`Possible personal data (absolute path) in ${file}`);
+    leakFound = true;
+  }
+}
+if (!leakFound) {
+  pass('No personal data leaks outside allowed files');
+}
+
+// ── 6. ABSOLUTE PATH CHECK ──────────────────────────────────────
+
+console.log('\n6. Absolute path check');
+
 const absPathResult = run(
-  `grep -rn "/Users/" --include="*.mjs" --include="*.sh" --include="*.md" --include="*.yml" . 2>/dev/null | grep -v node_modules | grep -v ".git/" | grep -v README.md | grep -v LICENSE | grep -v test-all.mjs | grep -v cv.md`
+  `grep -rn "/Users/" --include="*.mjs" --include="*.sh" . 2>/dev/null | grep -v node_modules | grep -v ".git/" | grep -v test-all.mjs`
 );
 if (!absPathResult) {
   pass('No absolute paths in code files');
@@ -129,14 +173,15 @@ if (!absPathResult) {
   }
 }
 
-// 5. MODE FILE INTEGRITY
-console.log('\n5. Mode file integrity');
+// ── 7. MODE FILE INTEGRITY ──────────────────────────────────────
+
+console.log('\n7. Mode file integrity');
 
 const expectedModes = [
   '_shared.md', '_profile.template.md', 'evaluate.md', 'pdf.md', 'scan.md',
   'batch.md', 'apply.md', 'auto-pipeline.md', 'contact.md', 'deep.md',
   'compare.md', 'pipeline.md', 'project.md', 'tracker.md', 'training.md',
-  'interview-prep.md',
+  'interview-prep.md', 'patterns.md',
 ];
 
 for (const mode of expectedModes) {
@@ -152,15 +197,17 @@ const shared = readFile('modes/_shared.md');
 if (shared.includes('_profile')) {
   pass('_shared.md references _profile');
 } else {
-  warn('_shared.md does NOT reference _profile');
+  fail('_shared.md does NOT reference _profile');
 }
 
-// 6. INSTRUCTIONS INTEGRITY
-console.log('\n6. copilot-instructions.md integrity');
+// ── 8. COPILOT INSTRUCTIONS INTEGRITY ───────────────────────────
+
+console.log('\n8. copilot-instructions.md integrity');
 
 const instructions = readFile('.github/copilot-instructions.md');
 const requiredSections = [
-  'Data Contract', 'Ethical Use', 'Canonical Application States',
+  'Data Contract', 'Update Check', 'Ethical Use',
+  'Offer Verification', 'Canonical', 'TSV Format',
   'Onboarding',
 ];
 
@@ -172,8 +219,9 @@ for (const section of requiredSections) {
   }
 }
 
-// 7. VERSION FILE
-console.log('\n7. Version file');
+// ── 9. VERSION FILE ─────────────────────────────────────────────
+
+console.log('\n9. Version file');
 
 if (fileExists('VERSION')) {
   const version = readFile('VERSION').trim();
@@ -186,8 +234,9 @@ if (fileExists('VERSION')) {
   fail('VERSION file missing');
 }
 
-// 8. ESSENTIAL SCRIPTS EXIST
-console.log('\n8. Essential scripts');
+// ── 10. ESSENTIAL SCRIPTS ───────────────────────────────────────
+
+console.log('\n10. Essential scripts');
 
 const essentialScripts = [
   'generate-pdf.mjs', 'doctor.mjs', 'verify-pipeline.mjs',
@@ -204,7 +253,8 @@ for (const script of essentialScripts) {
   }
 }
 
-// SUMMARY
+// ── SUMMARY ─────────────────────────────────────────────────────
+
 console.log('\n' + '='.repeat(50));
 console.log(`📊 Results: ${passed} passed, ${failed} failed, ${warnings} warnings`);
 

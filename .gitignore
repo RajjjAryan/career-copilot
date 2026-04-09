@@ -1,18 +1,24 @@
 # Dependencies
 node_modules/
-package-lock.json
 
 # Output (generated, user-specific)
-output/
-generated_resumes/
+output/*
+!output/.gitkeep
 
 # Data (user-specific, not tracked)
-data/
-reports/
-jds/
-interview-prep/
+data/applications.md
+data/pipeline.md
+data/scan-history.tsv
+reports/*.md
+!reports/.gitkeep
+jds/*
+!jds/.gitkeep
+interview-prep/*
+!interview-prep/.gitkeep
 batch/tracker-additions/*.tsv
-batch/logs/
+!batch/tracker-additions/.gitkeep
+batch/logs/*
+!batch/logs/.gitkeep
 batch/batch-state.tsv
 batch/batch-input.tsv
 
@@ -22,20 +28,20 @@ modes/_profile.md
 portals.yml
 cv.md
 article-digest.md
-resume.tex
 
-# Binaries
-tectonic
+# Update system
+.update-dismissed
+.update-lock
 
-# Environment
-.env
-.env.*
-!.env.example
-.app_env_tmp
-venv/
+# Generated
+.resolved-prompt-*
+career-dashboard
+package-lock.json
 
 # OS
 .DS_Store
+*.mov
+*.mp4
 Thumbs.db
 
 # IDE
@@ -43,10 +49,9 @@ Thumbs.db
 !.vscode/mcp.json
 .idea/
 
-# Python cache (legacy)
-__pycache__/
-*.pyc
-.pytest_cache/
+# Claude Code local (if used alongside)
+.claude/settings.local.json
+.claude/memory/
 
 # Temporary files
 /tmp/

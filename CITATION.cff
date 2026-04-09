@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use career-copilot, please cite it using these metadata."
+title: "Career-Copilot: AI-Powered Job Search Pipeline for GitHub Copilot CLI"
+type: software
+authors:
+  - family-names: "Aryan"
+    given-names: "Raj"
+url: "https://github.com/RajjjAryan/career-copilot"
+repository-code: "https://github.com/RajjjAryan/career-copilot"
+license: MIT
+keywords:
+  - ai
+  - job-search
+  - copilot-cli
+  - career
+  - automation
+  - github-copilot
+  - go-tui

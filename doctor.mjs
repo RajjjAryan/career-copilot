@@ -1,17 +1,18 @@
 #!/usr/bin/env node
 
 /**
- * doctor.mjs — Setup validation for career-ops (Copilot CLI Edition)
+ * doctor.mjs — Setup validation for career-ops
  * Checks all prerequisites and prints a pass/fail checklist.
  */
 
-import { existsSync, mkdirSync, readdirSync, readFileSync } from 'fs';
+import { existsSync, mkdirSync, readdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = __dirname;
 
+// ANSI colors (only on TTY)
 const isTTY = process.stdout.isTTY;
 const green = (s) => isTTY ? `\x1b[32m${s}\x1b[0m` : s;
 const red = (s) => isTTY ? `\x1b[31m${s}\x1b[0m` : s;
@@ -70,7 +71,7 @@ function checkCv() {
     label: 'cv.md not found',
     fix: [
       'Create cv.md in the project root with your CV in markdown',
-      'See examples/cv-example.md for reference',
+      'See examples/ for reference CVs',
     ],
   };
 }
@@ -113,12 +114,12 @@ function checkFonts() {
     };
   }
   try {
-    const files = readdirSync(fontsDir).filter(f => f.endsWith('.woff2'));
+    const files = readdirSync(fontsDir);
     if (files.length === 0) {
       return {
         pass: false,
-        label: 'fonts/ directory has no .woff2 files',
-        fix: 'Font files are required for PDF generation. Check README for setup instructions.',
+        label: 'fonts/ directory is empty',
+        fix: 'The fonts/ directory must contain font files for PDF generation',
       };
     }
   } catch {
@@ -129,17 +130,6 @@ function checkFonts() {
     };
   }
   return { pass: true, label: 'Fonts directory ready' };
-}
-
-function checkInstructions() {
-  if (existsSync(join(projectRoot, '.github', 'copilot-instructions.md'))) {
-    return { pass: true, label: '.github/copilot-instructions.md found' };
-  }
-  return {
-    pass: false,
-    label: '.github/copilot-instructions.md not found',
-    fix: 'This is the main agent instruction file — it should exist in the repo',
-  };
 }
 
 function checkAutoDir(name) {
@@ -159,44 +149,14 @@ function checkAutoDir(name) {
   }
 }
 
-function checkMcpConfig() {
-  const mcpPath = join(projectRoot, '.vscode', 'mcp.json');
-  if (!existsSync(mcpPath)) {
-    return {
-      pass: false,
-      label: '.vscode/mcp.json not found (Playwright MCP)',
-      fix: 'This file configures browser tools. It should exist in the repo.',
-    };
-  }
-  try {
-    const content = JSON.parse(readFileSync(mcpPath, 'utf-8'));
-    if (content?.mcp?.servers?.playwright) {
-      return { pass: true, label: 'Playwright MCP configured' };
-    }
-    return {
-      pass: false,
-      label: 'Playwright MCP not configured in .vscode/mcp.json',
-      fix: 'Add playwright server config — see docs/SETUP.md',
-    };
-  } catch {
-    return {
-      pass: false,
-      label: '.vscode/mcp.json is invalid JSON',
-      fix: 'Check .vscode/mcp.json for syntax errors',
-    };
-  }
-}
-
 async function main() {
-  console.log('\ncareer-ops doctor (Copilot CLI Edition)');
-  console.log('=======================================\n');
+  console.log('\ncareer-ops doctor');
+  console.log('================\n');
 
   const checks = [
     checkNodeVersion(),
     checkDependencies(),
     await checkPlaywright(),
-    checkInstructions(),
-    checkMcpConfig(),
     checkCv(),
     checkProfile(),
     checkPortals(),
@@ -204,8 +164,6 @@ async function main() {
     checkAutoDir('data'),
     checkAutoDir('output'),
     checkAutoDir('reports'),
-    checkAutoDir('batch/tracker-additions'),
-    checkAutoDir('batch/logs'),
   ];
 
   let failures = 0;
@@ -228,7 +186,7 @@ async function main() {
     console.log(`Result: ${failures} issue${failures === 1 ? '' : 's'} found. Fix them and run \`npm run doctor\` again.`);
     process.exit(1);
   } else {
-    console.log('Result: All checks passed. You\'re ready to go! Start Copilot CLI in this directory.');
+    console.log('Result: All checks passed. You\'re ready to go! Run `claude` to start.');
     process.exit(0);
   }
 }

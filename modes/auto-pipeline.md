@@ -23,10 +23,13 @@ view(path="data/article-digest.md")
 
 ### Step 0 — Extract JD
 
-- **If URL**: `web_fetch(url="{URL}")` → extract job description content from the page
-- **If raw text**: use the pasted text directly
+- **If raw text**: use the pasted text directly — no fetch needed
+- **If URL**: follow this priority order to extract the JD:
+  1. **Playwright (preferred):** Most job portals (Lever, Ashby, Greenhouse, Workday) are SPAs. Use `browser_navigate` + `browser_snapshot` to render and read the JD.
+  2. **WebFetch (fallback):** For static pages (ZipRecruiter, WeLoveProduct, company career pages). Use `web_fetch(url="{URL}")`.
+  3. **WebSearch (last resort):** Search for role title + company on secondary portals that index JDs in static HTML.
 - **Validate**: confirm you have company name, role title, and requirements list
-- **If extraction fails**: notify user and ask for text paste instead
+- **If no method works**: ask user to paste the JD text or share a screenshot
 
 ### Step 1 — Evaluate (Blocks A–F)
 
@@ -65,12 +68,32 @@ Execute PDF generation from `modes/pdf.md`:
 **Only if score >= 4.5 (Strong)**:
 
 1. Re-read the JD for application form questions (look for: "Why do you want to work here?", "Tell us about yourself", custom questions)
-2. If questions found, generate personalized answers:
-   - Tone: "I'm choosing you" — confident, specific, not desperate
-   - Content: map CV achievements to company needs
-   - Length: concise, 150-250 words per answer
-   - Include: specific company research from Block D
-3. Present answers formatted for easy copy-paste
+2. If questions can't be extracted, use these generic questions:
+   - Why are you interested in this role?
+   - Why do you want to work at [Company]?
+   - Tell us about a relevant project or achievement
+   - What makes you a good fit for this position?
+   - How did you hear about this role?
+3. Generate personalized answers:
+
+**Tone — Position: "I'm choosing you."** The candidate has options and is choosing this company for concrete reasons.
+
+| Question Framework | Approach |
+|-------------------|----------|
+| **Why this role?** | "Your [specific thing] maps directly to [specific thing I built]." |
+| **Why this company?** | Mention something concrete. "I've been using [product] for [time/purpose]." |
+| **Relevant experience?** | One quantified proof point. "Built [X] that [metric]. Sold the company in 2025." |
+| **Good fit?** | "I sit at the intersection of [A] and [B], which is exactly where this role lives." |
+| **How did you hear?** | Honest: "Found through [portal/scan], evaluated against my criteria, and it scored highest." |
+
+**Tone rules:**
+- Confident without arrogance — show evidence, not claims
+- Specific and concrete — always reference something REAL from JD and from CV
+- Direct, no fluff — 2-4 sentences per answer, no "I'm passionate about..."
+- The hook is the proof, not the assertion — "I built X that does Y" not "I'm great at X"
+- Language: same as the JD (EN default)
+
+4. Present answers formatted for easy copy-paste
 
 **If score < 4.5**: Skip this step, note in summary that application drafting was skipped due to score.
 
