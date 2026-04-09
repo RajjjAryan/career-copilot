@@ -39,7 +39,8 @@ venv/
 Thumbs.db
 
 # IDE
-.vscode/
+.vscode/*
+!.vscode/mcp.json
 .idea/
 
 # Python cache (legacy)

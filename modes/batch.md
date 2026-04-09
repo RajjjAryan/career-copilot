@@ -95,9 +95,12 @@ view(path="batch/batch-state.tsv")   # if exists — skip completed items
 For each pending URL, fetch the job description:
 
 **For SPA-hosted pages (Ashby, Lever, Workday):**
-```bash
-node browse.mjs "{url}" > /tmp/batch-jd-{id}.json
 ```
+browser_navigate(url="{url}")
+browser_snapshot()
+```
+
+Extract the JD text from the structured accessibility snapshot.
 
 **For static pages or API-accessible URLs:**
 ```
@@ -168,7 +171,7 @@ This consolidates `batch/tracker-additions/*.tsv` into `data/applications.md`.
 | Error | Recovery |
 |-------|----------|
 | URL inaccessible | Worker fails → conductor marks `failed`, continues |
-| JD behind login | Try `browse.mjs` first, then `web_fetch`. If both fail → `failed` |
+| JD behind login | Use `browser_navigate` to render page, extract JD from snapshot. If login required → `failed` |
 | Worker crashes | Mark `failed`, continue. Re-run batch to retry failed items |
 | PDF generation fails | Report .md saved. PDF marked as ❌ in tracker |
 | All workers fail | Check `npm run doctor` for setup issues |

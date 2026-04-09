@@ -5,7 +5,7 @@
  * Checks all prerequisites and prints a pass/fail checklist.
  */
 
-import { existsSync, mkdirSync, readdirSync } from 'fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -159,6 +159,34 @@ function checkAutoDir(name) {
   }
 }
 
+function checkMcpConfig() {
+  const mcpPath = join(projectRoot, '.vscode', 'mcp.json');
+  if (!existsSync(mcpPath)) {
+    return {
+      pass: false,
+      label: '.vscode/mcp.json not found (Playwright MCP)',
+      fix: 'This file configures browser tools. It should exist in the repo.',
+    };
+  }
+  try {
+    const content = JSON.parse(readFileSync(mcpPath, 'utf-8'));
+    if (content?.mcp?.servers?.playwright) {
+      return { pass: true, label: 'Playwright MCP configured' };
+    }
+    return {
+      pass: false,
+      label: 'Playwright MCP not configured in .vscode/mcp.json',
+      fix: 'Add playwright server config — see docs/SETUP.md',
+    };
+  } catch {
+    return {
+      pass: false,
+      label: '.vscode/mcp.json is invalid JSON',
+      fix: 'Check .vscode/mcp.json for syntax errors',
+    };
+  }
+}
+
 async function main() {
   console.log('\ncareer-ops doctor (Copilot CLI Edition)');
   console.log('=======================================\n');
@@ -168,6 +196,7 @@ async function main() {
     checkDependencies(),
     await checkPlaywright(),
     checkInstructions(),
+    checkMcpConfig(),
     checkCv(),
     checkProfile(),
     checkPortals(),

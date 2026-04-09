@@ -13,7 +13,26 @@
 git clone <your-repo-url>
 cd career-ops
 npm install
-npx playwright install chromium   # Required for PDF generation
+npx playwright install chromium   # Required for PDF generation + browser tools
+```
+
+### 1b. Playwright MCP (recommended)
+
+The project includes a `.vscode/mcp.json` that configures the **Playwright MCP server** — this gives the AI agent native browser tools (`browser_navigate`, `browser_snapshot`, `browser_click`, etc.) for scraping SPA career pages like Ashby, Lever, and Workday.
+
+If using VS Code / Copilot Agent Mode, this works automatically. For other MCP-compatible clients, add:
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "playwright": {
+        "command": "npx",
+        "args": ["@playwright/mcp@latest"]
+      }
+    }
+  }
+}
 ```
 
 ### 2. Check setup

@@ -192,8 +192,7 @@ console.log('\n8. Essential scripts');
 const essentialScripts = [
   'generate-pdf.mjs', 'doctor.mjs', 'verify-pipeline.mjs',
   'merge-tracker.mjs', 'dedup-tracker.mjs', 'normalize-statuses.mjs',
-  'check-liveness.mjs', 'cv-sync-check.mjs', 'browse.mjs',
-  'update-system.mjs',
+  'check-liveness.mjs', 'cv-sync-check.mjs', 'update-system.mjs',
 ];
 
 for (const script of essentialScripts) {

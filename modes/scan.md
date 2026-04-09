@@ -30,21 +30,24 @@ view(path="data/pipeline.md")
 
 ## Scanning Strategy (3 Levels)
 
-### Level 1 — Playwright Direct (PRINCIPAL, most reliable)
+### Level 1 — Playwright MCP Direct (PRINCIPAL, most reliable)
 
 For each company in `tracked_companies` with `careers_url`:
 
-Use `browse.mjs` to scrape the careers page with a real browser (handles SPAs like Ashby, Lever, Workday):
+Use Playwright MCP tools to scrape the careers page with a real browser (handles SPAs like Ashby, Lever, Workday):
 
-```bash
-node browse.mjs "{careers_url}" --jobs
+```
+browser_navigate(url="{careers_url}")
+browser_snapshot()
 ```
 
-Returns JSON with `{ jobs: [{ title, url, company }] }`.
+The snapshot returns a structured accessibility tree with all job listings, links, and text. Parse it to extract `{title, url, company}` for each job.
 
-**Why this is better than web_fetch:** Most modern career pages (Ashby, Lever, Workday) are JavaScript SPAs. `web_fetch` only gets raw HTML without JS rendering. `browse.mjs` uses Playwright to render the full page, wait for dynamic content, and extract job listings.
+**Why this is better than web_fetch:** Most modern career pages (Ashby, Lever, Workday) are JavaScript SPAs. `web_fetch` only gets raw HTML without JS rendering. Playwright MCP renders the full page with a real Chromium browser, waits for dynamic content, and returns structured data the agent can directly parse.
 
-**Fallback**: If `browse.mjs` fails (Playwright not installed), fall back to web_fetch for static pages, or use the Greenhouse API for Greenhouse-hosted boards.
+**Pagination:** If the page has "Next" or "Load More" buttons, use `browser_click(ref="{button_ref}")` followed by `browser_snapshot()` to get additional pages.
+
+**Fallback**: If Playwright MCP is not available, fall back to `web_fetch` for static pages, or use the Greenhouse API (Level 2) for Greenhouse-hosted boards.
 
 ### Level 2 — Structured API (Greenhouse, Lever)
 
@@ -92,13 +95,16 @@ Check each URL against 3 sources:
 
 WebSearch results can be stale. For each new URL from Level 3:
 
-```bash
-node browse.mjs "{url}" --check-alive
+```
+browser_navigate(url="{url}")
+browser_snapshot()
 ```
 
-Returns `{ data: { alive: true/false } }`. Discard expired postings.
+Check the snapshot for:
+- **Active**: Job title visible, description present, Apply/Submit button exists
+- **Expired**: Contains "job no longer available", "position has been filled", "this job has expired", "page not found", or URL has `?error=true`
 
-Level 1 and Level 2 results are inherently real-time — skip this step for them.
+Discard expired postings. Level 1 and Level 2 results are inherently real-time — skip this step for them.
 
 ---
 
