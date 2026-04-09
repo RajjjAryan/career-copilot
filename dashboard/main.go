@@ -9,9 +9,9 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/santifer/career-ops/dashboard/internal/data"
-	"github.com/santifer/career-ops/dashboard/internal/theme"
-	"github.com/santifer/career-ops/dashboard/internal/ui/screens"
+	"github.com/RajjjAryan/career-copilot/dashboard/internal/data"
+	"github.com/RajjjAryan/career-copilot/dashboard/internal/theme"
+	"github.com/RajjjAryan/career-copilot/dashboard/internal/ui/screens"
 )
 
 type viewState int
@@ -118,7 +118,7 @@ func (m appModel) View() string {
 }
 
 func main() {
-	pathFlag := flag.String("path", ".", "Path to career-ops directory")
+	pathFlag := flag.String("path", ".", "Path to career-copilot directory")
 	flag.Parse()
 
 	careerOpsPath := *pathFlag

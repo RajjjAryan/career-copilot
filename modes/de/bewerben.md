@@ -66,7 +66,7 @@ Für jede Frage die Antwort nach folgendem Schema bauen:
 2. **Vorheriger Block G**: Wenn ein Draft existiert, als Basis nehmen und nachschärfen
 3. **Ton "Ich entscheide mich für euch"**: gleiches Framework wie in der Auto-Pipeline — selbstbewusst, nicht bittend
 4. **Spezifität**: etwas Konkretes aus der sichtbaren Stellenanzeige zitieren
-5. **career-ops Proof Point**: in "Zusätzliche Informationen" einbauen, falls ein solches Feld existiert
+5. **career-copilot Proof Point**: in "Zusätzliche Informationen" einbauen, falls ein solches Feld existiert
 
 **Spezielle deutsche Formularfelder, die häufig auftauchen:**
 - **Gehaltsvorstellung (brutto, jährlich)** → Spanne aus `profile.yml`, in EUR, mit Hinweis "verhandelbar je nach Gesamtpaket"
@@ -104,7 +104,7 @@ Hinweise:
 Wenn der Kandidat bestätigt, dass die Bewerbung raus ist:
 1. Status in `applications.md` von "Evaluated" auf "Applied" setzen
 2. Block G im Report mit den finalen Antworten aktualisieren
-3. Nächsten Schritt vorschlagen: `/career-ops contacto` für LinkedIn-Outreach an den Personalleiter / Hiring Manager
+3. Nächsten Schritt vorschlagen: `/career-copilot contacto` für LinkedIn-Outreach an den Personalleiter / Hiring Manager
 
 ## Scroll-Handling
 

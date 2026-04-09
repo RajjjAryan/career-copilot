@@ -1,8 +1,8 @@
 # Customization Guide
 
-## Personalizing career-ops
+## Personalizing career-copilot
 
-career-ops is designed to be customized by the AI agent itself. Just ask it to make changes — it reads the same files it uses, so it knows exactly what to edit.
+career-copilot is designed to be customized by the AI agent itself. Just ask it to make changes — it reads the same files it uses, so it knows exactly what to edit.
 
 ## Key Customization Points
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * update-system.mjs — Safe auto-updater for career-ops
+ * update-system.mjs — Safe auto-updater for career-copilot
  *
  * Updates ONLY system layer files (modes, scripts, dashboard, templates).
  * NEVER touches user data (cv.md, profile.yml, _profile.md, data/, reports/).
@@ -23,9 +23,9 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;
 
-const CANONICAL_REPO = 'https://github.com/santifer/career-ops.git';
-const RAW_VERSION_URL = 'https://raw.githubusercontent.com/santifer/career-ops/main/VERSION';
-const RELEASES_API = 'https://api.github.com/repos/santifer/career-ops/releases/latest';
+const CANONICAL_REPO = 'https://github.com/RajjjAryan/career-copilot.git';
+const RAW_VERSION_URL = 'https://raw.githubusercontent.com/RajjjAryan/career-copilot/main/VERSION';
+const RELEASES_API = 'https://api.github.com/repos/RajjjAryan/career-copilot/releases/latest';
 
 // System layer paths — ONLY these files get updated
 const SYSTEM_PATHS = [

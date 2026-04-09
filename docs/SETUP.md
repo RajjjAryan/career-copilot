@@ -11,7 +11,7 @@
 
 ```bash
 git clone <your-repo-url>
-cd career-ops
+cd career-copilot
 npm install
 npx playwright install chromium   # Required for PDF generation + browser tools
 ```

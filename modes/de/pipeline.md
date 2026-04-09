@@ -1,6 +1,6 @@
 # Modus: pipeline — URL-Inbox (Second Brain)
 
-Verarbeitet URLs von Stellenanzeigen, die in `data/pipeline.md` gesammelt wurden. Der Kandidat wirft URLs ins Inbox, wann immer er eine entdeckt, und führt später `/career-ops pipeline` aus, um sie alle in einem Rutsch zu verarbeiten.
+Verarbeitet URLs von Stellenanzeigen, die in `data/pipeline.md` gesammelt wurden. Der Kandidat wirft URLs ins Inbox, wann immer er eine entdeckt, und führt später `/career-copilot pipeline` aus, um sie alle in einem Rutsch zu verarbeiten.
 
 ## Workflow
 

@@ -1,4 +1,4 @@
-# Contributing to Career-Ops (Copilot CLI Edition)
+# Contributing to Career-Copilot (Copilot CLI Edition)
 
 Thanks for your interest in contributing! This project uses GitHub Copilot CLI as the AI backbone.
 
@@ -49,7 +49,7 @@ PRs without a corresponding issue may be closed if they don't align with the pro
 ## What we do NOT accept
 
 - **PRs that scrape platforms prohibiting automated access** (LinkedIn, etc.). We actively reject these to respect third-party ToS.
-- **PRs that enable auto-submitting applications** without human review. career-ops is a decision-support tool, not a spam bot.
+- **PRs that enable auto-submitting applications** without human review. career-copilot is a decision-support tool, not a spam bot.
 - **PRs that add external API dependencies** without prior discussion in an issue.
 - **PRs containing personal data** (real CVs, emails, phone numbers). Use `examples/` with fictional data instead.
 

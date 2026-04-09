@@ -2,7 +2,7 @@
 
 ## 1. Nature of the Project
 
-`career-ops` is a collection of Markdown prompts, Node.js scripts, and HTML templates. It is strictly a local execution tool. The maintainers do not host, deploy, or operate an AI system, nor do we provide API access to Large Language Models (LLMs).
+`career-copilot` is a collection of Markdown prompts, Node.js scripts, and HTML templates. It is strictly a local execution tool. The maintainers do not host, deploy, or operate an AI system, nor do we provide API access to Large Language Models (LLMs).
 
 Users download the code, run it on their own machines, and connect it to their own AI coding assistant (GitHub Copilot CLI, Claude Code, or any other). The maintainers have no visibility into, control over, or responsibility for how the tool is used after download.
 
@@ -25,7 +25,7 @@ This tool interfaces with AI models via third-party CLI tools. The maintainers d
 
 ## 4. Third-Party Platforms
 
-career-ops interacts with career portals and job boards (Greenhouse, Lever, Ashby, Workday, and others).
+career-copilot interacts with career portals and job boards (Greenhouse, Lever, Ashby, Workday, and others).
 
 - Users must comply with the Terms of Service of every platform they interact with.
 - Do not use this tool to scrape platforms that prohibit automated access.
@@ -35,7 +35,7 @@ career-ops interacts with career portals and job boards (Greenhouse, Lever, Ashb
 
 ## 5. Acceptable Use
 
-career-ops is designed to help individuals make better career decisions, not to automate away human judgment. Acceptable use includes:
+career-copilot is designed to help individuals make better career decisions, not to automate away human judgment. Acceptable use includes:
 
 - Evaluating job offers to prioritize your time
 - Generating tailored CVs that you review and edit before submitting
@@ -55,7 +55,7 @@ Because this tool runs locally, is free, and is open-source, the maintainers are
 
 ## 7. Indemnification
 
-By using career-ops, you agree to indemnify, defend, and hold harmless the authors, contributors, and any affiliated parties from and against any and all claims, damages, losses, liabilities, costs, and expenses (including reasonable attorneys' fees) arising from your use of this software, your violation of these terms, or your violation of any third-party terms of service.
+By using career-copilot, you agree to indemnify, defend, and hold harmless the authors, contributors, and any affiliated parties from and against any and all claims, damages, losses, liabilities, costs, and expenses (including reasonable attorneys' fees) arising from your use of this software, your violation of these terms, or your violation of any third-party terms of service.
 
 ## 8. Cost Responsibility
 

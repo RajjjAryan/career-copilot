@@ -1,6 +1,6 @@
-# career-ops — Deutsche Modi (`modes/de/`)
+# career-copilot — Deutsche Modi (`modes/de/`)
 
-Dieser Ordner enthält die deutschen Übersetzungen der wichtigsten career-ops-Modi für Bewerber:innen, die im DACH-Raum (Deutschland, Österreich, Schweiz) suchen oder mit deutschen Stellenanzeigen arbeiten.
+Dieser Ordner enthält die deutschen Übersetzungen der wichtigsten career-copilot-Modi für Bewerber:innen, die im DACH-Raum (Deutschland, Österreich, Schweiz) suchen oder mit deutschen Stellenanzeigen arbeiten.
 
 ## Wann diese Modi nutzen?
 
@@ -15,7 +15,7 @@ Wenn die meisten deiner Stellenanzeigen auf Englisch sind, bleib bei den Standar
 
 ## Wie aktivieren?
 
-career-ops hat keinen "Sprach-Schalter" als Code-Flag. Stattdessen gibt es zwei Wege:
+career-copilot hat keinen "Sprach-Schalter" als Code-Flag. Stattdessen gibt es zwei Wege:
 
 ### Weg 1 — Pro Session, per Befehl
 

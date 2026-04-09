@@ -120,7 +120,7 @@ task(
   name="eval-{company-slug}",
   description="Evaluate {company}",
   prompt="
-    You are a career-ops batch worker evaluating a job offer.
+    You are a career-copilot batch worker evaluating a job offer.
 
     ## Your task
     1. Read these files: cv.md, modes/_shared.md, modes/_profile.md

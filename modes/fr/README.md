@@ -1,6 +1,6 @@
-# career-ops -- Modes francophones (`modes/fr/`)
+# career-copilot -- Modes francophones (`modes/fr/`)
 
-Ce dossier contient les traductions francaises des principaux modes career-ops pour les candidats qui ciblent le marche francophone (France, Belgique, Suisse romande, Luxembourg, Quebec).
+Ce dossier contient les traductions francaises des principaux modes career-copilot pour les candidats qui ciblent le marche francophone (France, Belgique, Suisse romande, Luxembourg, Quebec).
 
 ## Quand utiliser ces modes ?
 

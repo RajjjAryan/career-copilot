@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * doctor.mjs — Setup validation for career-ops
+ * doctor.mjs — Setup validation for career-copilot
  * Checks all prerequisites and prints a pass/fail checklist.
  */
 
@@ -150,7 +150,7 @@ function checkAutoDir(name) {
 }
 
 async function main() {
-  console.log('\ncareer-ops doctor');
+  console.log('\ncareer-copilot doctor');
   console.log('================\n');
 
   const checks = [
@@ -186,7 +186,7 @@ async function main() {
     console.log(`Result: ${failures} issue${failures === 1 ? '' : 's'} found. Fix them and run \`npm run doctor\` again.`);
     process.exit(1);
   } else {
-    console.log('Result: All checks passed. You\'re ready to go! Run `claude` to start.');
+    console.log('Result: All checks passed. You\'re ready to go! Run \`claude\` to start.');
     process.exit(0);
   }
 }

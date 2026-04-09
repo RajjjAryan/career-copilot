@@ -1,4 +1,4 @@
-# career-ops Batch Worker — Full Evaluation + PDF + Tracker Line
+# career-copilot Batch Worker — Full Evaluation + PDF + Tracker Line
 
 You are a job offer evaluation worker for the candidate (read name from config/profile.yml). You receive an offer (URL + JD text) and produce:
 
@@ -165,7 +165,7 @@ Where `{company-slug}` is the company name in lowercase, no spaces, with hyphens
 **Archetype:** {detected}
 **Score:** {X/5}
 **URL:** {original offer URL}
-**PDF:** career-ops/output/cv-candidate-{company-slug}-{{DATE}}.pdf
+**PDF:** career-copilot/output/cv-candidate-{company-slug}-{{DATE}}.pdf
 **Batch ID:** {{ID}}
 
 ---

@@ -1,4 +1,4 @@
-# Career-Ops — Canonical States
+# Career-Copilot — Canonical States
 # Source of truth for application statuses.
 # The status field in applications.md must contain EXACTLY
 # one of these values (case-insensitive). No markdown bold,

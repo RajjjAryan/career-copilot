@@ -2,7 +2,7 @@
 
 This is for the case where one candidate has a real track record on two different archetypes at once. The example here is a senior AI engineer who is also a senior technical instructor, but the same structure works for backend + SRE, ML + research, IC + manager, or engineer + product manager.
 
-The default career-ops examples assume one north-star archetype. Hybrid careers do not fit that mould. Bootcamp instructors, university lecturers, AI/ML educators inside companies, DevRel engineers, training architects, internal-enablement leads -- these people have two real jobs on the CV and the existing single-archetype config either flattens one side or the other.
+The default career-copilot examples assume one north-star archetype. Hybrid careers do not fit that mould. Bootcamp instructors, university lecturers, AI/ML educators inside companies, DevRel engineers, training architects, internal-enablement leads -- these people have two real jobs on the CV and the existing single-archetype config either flattens one side or the other.
 
 This folder shows how to:
 
@@ -42,7 +42,7 @@ Use single-track instead if:
 
 ---
 
-## How dual-track changes the rest of career-ops
+## How dual-track changes the rest of career-copilot
 
 ### `modes/_shared.md`
 List both archetypes in the "North Star -- Target Roles" table with `fit: primary`. The skill applies equal rigor to all primary archetypes, which is what you need here.
@@ -59,7 +59,7 @@ Lead the Professional Summary with the combination itself -- "senior AI engineer
 Put your engineering range in `compensation.target_range` (it's usually the higher one) and the teaching range in the optional `compensation.alternate_ranges` block. The evaluator picks the right one based on the JD.
 
 ### Evaluation reports
-When career-ops evaluates an offer, it should detect which archetype the JD targets and pick the matching salary range, the matching CV emphasis, and the matching STAR stories. With two `fit: primary` entries this mostly just works, but check the `Archetype:` line in the report header. If it picked wrong, the rest of the report is wrong too.
+When career-copilot evaluates an offer, it should detect which archetype the JD targets and pick the matching salary range, the matching CV emphasis, and the matching STAR stories. With two `fit: primary` entries this mostly just works, but check the `Archetype:` line in the report header. If it picked wrong, the rest of the report is wrong too.
 
 ---
 

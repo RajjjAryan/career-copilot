@@ -1,5 +1,5 @@
 /**
- * analyze-patterns.mjs — Rejection Pattern Detector for career-ops
+ * analyze-patterns.mjs — Rejection Pattern Detector for career-copilot
  *
  * Parses applications.md + all linked reports, extracts dimensions
  * (archetype, seniority, remote, gaps, scores), classifies outcomes,

@@ -8,7 +8,7 @@
  * Also strips markdown bold (**) and dates from the status field,
  * moving DUPLICADO info to the notes column.
  *
- * Run: node career-ops/normalize-statuses.mjs [--dry-run]
+ * Run: node career-copilot/normalize-statuses.mjs [--dry-run]
  */
 
 import { readFileSync, writeFileSync, copyFileSync, existsSync } from 'fs';
@@ -150,7 +150,7 @@ if (unknowns.length > 0) {
   }
 }
 
-console.log(`\n�� ${changes} statuses normalized`);
+console.log(`\n📊 ${changes} statuses normalized`);
 
 if (!DRY_RUN && changes > 0) {
   // Backup first

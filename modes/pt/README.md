@@ -1,6 +1,6 @@
-# career-ops -- Modos em Portugues BR (`modes/pt/`)
+# career-copilot -- Modos em Portugues BR (`modes/pt/`)
 
-Esta pasta contem as traducoes em portugues brasileiro dos principais modos do career-ops para candidatos que buscam vagas no mercado brasileiro ou em empresas que operam em portugues.
+Esta pasta contem as traducoes em portugues brasileiro dos principais modos do career-copilot para candidatos que buscam vagas no mercado brasileiro ou em empresas que operam em portugues.
 
 ## Quando usar estes modos?
 
@@ -15,7 +15,7 @@ Se a maioria das suas vagas e em ingles, fique com os modos padrao em `modes/`. 
 
 ## Como ativar?
 
-O career-ops nao tem um "switch de idioma" como flag de codigo. Em vez disso, existem dois caminhos:
+O career-copilot nao tem um "switch de idioma" como flag de codigo. Em vez disso, existem dois caminhos:
 
 ### Caminho 1 -- Por sessao, via comando
 

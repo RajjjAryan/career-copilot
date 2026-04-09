@@ -1,4 +1,4 @@
-# Career-Ops for Copilot CLI
+# Career-Copilot for Copilot CLI
 
 Read `.github/copilot-instructions.md` for all project instructions, routing, and behavioral rules.
 

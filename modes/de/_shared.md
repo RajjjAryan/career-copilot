@@ -1,10 +1,10 @@
-# Geteilter Kontext -- career-ops (Deutsch)
+# Geteilter Kontext -- career-copilot (Deutsch)
 
 <!-- ============================================================
      ANPASSEN DIESER DATEI
      ============================================================
-     Diese Datei enthält den geteilten Kontext für alle career-ops-Modi
-     in der deutschen Variante. Bevor du career-ops verwendest, MUSST du:
+     Diese Datei enthält den geteilten Kontext für alle career-copilot-Modi
+     in der deutschen Variante. Bevor du career-copilot verwendest, MUSST du:
      1. config/profile.yml mit deinen persönlichen Daten ausfüllen
      2. cv.md im Projekt-Root anlegen (Lebenslauf in Markdown)
      3. (Optional) article-digest.md mit deinen Proof Points anlegen

@@ -11,7 +11,7 @@
  * If duplicate with higher score → update in-place, update report link
  * Validates status against states.yml (rejects non-canonical, logs warning)
  *
- * Run: node career-ops/merge-tracker.mjs [--dry-run] [--verify]
+ * Run: node career-copilot/merge-tracker.mjs [--dry-run] [--verify]
  */
 
 import { readFileSync, writeFileSync, readdirSync, mkdirSync, renameSync, existsSync } from 'fs';

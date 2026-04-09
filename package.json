@@ -1,5 +1,5 @@
 {
-  "name": "career-ops",
+  "name": "career-copilot",
   "version": "1.0.0",
   "description": "AI-powered job search pipeline built on GitHub Copilot CLI",
   "type": "module",

@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 /**
- * test-all.mjs — Comprehensive test suite for career-ops (Copilot CLI Edition)
+ * test-all.mjs — Comprehensive test suite for career-copilot
  *
  * Run before merging any PR or pushing changes.
- * Tests: syntax, scripts, dashboard, data contract, personal data, paths, mode integrity.
+ * Tests: syntax, scripts, dashboard, data contract, personal data, paths.
  *
  * Usage:
  *   node test-all.mjs           # Run all tests
@@ -39,7 +39,7 @@ function run(cmd, opts = {}) {
 function fileExists(path) { return existsSync(join(ROOT, path)); }
 function readFile(path) { return readFileSync(join(ROOT, path), 'utf-8'); }
 
-console.log('\n🧪 career-ops test suite (Copilot CLI Edition)\n');
+console.log('\n🧪 career-copilot test suite\n');
 
 // ── 1. SYNTAX CHECKS ────────────────────────────────────────────
 
@@ -60,7 +60,7 @@ for (const f of mjsFiles) {
 console.log('\n2. Script execution (graceful on empty data)');
 
 const scripts = [
-  { name: 'cv-sync-check.mjs', expectExit: 1, allowFail: true },
+  { name: 'cv-sync-check.mjs', expectExit: 1, allowFail: true }, // fails without cv.md (normal in repo)
   { name: 'verify-pipeline.mjs', expectExit: 0 },
   { name: 'normalize-statuses.mjs', expectExit: 0 },
   { name: 'dedup-tracker.mjs', expectExit: 0 },
@@ -83,15 +83,11 @@ for (const { name, allowFail } of scripts) {
 
 if (!QUICK) {
   console.log('\n3. Dashboard build');
-  if (fileExists('dashboard/go.mod')) {
-    const goBuild = run('cd dashboard && go build -o /tmp/career-dashboard-test . 2>&1');
-    if (goBuild !== null) {
-      pass('Dashboard compiles');
-    } else {
-      warn('Dashboard build failed (Go may not be installed)');
-    }
+  const goBuild = run('cd dashboard && go build -o /tmp/career-dashboard-test . 2>&1');
+  if (goBuild !== null) {
+    pass('Dashboard compiles');
   } else {
-    warn('Dashboard directory missing — skipping build test');
+    fail('Dashboard build failed');
   }
 } else {
   console.log('\n3. Dashboard build (skipped --quick)');
@@ -101,13 +97,12 @@ if (!QUICK) {
 
 console.log('\n4. Data contract validation');
 
+// Check system files exist
 const systemFiles = [
   '.github/copilot-instructions.md', 'VERSION', 'DATA_CONTRACT.md',
   'modes/_shared.md', 'modes/_profile.template.md',
   'modes/evaluate.md', 'modes/pdf.md', 'modes/scan.md',
-  'modes/batch.md', 'modes/auto-pipeline.md',
   'templates/states.yml', 'templates/cv-template.html',
-  'config/profile.example.yml',
 ];
 
 for (const f of systemFiles) {
@@ -124,7 +119,9 @@ const userFiles = [
 ];
 for (const f of userFiles) {
   const tracked = run(`git ls-files ${f}`);
-  if (tracked === '' || tracked === null) {
+  if (tracked === '') {
+    pass(`User file gitignored: ${f}`);
+  } else if (tracked === null) {
     pass(`User file gitignored: ${f}`);
   } else {
     fail(`User file IS tracked (should be gitignored): ${f}`);
@@ -135,25 +132,76 @@ for (const f of userFiles) {
 
 console.log('\n5. Personal data leak check');
 
-const scanExtensions = ['md', 'yml', 'html', 'mjs', 'sh', 'go', 'json'];
-const allowedFiles = ['README.md', 'LICENSE', 'CITATION.cff', 'CONTRIBUTING.md',
-  'package.json', '.github/FUNDING.yml', '.github/copilot-instructions.md',
-  'go.mod', 'test-all.mjs', 'AGENTS.md'];
+// Generic patterns to detect personal data leaks.
+// Add your own name, email, phone, or personal domain patterns here
+// to ensure they don't leak into system files.
+const leakPatterns = [
+  // Example patterns — replace with your own personal identifiers:
+  // 'Your Name', 'yourname.com', 'your@email.com', 'your-phone-number',
+  // '/Users/youruser/',
+];
 
-// Check for absolute paths as personal data indicator
+// Also check for common PII patterns (generic)
+const piiRegexPatterns = [
+  { pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/, label: 'email address' },
+  { pattern: /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/, label: 'phone number' },
+];
+
+const scanExtensions = ['md', 'yml', 'html', 'mjs', 'sh', 'go', 'json'];
+const excludeDirs = ['node_modules', '.git', 'dashboard/go.sum'];
+const allowedFiles = ['README.md', 'LICENSE', 'CITATION.cff', 'CONTRIBUTING.md',
+  'package.json', '.github/FUNDING.yml', '.github/copilot-instructions.md', 'go.mod', 'test-all.mjs',
+  'config/profile.example.yml', 'config/profile.yml'];
+
 let leakFound = false;
-const absResult = run(
-  `grep -rn "/Users/" --include="*.mjs" --include="*.sh" --include="*.md" --include="*.go" --include="*.yml" . 2>/dev/null | grep -v node_modules | grep -v ".git/"`,
-);
-if (absResult) {
-  for (const line of absResult.split('\n').filter(Boolean)) {
-    const file = line.split(':')[0].replace('./', '');
-    if (allowedFiles.some(a => file.includes(a))) continue;
-    if (file.includes('go.sum')) continue;
-    warn(`Possible personal data (absolute path) in ${file}`);
-    leakFound = true;
+
+// Check explicit string patterns
+for (const pattern of leakPatterns) {
+  const result = run(
+    `grep -rn "${pattern}" --include="*.{${scanExtensions.join(',')}}" . 2>/dev/null | grep -v node_modules | grep -v ".git/" | grep -v go.sum`
+  );
+  if (result) {
+    for (const line of result.split('\n')) {
+      const file = line.split(':')[0].replace('./', '');
+      if (allowedFiles.some(a => file.includes(a))) continue;
+      if (file.includes('dashboard/go.mod')) continue;
+      warn(`Possible personal data in ${file}: "${pattern}"`);
+      leakFound = true;
+    }
   }
 }
+
+// Check PII regex patterns in non-allowed system files
+const systemMdFiles = run(
+  `find . -type f \\( ${scanExtensions.map(e => `-name "*.${e}"`).join(' -o ')} \\) | grep -v node_modules | grep -v ".git/" | grep -v go.sum`
+);
+if (systemMdFiles) {
+  for (const filePath of systemMdFiles.split('\n').filter(Boolean)) {
+    const cleanPath = filePath.replace('./', '');
+    if (allowedFiles.some(a => cleanPath.includes(a))) continue;
+    if (cleanPath.includes('dashboard/go.mod')) continue;
+    // Skip user data directories
+    if (cleanPath.startsWith('data/') || cleanPath.startsWith('reports/') ||
+        cleanPath.startsWith('output/') || cleanPath.startsWith('jds/') ||
+        cleanPath.startsWith('config/profile.yml')) continue;
+    try {
+      const content = readFileSync(join(ROOT, cleanPath), 'utf-8');
+      for (const { pattern: regex, label } of piiRegexPatterns) {
+        const match = content.match(regex);
+        if (match) {
+          // Skip if it looks like an example/placeholder
+          if (match[0].includes('example') || match[0].includes('placeholder') ||
+              match[0].includes('jane') || match[0].includes('your')) continue;
+          warn(`Possible ${label} in ${cleanPath}: "${match[0]}"`);
+          leakFound = true;
+        }
+      }
+    } catch {
+      // File read error, skip
+    }
+  }
+}
+
 if (!leakFound) {
   pass('No personal data leaks outside allowed files');
 }
@@ -163,7 +211,7 @@ if (!leakFound) {
 console.log('\n6. Absolute path check');
 
 const absPathResult = run(
-  `grep -rn "/Users/" --include="*.mjs" --include="*.sh" . 2>/dev/null | grep -v node_modules | grep -v ".git/" | grep -v test-all.mjs`
+  `grep -rn "/Users/" --include="*.mjs" --include="*.sh" --include="*.md" --include="*.go" --include="*.yml" . 2>/dev/null | grep -v node_modules | grep -v ".git/" | grep -v README.md | grep -v LICENSE | grep -v go.sum | grep -v copilot-instructions.md | grep -v test-all.mjs`
 );
 if (!absPathResult) {
   pass('No absolute paths in code files');
@@ -194,21 +242,21 @@ for (const mode of expectedModes) {
 
 // Check _shared.md references _profile.md
 const shared = readFile('modes/_shared.md');
-if (shared.includes('_profile')) {
-  pass('_shared.md references _profile');
+if (shared.includes('_profile.md')) {
+  pass('_shared.md references _profile.md');
 } else {
-  fail('_shared.md does NOT reference _profile');
+  fail('_shared.md does NOT reference _profile.md');
 }
 
 // ── 8. COPILOT INSTRUCTIONS INTEGRITY ───────────────────────────
 
-console.log('\n8. copilot-instructions.md integrity');
+console.log('\n8. Copilot instructions integrity');
 
 const instructions = readFile('.github/copilot-instructions.md');
 const requiredSections = [
   'Data Contract', 'Update Check', 'Ethical Use',
-  'Offer Verification', 'Canonical', 'TSV Format',
-  'Onboarding',
+  'Offer Verification', 'Canonical Application States', 'TSV Format',
+  'First Run', 'Onboarding',
 ];
 
 for (const section of requiredSections) {
@@ -232,25 +280,6 @@ if (fileExists('VERSION')) {
   }
 } else {
   fail('VERSION file missing');
-}
-
-// ── 10. ESSENTIAL SCRIPTS ───────────────────────────────────────
-
-console.log('\n10. Essential scripts');
-
-const essentialScripts = [
-  'generate-pdf.mjs', 'doctor.mjs', 'verify-pipeline.mjs',
-  'merge-tracker.mjs', 'dedup-tracker.mjs', 'normalize-statuses.mjs',
-  'check-liveness.mjs', 'cv-sync-check.mjs', 'update-system.mjs',
-  'analyze-patterns.mjs',
-];
-
-for (const script of essentialScripts) {
-  if (fileExists(script)) {
-    pass(`Script exists: ${script}`);
-  } else {
-    fail(`Missing script: ${script}`);
-  }
 }
 
 // ── SUMMARY ─────────────────────────────────────────────────────

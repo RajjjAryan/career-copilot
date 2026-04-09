@@ -1,4 +1,4 @@
-module github.com/santifer/career-ops/dashboard
+module github.com/RajjjAryan/career-copilot/dashboard
 
 go 1.24.2
 

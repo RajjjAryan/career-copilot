@@ -1,4 +1,4 @@
-# Career-Ops (Copilot CLI Edition)
+# Career-Copilot (Copilot CLI Edition)
 
 <p align="center">
   <em>Companies use AI to filter candidates. This gives candidates AI to <strong>choose</strong> companies.</em>
@@ -15,8 +15,6 @@
 
 AI-powered job search pipeline built on **GitHub Copilot CLI**. Evaluate offers, generate tailored CVs, scan portals, track applications, and prepare for interviews — all from your terminal.
 
-> Adapted from [santifer/career-ops](https://github.com/santifer/career-ops) (originally built for Claude Code). Full credit to [Santiago Fernández](https://santifer.io) for the original system design.
-
 ## What It Does
 
 - **Evaluate** job offers with a structured A-F scoring system (6 weighted dimensions)
@@ -28,7 +26,7 @@ AI-powered job search pipeline built on **GitHub Copilot CLI**. Evaluate offers,
 - **Research** companies in depth
 - **Draft** LinkedIn outreach messages
 
-> **Important: This is NOT a spray-and-pray tool.** career-ops is a filter — it helps you find the few offers worth your time out of hundreds. The system strongly recommends against applying to anything scoring below 4.0/5. Your time is valuable, and so is the recruiter's. Always review before submitting.
+> **Important: This is NOT a spray-and-pray tool.** career-copilot is a filter — it helps you find the few offers worth your time out of hundreds. The system strongly recommends against applying to anything scoring below 4.0/5. Your time is valuable, and so is the recruiter's. Always review before submitting.
 
 > **Heads up: the first evaluations won't be great.** The system doesn't know you yet. Feed it context — your CV, your career story, your proof points, your preferences. The more you nurture it, the better it gets.
 
@@ -57,7 +55,7 @@ AI-powered job search pipeline built on **GitHub Copilot CLI**. Evaluate offers,
 ```bash
 # 1. Clone and install
 git clone <your-repo-url>
-cd career-ops && npm install
+cd career-copilot && npm install
 npx playwright install chromium   # Required for PDF generation
 
 # 2. Check setup
@@ -132,7 +130,7 @@ You paste a job URL or description
 ## Project Structure
 
 ```
-career-ops/
+career-copilot/
 ├── .github/
 │   ├── copilot-instructions.md   # AI agent instructions (the brain)
 │   └── ISSUE_TEMPLATE/           # Bug report & feature request
@@ -228,7 +226,7 @@ See [docs/CUSTOMIZATION.md](docs/CUSTOMIZATION.md) for details.
 
 ## Disclaimer
 
-**career-ops is a local, open-source tool — NOT a hosted service.** By using this software, you acknowledge:
+**career-copilot is a local, open-source tool — NOT a hosted service.** By using this software, you acknowledge:
 
 1. **You control your data.** Your CV, contact info, and personal data stay on your machine and are sent directly to the AI provider you choose. We do not collect any data.
 2. **You control the AI.** The default prompts instruct the AI not to auto-submit applications. Always review AI-generated content before submitting.
@@ -236,10 +234,6 @@ See [docs/CUSTOMIZATION.md](docs/CUSTOMIZATION.md) for details.
 4. **No guarantees.** Evaluations are recommendations, not truth. AI models may hallucinate.
 
 See [LEGAL_DISCLAIMER.md](LEGAL_DISCLAIMER.md) for full details.
-
-## Credits
-
-Based on [career-ops](https://github.com/santifer/career-ops) by [Santiago Fernández](https://santifer.io). Adapted for GitHub Copilot CLI.
 
 ## License
 

@@ -1,8 +1,8 @@
-# Career-Ops — Copilot CLI Instructions
+# Career-Copilot — Copilot CLI Instructions
 
 > AI-powered job search pipeline: offer evaluation, CV generation, pipeline tracking, portal scanning, batch processing, interview preparation.
 >
-> Adapted from [career-ops](https://github.com/santifer/career-ops). This file is the primary instruction set for GitHub Copilot CLI when operating inside this repository.
+> This file is the primary instruction set for GitHub Copilot CLI when operating inside this repository.
 
 ---
 
@@ -116,12 +116,12 @@ node update-system.mjs check
 ```
 
 Parse the JSON output:
-- `{"status": "update-available", ...}` → tell the user: "career-ops update available (v{local} → v{remote}). Your data (CV, profile, tracker, reports) will NOT be touched. Want me to update?" If yes → `node update-system.mjs apply`. If no → `node update-system.mjs dismiss`.
+- `{"status": "update-available", ...}` → tell the user: "career-copilot update available (v{local} → v{remote}). Your data (CV, profile, tracker, reports) will NOT be touched. Want me to update?" If yes → `node update-system.mjs apply`. If no → `node update-system.mjs dismiss`.
 - `{"status": "up-to-date"}` → say nothing
 - `{"status": "dismissed"}` → say nothing
 - `{"status": "offline"}` → say nothing
 
-The user can also say "check for updates" or "update career-ops" at any time. To rollback: `node update-system.mjs rollback`.
+The user can also say "check for updates" or "update career-copilot" at any time. To rollback: `node update-system.mjs rollback`.
 
 ---
 
