@@ -12,6 +12,10 @@
     "pdf": "node generate-pdf.mjs",
     "sync-check": "node cv-sync-check.mjs",
     "liveness": "node check-liveness.mjs",
+    "browse": "node browse.mjs",
+    "update:check": "node update-system.mjs check",
+    "update": "node update-system.mjs apply",
+    "rollback": "node update-system.mjs rollback",
     "test": "node test-all.mjs"
   },
   "keywords": ["ai", "job-search", "copilot-cli", "career", "automation", "resume", "cv"],

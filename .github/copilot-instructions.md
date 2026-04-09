@@ -317,8 +317,16 @@ Use the correct tool for each operation. This mapping ensures efficient, reliabl
 | Compensation data | `web_search` | Search for salary ranges, Glassdoor data, Levels.fyi |
 | LinkedIn contacts | `web_search` | Find hiring managers, recruiters, team leads |
 | Extract JD from URL | `web_fetch` | Fetch job posting page, parse JD content |
+| Extract JD from SPA | `bash` | `node browse.mjs "{url}"` — Playwright-based, handles JS-rendered pages |
+| Scrape job listings | `bash` | `node browse.mjs "{careers_url}" --jobs` — extract job listings from portal |
+| Check if job is active | `bash` | `node browse.mjs "{url}" --check-alive` — verify posting not expired |
 | Verify company claims | `web_fetch` | Check company blog posts, press releases |
 | Latest news about company | `web_search` | Recent funding, layoffs, product launches |
+
+> **When to use `browse.mjs` vs `web_fetch`:**
+> - `web_fetch` is fast and lightweight — use for static pages, APIs, and simple HTML
+> - `browse.mjs` uses Playwright with a real browser — use for SPAs (Ashby, Lever, Workday), JS-rendered content, and liveness checks
+> - If `web_fetch` returns empty/broken content, retry with `browse.mjs`
 
 ### File Reading
 
@@ -352,7 +360,9 @@ Use the correct tool for each operation. This mapping ensures efficient, reliabl
 | Task | Tool | Usage |
 |---|---|---|
 | Generate PDF from HTML | `bash` | `node generate-pdf.mjs output/{file}.html output/{file}.pdf --format=a4` |
+| Browse SPA page | `bash` | `node browse.mjs "{url}" [--jobs\|--check-alive\|--links]` |
 | Install dependencies | `bash` | `npm install` or `npx playwright install chromium` |
+| Check for updates | `bash` | `node update-system.mjs check` |
 | Git operations | `bash` | Commit, status, diff (always use `--no-pager`) |
 
 ### Search & Discovery

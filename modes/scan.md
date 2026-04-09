@@ -1,7 +1,7 @@
-# scan.md — Portal Scanner
+# scan.md — Portal Scanner (Job Discovery)
 
 > **Trigger**: User asks to scan for new job postings.
-> **Input**: Configured portals in `config/portals.yml`.
+> **Input**: Configured portals in `portals.yml` (root) or `templates/portals.example.yml`.
 > **Output**: New offers added to `data/pipeline.md`, deduped against history.
 
 ---
@@ -11,76 +11,62 @@
 ```
 view(path="modes/_shared.md")
 view(path="modes/_profile.md")
-view(path="config/portals.yml")
-view(path="data/scan-history.tsv")
+```
+
+Read portal config:
+```
+view(path="portals.yml")           # user config (preferred)
+view(path="templates/portals.example.yml")  # fallback if portals.yml doesn't exist
+```
+
+Read dedup sources:
+```
+view(path="data/scan-history.tsv")   # if exists
 view(path="data/applications.md")
 view(path="data/pipeline.md")
 ```
 
 ---
 
-## Portal Configuration (portals.yml)
-
-Expected format in `config/portals.yml`:
-
-```yaml
-portals:
-  - name: "Company Careers"
-    url: "https://company.com/careers"
-    type: "careers-page"        # careers-page | greenhouse | lever | workday | custom
-    filters:
-      positive_keywords:
-        - "senior"
-        - "backend"
-        - "engineer"
-      negative_keywords:
-        - "intern"
-        - "junior"
-        - "manager"
-
-scan_settings:
-  max_results_per_portal: 20
-  dedup_window_days: 30
-```
-
----
-
 ## Scanning Strategy (3 Levels)
 
-### Level 1 — Direct Careers Page Scrape
+### Level 1 — Playwright Direct (PRINCIPAL, most reliable)
 
-For portals with type `careers-page`:
+For each company in `tracked_companies` with `careers_url`:
 
+Use `browse.mjs` to scrape the careers page with a real browser (handles SPAs like Ashby, Lever, Workday):
+
+```bash
+node browse.mjs "{careers_url}" --jobs
 ```
-web_fetch(url="{portal.url}")
-```
 
-Parse the page content to extract:
-- Job titles
-- Job URLs
-- Location (if visible)
-- Date posted (if visible)
+Returns JSON with `{ jobs: [{ title, url, company }] }`.
+
+**Why this is better than web_fetch:** Most modern career pages (Ashby, Lever, Workday) are JavaScript SPAs. `web_fetch` only gets raw HTML without JS rendering. `browse.mjs` uses Playwright to render the full page, wait for dynamic content, and extract job listings.
+
+**Fallback**: If `browse.mjs` fails (Playwright not installed), fall back to web_fetch for static pages, or use the Greenhouse API for Greenhouse-hosted boards.
 
 ### Level 2 — Structured API (Greenhouse, Lever)
 
-For portals with type `greenhouse` or `lever`:
+For companies with `api:` field:
 
 ```
-web_fetch(url="https://boards-api.greenhouse.io/v1/boards/{board_token}/jobs")
-web_fetch(url="https://api.lever.co/v0/postings/{company}?mode=json")
+web_fetch(url="https://boards-api.greenhouse.io/v1/boards/{slug}/jobs")
 ```
 
-Parse JSON response to extract job listings with full metadata.
+Parse JSON response — no browser needed. Fast and structured.
 
 ### Level 3 — Broad Discovery via Web Search
 
-For portals with type `custom` or as a supplement:
+For `search_queries` in portals.yml:
 
 ```
-web_search("{company name} {positive_keywords} open positions {current year}")
+web_search("{query}")
 ```
 
-Extract relevant URLs from search results.
+Extract `{title, url, company}` from results. Results may be stale — verify with browse.mjs before adding to pipeline.
+
+**Priority:** Level 1 → Level 2 → Level 3 (all additive, results merged and deduped).
 
 ---
 
@@ -88,42 +74,39 @@ Extract relevant URLs from search results.
 
 ### Step 1 — Title Filtering
 
-For each discovered job:
+Using `title_filter` from portals.yml:
 
-1. Check title against `positive_keywords` — must match at least one
-2. Check title against `negative_keywords` — must match none
-3. Titles are case-insensitive matched
+1. At least 1 keyword from `positive` must appear in the title (case-insensitive)
+2. 0 keywords from `negative` must appear
+3. `seniority_boost` keywords give priority but are not required
 
 ### Step 2 — Deduplication
 
-Check each URL against three sources:
+Check each URL against 3 sources:
 
-1. `data/scan-history.tsv` — previously scanned URLs
-2. `data/applications.md` — already evaluated/applied
-3. `data/pipeline.md` — already in the pipeline
+1. `data/scan-history.tsv` — URL already scanned
+2. `data/applications.md` — company + role already evaluated
+3. `data/pipeline.md` — URL already in pipeline
 
-If URL matches any source, skip it.
+### Step 3 — Liveness Verification (Level 3 results only)
 
-### Step 3 — Link Verification
+WebSearch results can be stale. For each new URL from Level 3:
 
-For each new (non-duplicate) URL:
-
-```
-web_fetch(url="{job_url}")
+```bash
+node browse.mjs "{url}" --check-alive
 ```
 
-Verify:
-- The page loads (not 404/expired)
-- The job posting is still active
-- The content matches expected role type
+Returns `{ data: { alive: true/false } }`. Discard expired postings.
+
+Level 1 and Level 2 results are inherently real-time — skip this step for them.
 
 ---
 
-## Output Actions
+## Output
 
 ### Step 4 — Add to Pipeline
 
-For each verified new offer, add to `data/pipeline.md` under the "Pending" section:
+For each verified new offer:
 
 ```markdown
 - [ ] [{Company} — {Role Title}]({URL}) | Found: {YYYY-MM-DD} | Source: {portal name}
@@ -134,21 +117,26 @@ For each verified new offer, add to `data/pipeline.md` under the "Pending" secti
 Append to `data/scan-history.tsv`:
 
 ```
-{YYYY-MM-DD}\t{URL}\t{Company}\t{Role Title}\t{Status: new|duplicate|expired|filtered}
+url	first_seen	portal	title	company	status
+https://...	2026-02-10	Ashby	PM AI	Acme	added
+https://...	2026-02-10	Greenhouse	Junior Dev	BigCo	skipped_title
+https://...	2026-02-10	WebSearch	SA AI	OldCo	skipped_dup
+https://...	2026-02-10	WebSearch	PM AI	ClosedCo	skipped_expired
 ```
 
-Register ALL discovered URLs — including filtered and duplicate ones — for future dedup.
+Register ALL discovered URLs — including filtered, duplicate, and expired — for future dedup.
 
 ### Step 6 — Summary
 
 ```markdown
 ---
-## 🔍 Scan Complete
+## 🔍 Scan Complete — {YYYY-MM-DD}
 
-| Portal | Discovered | New | Duplicate | Filtered | Expired |
+| Source | Discovered | New | Duplicate | Filtered | Expired |
 |--------|-----------|-----|-----------|----------|---------|
-| {portal 1} | {n} | {n} | {n} | {n} | {n} |
-| {portal 2} | {n} | {n} | {n} | {n} | {n} |
+| Playwright | {n} | {n} | {n} | {n} | — |
+| Greenhouse API | {n} | {n} | {n} | {n} | — |
+| WebSearch | {n} | {n} | {n} | {n} | {n} |
 | **Total** | **{n}** | **{n}** | **{n}** | **{n}** | **{n}** |
 
 ### New Offers Added to Pipeline
@@ -160,3 +148,18 @@ Register ALL discovered URLs — including filtered and duplicate ones — for f
 - Run `batch` mode to evaluate all at once
 ---
 ```
+
+---
+
+## careers_url Management
+
+**Known patterns by platform:**
+- **Ashby:** `https://jobs.ashbyhq.com/{slug}`
+- **Greenhouse:** `https://job-boards.greenhouse.io/{slug}` or `https://job-boards.eu.greenhouse.io/{slug}`
+- **Lever:** `https://jobs.lever.co/{slug}`
+- **Custom:** Company's own careers page
+
+If `careers_url` returns 404 or redirect:
+1. Note in scan summary
+2. Try `scan_query` as fallback
+3. Mark for manual URL update
