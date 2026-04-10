@@ -100,7 +100,7 @@ function parseAppLine(line) {
  * Handles: 9-col TSV, 8-col TSV, pipe-delimited markdown.
  */
 function parseTsvContent(content, filename) {
-  content = content.trim();
+  content = content.replace(/^\uFEFF/, '').trim();
   if (!content) return null;
 
   let parts;
