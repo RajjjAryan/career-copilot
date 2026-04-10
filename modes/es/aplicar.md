@@ -1,10 +1,10 @@
-# Modo: aplicar -- Asistente de Candidatura en Vivo
+# Modo: apply -- Asistente de Candidatura en Vivo
 
 Modo interactivo para cuando el candidato está completando un formulario de candidatura en Chrome. Lee lo que está en la pantalla, carga el contexto de la evaluación previa de la vacante y genera respuestas personalizadas para cada pregunta del formulario.
 
 ## Requisitos
 
-- **Mejor con Playwright visible**: En modo visible, el candidato ve el navegador y Claude puede interactuar con la página.
+- **Mejor con Playwright visible**: En modo visible, el candidato ve el navegador y Copilot CLI puede interactuar con la página.
 - **Sin Playwright**: el candidato comparte una captura de pantalla (screenshot) o pega las preguntas manualmente.
 
 ## Workflow
@@ -68,15 +68,13 @@ Para cada pregunta, generar la respuesta siguiendo:
 4. **Especificidad**: Referenciar algo concreto del JD visible en la pantalla
 5. **career-copilot proof point**: Incluir en "Información adicional" si hay campo para ello
 
-**Campos específicos del mercado brasileño que aparecen con frecuencia:**
-- **Expectativa salarial (bruto, mensual o anual)** → Rango de `profile.yml`, en BRL, con nota "negociable según paquete total"
-- **Régimen de contratación preferido (CLT/PJ)** → Responder según `profile.yml`, o "abierto a ambos" si aplica
-- **Disponibilidad / plazo de inicio** → Fecha realista considerando el preaviso actual (Formal: 30 días + 3 días/año)
-- **Autorización de trabajo** → Responder con claridad; si es brasileño: "Ciudadano brasileño, no requiere autorización"
-- **Idiomas** → Informar nivel por idioma (nativo, fluido, intermedio, básico)
+**Campos frecuentes en formularios del mercado hispanohablante (o internacionales):**
+- **Expectativa salarial (bruta o neta; mensual o anual)** → Rango de `profile.yml`, en la moneda y periodicidad que pida el formulario, con nota "negociable según paquete total" si aplica
+- **Tipo de contratación preferido** → Responder según `profile.yml` (asalariado, autónomo/freelance, contractor, etc.), o "abierto según la propuesta" si aplica
+- **Disponibilidad / fecha de inicio** → Indicar una fecha realista según la situación actual, preaviso y posibles compromisos de cierre
+- **Autorización de trabajo** → Responder con claridad para el país de la vacante: ciudadanía, permiso vigente, necesidad de visado o patrocinio, según corresponda
 
-**Formato de output:**
-```
+```text
 ## Respuestas para [Empresa] -- [Vacante]
 
 Base: Report #NNN | Score: X.X/5 | Arquetipo: [tipo]
@@ -84,10 +82,10 @@ Base: Report #NNN | Score: X.X/5 | Arquetipo: [tipo]
 ---
 
 ### 1. [Pregunta exacta del formulario]
-[Respuesta lista para copy-paste]
+> [Respuesta lista para copy-paste]
 
 ### 2. [Próxima pregunta]
-[Respuesta]
+> [Respuesta]
 
 ...
 
@@ -103,7 +101,7 @@ Notas:
 Si el candidato confirma que envió la candidatura:
 1. Actualizar status en `applications.md` de "Evaluated" a "Applied"
 2. Actualizar Bloque G del report con las respuestas finales
-3. Sugerir próximo paso: `/career-copilot contacto` para LinkedIn outreach
+3. Sugerir próximo paso: `/career-copilot contact` para LinkedIn outreach
 
 ## Manejo del Scroll (Scroll handling)
 

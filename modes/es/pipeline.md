@@ -9,9 +9,9 @@ Procesa las URLs de ofertas acumuladas en `data/pipeline.md`. El candidato agreg
    a. Calcular el próximo `REPORT_NUM` secuencial (leer `reports/`, tomar el número más alto + 1)
    b. **Extraer la oferta** con Playwright (`browser_navigate` + `browser_snapshot`) -> WebFetch -> WebSearch
    c. Si la URL no es accesible -> marcar como `- [!]` con una nota y continuar
-   d. **Ejecutar el auto-pipeline completo** : Evaluación A-F -> Reporte .md -> PDF (si score >= 3.0) -> Tracker
+   d. **Ejecutar el auto-pipeline completo** : evaluación -> reporte `.md` -> PDF -> tracker, siguiendo el modo canónico `modes/auto-pipeline.md`
    e. **Mover de "Pendientes" a "Procesadas"** : `- [x] #NNN | URL | Empresa | Rol | Score/5 | PDF sí/no`
-3. **Si hay 3+ URLs pendientes**, lanzar agentes en paralelo (Agent tool con `run_in_background`) para maximizar la velocidad.
+3. **Si hay 3+ URLs pendientes**, procesar ofertas independientes en paralelo con la herramienta `task`, siguiendo el patrón canónico de `modes/pipeline.md`
 4. **Al final**, mostrar una tabla resumen :
 
 ```
@@ -43,8 +43,8 @@ Procesa las URLs de ofertas acumuladas en `data/pipeline.md`. El candidato agreg
 - **LinkedIn** : Puede requerir login -> marcar `[!]` y pedir al candidato que pegue el texto
 - **PDF** : Si la URL apunta a un PDF, leerlo directamente con el Read tool
 - **Prefijo `local:`** : Leer el archivo local. Ejemplo : `local:jds/linkedin-pm-ai.md` -> leer `jds/linkedin-pm-ai.md`
-- **Welcome to the Jungle / Indeed FR / APEC** : Portales francófonos comunes. Playwright maneja bien los banners de cookies
-- **France Travail (ex-Pole emploi)** : Ofertas estructuradas, bien legibles por máquina. WebFetch generalmente es suficiente
+- **Portales generalistas y regionales en español** : Pueden mostrar banners de cookies o contenido dinámico. Priorizar Playwright cuando WebFetch no extraiga bien la oferta
+- **Portales públicos de empleo o bolsas institucionales** : Suelen tener ofertas estructuradas; WebFetch puede ser suficiente si la página no depende de JavaScript
 
 ## Numeración automática
 

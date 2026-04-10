@@ -17,11 +17,11 @@ Si la mayoría de tus ofertas son en inglés, quédate con los modos estándar e
 
 ### Opción 1 -- Por sesión
 
-Dile a Claude al inicio de la sesión:
+Dile a Copilot CLI al inicio de la sesión:
 
 > "Usa los modos en español bajo `modes/es/`."
 
-Claude leerá entonces los archivos de esta carpeta en lugar de `modes/`.
+Copilot CLI leerá entonces los archivos de esta carpeta en lugar de `modes/`.
 
 ### Opción 2 -- De forma permanente
 
@@ -33,7 +33,7 @@ language:
   modes_dir: modes/es
 ```
 
-Recuérdaselo a Claude en tu primera sesión ("Mira en `profile.yml`, configuré `language.modes_dir`"). Claude usará automáticamente los modos en español.
+Recuérdaselo a Copilot CLI en tu primera sesión("Mira en `profile.yml`, configuré `language.modes_dir`"). Copilot CLI usará automáticamente los modos en español.
 
 ## ¿Qué modos están traducidos?
 
@@ -42,11 +42,11 @@ Esta primera iteración cubre los cuatro modos de mayor impacto:
 | Archivo | Traducido desde | Rol |
 |---------|-----------------|-----|
 | `_shared.md` | `modes/_shared.md` (EN) | Contexto compartido, arquetipos, reglas globales, especificidades del mercado hispanohablante |
-| `oferta.md` | `modes/oferta.md` (ES) | Evaluación completa de una oferta (Bloques A-F) |
-| `postular.md` | `modes/apply.md` (EN) | Asistente en vivo para completar formularios de candidatura |
-| `pipeline.md` | `modes/pipeline.md` (ES) | Bandeja de entrada de URLs / Second Brain para las ofertas recopiladas |
+| `oferta.md` | `modes/evaluate.md` (EN) | Evaluación completa de una oferta (Bloques A-F) |
+| `aplicar.md` | `modes/apply.md` (EN) | Asistente en vivo para completar formularios de candidatura |
+| `pipeline.md` | `modes/pipeline.md` (EN) | Bandeja de entrada de URLs / Second Brain para las ofertas recopiladas |
 
-Los demás modos (`scan`, `batch`, `pdf`, `tracker`, `auto-pipeline`, `deep`, `contacto`, `ofertas`, `project`, `training`) permanecen en EN/ES. Su contenido es principalmente tooling, rutas y comandos — debe mantenerse independiente del idioma.
+Los demás modos (`scan`, `batch`, `pdf`, `tracker`, `auto-pipeline`, `deep`, `contact`, `project`, `training`) permanecen en EN/ES. Su contenido es principalmente tooling, rutas y comandos — debe mantenerse independiente del idioma.
 
 ## Lo que permanece en inglés
 
@@ -83,7 +83,7 @@ Para mantener un tono coherente si modificas o amplías los modos:
 | Vacation | Vacaciones / Días de descanso |
 | 13th month salary | 13er mes / Paga extra de fin de año |
 | Permanent employment | Contrato indefinido |
-| Fixed-term contract | Contrato temporal / CDD |
+| Fixed-term contract | Contrato temporal |
 | Freelance | Freelance / Independiente / Autónomo |
 | Collective agreement | Convenio colectivo |
 | Works council | Comité de empresa |
@@ -91,9 +91,7 @@ Para mantener un tono coherente si modificas o amplías los modos:
 | Meal vouchers | Tickets restaurante / Vales de comida |
 | Health insurance | Seguro médico de empresa / Mutua |
 | Disability/life insurance | Seguro de vida / Previsión social |
-| RTT | Días de libre disposición / Asuntos propios |
 | Cadre status | Categoría directiva / Personal técnico cualificado |
-| SYNTEC | Convenio SYNTEC (IT/consultoría) |
 
 ## Contribuir
 

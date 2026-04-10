@@ -40,7 +40,7 @@ La evaluación usa 6 bloques (A-F) con una nota global de 1-5:
 - 4.5+ → Match fuerte, recomendado aplicar inmediatamente
 - 4.0-4.4 → Buen match, vale la pena aplicar
 - 3.5-3.9 → Razonable pero no ideal, aplicar solo si hay un motivo específico
-- Por debajo de 3.5 → Recomendado no aplicar (ver Ethical Use en CLAUDE.md)
+- Por debajo de 3.5 → Recomendado no aplicar (ver Ethical Use en copilot-instructions.md)
 
 ## North Star -- Vacantes Objetivo
 
@@ -123,23 +123,21 @@ Cuando el candidato tiene una demo en vivo / dashboard (verificar `profile.yml`)
 - Las tarifas de freelance generalmente son 30-60% más altas que la hora bruta de relación de dependencia (cargas sociales, vacaciones, aportes)
 - El geo-arbitraje funciona en vacantes remotas: menor costo de vida = mejor neto
 
-### Mercado Brasileño -- Especificidades (IMPORTANTE)
+### Mercado ES/LATAM -- Consideraciones habituales (IMPORTANTE)
 
-En vacantes y negociaciones brasileñas, existen términos y prácticas que no aparecen en los mercados EN/ES/DE. DEBEN evaluarse correctamente:
+En vacantes y negociaciones del mercado hispanohablante, los términos exactos cambian según el país. Evaluar siempre el equivalente local y NO asumir reglas brasileñas si la oferta está en ES/LATAM:
 
 | Término | Significado | Impacto en la Evaluación |
 |---------|-------------|--------------------------|
-| **CLT** (Consolidação das Leis do Trabalho) | Contrato formal con registro laboral | Incluye FGTS, INSS, vacaciones, aguinaldo, preaviso. En la comparación, considerar el costo total del empleador |
-| **PJ** (Pessoa Jurídica) | Contratación como prestador de servicios (factura) | Valor mensual más alto, pero sin beneficios CLT. Calcular equivalente CLT para comparación justa |
-| **13o Salario** | Pago extra obligatorio para CLT (aguinaldo) | Comp CLT = salario x 13 (o 13,33 con 1/3 de vacaciones). NUNCA olvidar en la comparación |
-| **FGTS** (Fundo de Garantia do Tempo de Serviço) | 8% del salario depositado por el empleador | Beneficio CLT, no aparece en el recibo de sueldo pero es remuneración real |
-| **Vale-Refeição / Vale-Alimentação** | Beneficio de alimentación (iFood, Sodexo, Alelo) | Común en vacantes CLT, puede llegar a R$ 1.500+/mes. Incluir en la comp total |
-| **PLR** (Participação nos Lucros e Resultados) | Bono atado a resultados de la empresa | Puede ser 1-3 salarios extras/año. Variable — ponderar con cautela |
-| **Stock Options / VSOP** | Equity en startups | Común en startups brasileñas. Evaluar vesting, cliff y liquidez |
-| **Período de Experiência** | 45+45 días (CLT) o según contrato (PJ) | Estándar de mercado, no es red flag |
-| **Aviso Prévio** | 30 días (CLT) + 3 días por año trabajado | Planificar fecha de inicio según vínculo actual |
-| **Plano de Saúde** | Beneficio médico (Amil, SulAmérica, Bradesco Saúde) | Muy valorado en Brasil. Sin plan = red flag en vacantes CLT |
-| **Cooperativa / MEI** | Formas alternativas de contratación | Evaluar con cautela — puede indicar precarización laboral |
+| **Contrato indefinido / relación de dependencia** | Contrato laboral formal en nómina | Suele incluir cotizaciones, vacaciones, aguinaldo o pagas extra, licencias y mayor estabilidad. Comparar por compensación total anual, no solo salario mensual |
+| **Freelance / autónomo / contractor** | Prestación de servicios por factura | Tarifa nominal más alta, pero normalmente sin beneficios laborales. Descontar impuestos, vacaciones no pagadas, seguridad social y tiempo sin proyecto para una comparación justa |
+| **Aguinaldo / paga extra** | Pago adicional anual o semestral según el país | Puede alterar mucho la compensación real. Confirmar si el salario publicado ya lo incluye o si se paga aparte |
+| **Bono variable / comisión / performance bonus** | Compensación ligada a objetivos individuales o de empresa | No tratarlo como fijo. Ponderarlo según historial de pago, criterios y porcentaje de cumplimiento |
+| **Prestaciones / beneficios** | Coberturas y extras como seguro médico, vales, formación o días libres | Incluirlos en la evaluación total, pero separando beneficio garantizado de beneficio discrecional |
+| **Equity / stock options / RSUs** | Participación accionaria o derecho a compra futura | Evaluar vesting, cliff, liquidez, dilución y etapa de la empresa. No contar como efectivo salvo alta probabilidad de salida |
+| **Período de prueba** | Etapa inicial con condiciones de rescisión más simples | Normal en muchos países. Revisar duración, criterios de evaluación y si afecta beneficios desde el día 1 |
+| **Preaviso** | Tiempo requerido para renuncia o terminación | Afecta fecha de incorporación, negociación de salida y riesgo de solapamiento entre ofertas |
+| **Modalidad remota / híbrida y geo-salario** | Política de trabajo y posible ajuste por ubicación | Confirmar si el rango cambia por país o ciudad, quién asume equipamiento y si existen restricciones de contratación internacional |
 
 ### Scripts de Negociación
 
@@ -154,8 +152,8 @@ En vacantes y negociaciones brasileñas, existen términos y prácticas que no a
 **Cuando la oferta está por debajo del objetivo:**
 > "Estoy comparando con ofertas en el rango de [rango más alto]. [Empresa] me atrae por [motivo]. ¿Podemos llegar juntos a [valor objetivo]?"
 
-**CLT vs PJ:**
-> "Para comparar de forma justa, necesito entender la composición completa: salario base, aguinaldo, vacaciones, FGTS, vale-refeição, plan de salud y PLR. Si es PJ, ¿cuál es el valor mensual equivalente considerando estos ítems?"
+**Relación de dependencia vs Freelance:**
+> "Para comparar de forma justa, necesito entender la composición completa: salario base, aguinaldo, vacaciones, seguro médico y bonos. Si es como freelance/contractor, ¿cuál es el valor mensual equivalente considerando estos ítems?"
 
 ### Política de Ubicación (Location Policy)
 

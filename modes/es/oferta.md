@@ -1,6 +1,11 @@
-# Modo: oferta -- Evaluación completa A-F
+# Modo: evaluate -- Evaluación completa A-F
 
 Cuando el candidato pega una oferta (texto o URL), SIEMPRE entregar los 6 bloques.
+
+## Prerrequisitos
+Antes de generar la evaluación:
+1. Leer `cv.md`, `modes/_profile.md` y `config/profile.yml`.
+2. Si el usuario proporciona una URL, usar `web_fetch` o `browser_navigate` (Playwright) para extraer la descripción completa de la vacante.
 
 ## Paso 0 -- Detección de arquetipo
 
@@ -145,22 +150,17 @@ Guardar la evaluación completa en `reports/{###}-{company-slug}-{YYYY-MM-DD}.md
 
 ## Palabras clave extraídas
 (lista de 15-20 palabras clave de la oferta para optimización ATS)
-```
 
-### 2. Registrar en el tracker
+### 2. Registrar en el tracker (Formato TSV)
 
-**SIEMPRE** registrar en `data/applications.md`:
+**SIEMPRE** generar la entrada del tracker en **formato TSV** siguiendo la regla global de `_shared.md`. **NUNCA** editar `data/applications.md` directamente desde este modo. Escribir el TSV en la carpeta `batch/tracker-additions/` (crear un archivo .tsv temporal).
+
+La entrada debe incluir:
 - Próximo número secuencial
 - Fecha de hoy
 - Empresa
 - Rol
-- Score: promedio del match (1-5)
 - Estado: `Evaluated`
-- PDF: no (o sí si el auto-pipeline generó un PDF)
-- Reporte: enlace relativo al archivo de reporte (ej: `[001](reports/001-company-2026-01-01.md)`)
-
-**Formato del tracker:**
-
-```markdown
-| # | Fecha | Empresa | Rol | Score | Estado | PDF | Reporte |
-```
+- Score: promedio del match (1-5)
+- PDF: ❌ (o ✅ si el auto-pipeline generó un PDF)
+- Reporte: enlace relativo al archivo de reporte (ej: `[{num}](reports/{num}-{slug}-{fecha}.md)`)
