@@ -99,6 +99,21 @@ After detecting archetype, read `modes/_profile.md` for the user's specific fram
 | Canva MCP | Optional visual CV generation. Duplicate base design, edit text, export PDF. Requires `canva_resume_design_id` in profile.yml. |
 | Bash | `node generate-pdf.mjs` |
 
+### Cross-CLI Tool Concepts (abstraction layer)
+
+These mode files use semantic operations so they can run across Copilot CLI, Claude Code, Gemini CLI, Cursor, and Windsurf. Map equivalent provider tools before execution.
+
+| Concept | Typical use |
+|------|-----|
+| `sub_agent` | Parallel/isolated worker execution for batch and pipeline processing |
+| `web_search` | Comp, market and company research |
+| `web_fetch` | Static page extraction |
+| `browser_navigate` + `browser_snapshot` | SPA extraction and liveness checks |
+| `file_read` / `file_write` / `file_edit` | Mode, config, tracker, report I/O |
+| `shell` | Run node scripts and utility commands |
+
+If a provider does not support `sub_agent`, fall back to sequential processing in the current context.
+
 ### Time-to-offer priority
 - Working demo + metrics > perfection
 - Apply sooner > learn more

@@ -1,4 +1,4 @@
-# Career-Copilot (Copilot CLI Edition)
+# Career-Copilot (Multi-CLI Edition)
 
 <p align="center">
   <em>Companies use AI to filter candidates. This gives candidates AI to <strong>choose</strong> companies.</em>
@@ -13,7 +13,7 @@
 
 ---
 
-AI-powered job search pipeline built on **GitHub Copilot CLI**. Evaluate offers, generate tailored CVs, scan portals, track applications, and prepare for interviews — all from your terminal.
+AI-powered job search pipeline for **GitHub Copilot CLI, Claude Code, Gemini CLI, Cursor, and Windsurf**. Evaluate offers, generate tailored CVs, scan portals, track applications, and prepare for interviews — all from your terminal.
 
 ## What It Does
 
@@ -47,7 +47,7 @@ AI-powered job search pipeline built on **GitHub Copilot CLI**. Evaluate offers,
 
 ### Prerequisites
 
-- [GitHub Copilot CLI](https://docs.github.com/en/copilot) installed and configured
+- At least one supported AI CLI configured (GitHub Copilot CLI, Claude Code, Gemini CLI, Cursor, or Windsurf)
 - Node.js >= 18 (for PDF generation)
 
 ### Setup
@@ -73,12 +73,15 @@ cp templates/portals.example.yml portals.yml       # Customize companies
 # Create cv.md in the project root with your CV in markdown
 # See examples/cv-example.md for reference
 
-# 5. Start using — open Copilot CLI in this directory
+# 5. Generate provider instructions (recommended)
+npm run generate-instructions
+
+# 6. Start using with your CLI of choice
 ```
 
 ### Usage
 
-Open the project in your terminal and start Copilot CLI. The AI agent reads `.github/copilot-instructions.md` and knows all the workflows. Just ask naturally:
+Open the project in your terminal and start your AI CLI. The assistant reads the provider-specific instruction file (`.github/copilot-instructions.md`, `CLAUDE.md`, `GEMINI.md`, `.cursor/rules/career-copilot.mdc`, `.windsurfrules`) and knows all the workflows. Just ask naturally:
 
 ```
 # Evaluate a job offer

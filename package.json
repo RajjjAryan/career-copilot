@@ -9,6 +9,8 @@
     "normalize": "node normalize-statuses.mjs",
     "dedup": "node dedup-tracker.mjs",
     "merge": "node merge-tracker.mjs",
+    "generate-instructions": "node scripts/generate-instructions.mjs",
+    "detect-cli": "node scripts/detect-cli.mjs",
     "pdf": "node generate-pdf.mjs",
     "patterns": "node analyze-patterns.mjs",
     "sync-check": "node cv-sync-check.mjs",
@@ -18,7 +20,7 @@
     "rollback": "node update-system.mjs rollback",
     "test": "node test-all.mjs"
   },
-  "keywords": ["ai", "job-search", "copilot-cli", "career", "automation", "resume", "cv"],
+  "keywords": ["ai", "job-search", "copilot-cli", "multi-cli", "career", "automation", "resume", "cv"],
   "license": "MIT",
   "repository": {
     "type": "git",

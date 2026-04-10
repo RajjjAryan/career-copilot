@@ -53,6 +53,7 @@ Extract all `- [ ]` items from the "Pending" section. For each item, parse:
 
 - **1–2 URLs**: Process sequentially in the current context
 - **3+ URLs**: Use `task` tool to process in parallel (up to 3 concurrent workers)
+- **If sub-agent tool is unavailable**: Always process sequentially (same workflow, no functional changes)
 
 ### Step 3a — Sequential Processing (1–2 URLs)
 
@@ -110,6 +111,8 @@ task(
 Dispatch up to 3 workers simultaneously. After each completes:
 - Update `data/pipeline.md` (move item to Processed)
 - Append tracker line to `data/applications.md`
+
+If parallel worker delegation is not supported in the current CLI/runtime, run this same step sequentially for each pending URL in the current context.
 
 ### Step 4 — Post-Processing
 

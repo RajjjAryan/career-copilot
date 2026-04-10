@@ -1,8 +1,8 @@
-# Career-Copilot — GitHub Copilot CLI Instructions
+# Career-Copilot — {{CLI_NAME}} Instructions
 
 > AI-powered job search pipeline: offer evaluation, CV generation, pipeline tracking, portal scanning, batch processing, interview preparation.
 >
-> This file is the primary instruction set for GitHub Copilot CLI when operating inside this repository.
+> This file is the primary instruction set for {{CLI_NAME}} when operating inside this repository.
 
 ---
 
@@ -147,16 +147,7 @@ Allowed states only:
 
 The mode files express **semantic operations**. Map them to provider tools using this adapter table.
 
-| Concept | GitHub Copilot CLI | Claude Code | Gemini CLI | Cursor | Windsurf |
-|---|---|---|---|---|---|
-| sub_agent | `task` | `Task` | Provider task/agent primitive | Agent/composer task | Cascade task/workflow |
-| web_fetch | `web_fetch` | `WebFetch` | HTTP fetch tool | Fetch/integrated browser fetch | Fetch tool |
-| web_search | `web_search` | `WebSearch` | Search tool | Web search | Web search |
-| file_read | `view` | `Read` | File read tool | File read | File read |
-| file_write | `create` | `Write` | File write tool | File create/write | File write |
-| file_edit | `edit` | `Edit` | File edit tool | File edit | File edit |
-| shell | `bash` | `Bash` | Shell tool | Terminal command | Terminal command |
-| browser_navigate/snapshot/click | `browser_*` (Playwright MCP) | Browser MCP tools | Browser/automation tools | Built-in browser/automation | Built-in browser/automation |
+{{TOOL_MAPPING_TABLE}}
 
 ### Semantic tool concepts
 
@@ -211,7 +202,7 @@ Batch:
 - If dynamic browser tools are unavailable: use static fetch and mark verification as unconfirmed.
 - If provider-specific tool names differ: use semantic concepts from section 13.
 
-- Native mode: use Copilot tool names directly.
+{{PROVIDER_NOTES}}
 
 ---
 

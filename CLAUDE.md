@@ -1,8 +1,8 @@
-# Career-Copilot — GitHub Copilot CLI Instructions
+# Career-Copilot — Claude Code Instructions
 
 > AI-powered job search pipeline: offer evaluation, CV generation, pipeline tracking, portal scanning, batch processing, interview preparation.
 >
-> This file is the primary instruction set for GitHub Copilot CLI when operating inside this repository.
+> This file is the primary instruction set for Claude Code when operating inside this repository.
 
 ---
 
@@ -211,7 +211,7 @@ Batch:
 - If dynamic browser tools are unavailable: use static fetch and mark verification as unconfirmed.
 - If provider-specific tool names differ: use semantic concepts from section 13.
 
-- Native mode: use Copilot tool names directly.
+- Translate semantic operations to Claude tool names (`Task`, `WebFetch`, `Read`, `Write`, `Edit`, `Bash`).
 
 ---
 

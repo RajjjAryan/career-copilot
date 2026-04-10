@@ -140,6 +140,11 @@ task(
 )
 ```
 
+**Fallback when sub-agents are unavailable:**
+- Process each pending URL sequentially in the current context.
+- Reuse the exact same worker steps (`batch/batch-prompt.md`) one item at a time.
+- Keep `batch-state.tsv` updated exactly as in parallel mode.
+
 **Parallelism rules:**
 - Dispatch up to **3 workers in parallel** using multiple `task` calls in one response
 - Wait for all to complete before dispatching next batch of 3
