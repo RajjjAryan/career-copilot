@@ -58,20 +58,20 @@ if (!existsSync(APPS_FILE)) {
   console.log('   The file will be created when you evaluate your first offer.\n');
   process.exit(0);
 }
-const content = readFileSync(APPS_FILE, 'utf-8');
+const content = readFileSync(APPS_FILE, 'utf-8').replace(/^\uFEFF/, '');
 const lines = content.split('\n');
 
 const entries = [];
 for (const line of lines) {
   if (!line.startsWith('|')) continue;
-  const parts = line.split('|').map(s => s.trim());
-  if (parts.length < 9) continue;
-  const num = parseInt(parts[1]);
+  const parts = line.split('|').map(s => s.trim()).filter(Boolean);
+  if (parts.length < 8) continue;
+  const num = parseInt(parts[0]);
   if (isNaN(num)) continue;
   entries.push({
-    num, date: parts[2], company: parts[3], role: parts[4],
-    score: parts[5], status: parts[6], pdf: parts[7], report: parts[8],
-    notes: parts[9] || '',
+    num, date: parts[1], company: parts[2], role: parts[3],
+    score: parts[4], status: parts[5], pdf: parts[6], report: parts[7],
+    notes: parts[8] || '',
   });
 }
 

@@ -53,9 +53,11 @@ const APPLY_PATTERNS = [
 // Below this length the page is probably just nav/footer (closed ATS page)
 const MIN_CONTENT_CHARS = 300;
 
+const TIMEOUT_MS = parseInt(process.env.LIVENESS_TIMEOUT_MS, 10) || 30000;
+
 async function checkUrl(page, url) {
   try {
-    const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: TIMEOUT_MS });
 
     const status = response?.status() ?? 0;
     if (status === 404 || status === 410) {
@@ -119,25 +121,27 @@ async function main() {
   console.log(`Checking ${urls.length} URL(s)...\n`);
 
   const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage();
+  try {
+    const page = await browser.newPage();
 
-  let active = 0, expired = 0, uncertain = 0;
+    let active = 0, expired = 0, uncertain = 0;
 
-  // Sequential — project rule: never Playwright in parallel
-  for (const url of urls) {
-    const { result, reason } = await checkUrl(page, url);
-    const icon = { active: '✅', expired: '❌', uncertain: '⚠️' }[result];
-    console.log(`${icon} ${result.padEnd(10)} ${url}`);
-    if (result !== 'active') console.log(`           ${reason}`);
-    if (result === 'active') active++;
-    else if (result === 'expired') expired++;
-    else uncertain++;
+    // Sequential — project rule: never Playwright in parallel
+    for (const url of urls) {
+      const { result, reason } = await checkUrl(page, url);
+      const icon = { active: '✅', expired: '❌', uncertain: '⚠️' }[result];
+      console.log(`${icon} ${result.padEnd(10)} ${url}`);
+      if (result !== 'active') console.log(`           ${reason}`);
+      if (result === 'active') active++;
+      else if (result === 'expired') expired++;
+      else uncertain++;
+    }
+
+    console.log(`\nResults: ${active} active  ${expired} expired  ${uncertain} uncertain`);
+    if (expired > 0 || uncertain > 0) process.exit(1);
+  } finally {
+    await browser.close();
   }
-
-  await browser.close();
-
-  console.log(`\nResults: ${active} active  ${expired} expired  ${uncertain} uncertain`);
-  if (expired > 0 || uncertain > 0) process.exit(1);
 }
 
 main().catch(err => {
