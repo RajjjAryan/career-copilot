@@ -8,6 +8,8 @@ function detectCli() {
   if (env.GEMINI_API_KEY || env.GOOGLE_GENAI_USE_VERTEXAI || env.GEMINI_CLI) return 'gemini';
   if (env.CURSOR_TRACE_ID || env.CURSOR_SESSION_ID) return 'cursor';
   if (env.WINDSURF || env.CODEIUM_WIND_SURF || env.CASCADE_SESSION_ID) return 'windsurf';
+  // Default to copilot to keep backward compatibility for existing users
+  // running this repository without explicit provider env variables.
   return 'copilot';
 }
 

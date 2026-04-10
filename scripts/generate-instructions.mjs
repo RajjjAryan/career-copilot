@@ -10,7 +10,26 @@ const templatePath = join(root, 'templates', 'instructions.template.md');
 
 const template = readFileSync(templatePath, 'utf8');
 
-const toolTable = `| Concept | GitHub Copilot CLI | Claude Code | Gemini CLI | Cursor | Windsurf |\n|---|---|---|---|---|---|\n| sub_agent | \`task\` | \`Task\` | Provider task/agent primitive | Agent/composer task | Cascade task/workflow |\n| web_fetch | \`web_fetch\` | \`WebFetch\` | HTTP fetch tool | Fetch/integrated browser fetch | Fetch tool |\n| web_search | \`web_search\` | \`WebSearch\` | Search tool | Web search | Web search |\n| file_read | \`view\` | \`Read\` | File read tool | File read | File read |\n| file_write | \`create\` | \`Write\` | File write tool | File create/write | File write |\n| file_edit | \`edit\` | \`Edit\` | File edit tool | File edit | File edit |\n| shell | \`bash\` | \`Bash\` | Shell tool | Terminal command | Terminal command |\n| browser_navigate/snapshot/click | \`browser_*\` (Playwright MCP) | Browser MCP tools | Browser/automation tools | Built-in browser/automation | Built-in browser/automation |`;
+const tableHeaders = ['Concept', 'GitHub Copilot CLI', 'Claude Code', 'Gemini CLI', 'Cursor', 'Windsurf'];
+const tableRows = [
+  ['sub_agent', '`task`', '`Task`', 'Provider task/agent primitive', 'Agent/composer task', 'Cascade task/workflow'],
+  ['web_fetch', '`web_fetch`', '`WebFetch`', 'HTTP fetch tool', 'Fetch/integrated browser fetch', 'Fetch tool'],
+  ['web_search', '`web_search`', '`WebSearch`', 'Search tool', 'Web search', 'Web search'],
+  ['file_read', '`view`', '`Read`', 'File read tool', 'File read', 'File read'],
+  ['file_write', '`create`', '`Write`', 'File write tool', 'File create/write', 'File write'],
+  ['file_edit', '`edit`', '`Edit`', 'File edit tool', 'File edit', 'File edit'],
+  ['shell', '`bash`', '`Bash`', 'Shell tool', 'Terminal command', 'Terminal command'],
+  ['browser_navigate/snapshot/click', '`browser_*` (Playwright MCP)', 'Browser MCP tools', 'Browser/automation tools', 'Built-in browser/automation', 'Built-in browser/automation'],
+];
+
+function toMarkdownTable(headers, rows) {
+  const head = `| ${headers.join(' | ')} |`;
+  const separator = `|${headers.map(() => '---').join('|')}|`;
+  const body = rows.map((row) => `| ${row.join(' | ')} |`).join('\n');
+  return `${head}\n${separator}\n${body}`;
+}
+
+const toolTable = toMarkdownTable(tableHeaders, tableRows);
 
 const providers = [
   {
