@@ -1,5 +1,12 @@
 # Career-Copilot (Copilot CLI Edition)
 
+[![GitHub stars](https://img.shields.io/github/stars/RajjjAryan/career-copilot?style=social)](https://github.com/RajjjAryan/career-copilot/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/RajjjAryan/career-copilot?style=social)](https://github.com/RajjjAryan/career-copilot/network)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/RajjjAryan/career-copilot/actions/workflows/ci.yml/badge.svg)](https://github.com/RajjjAryan/career-copilot/actions/workflows/ci.yml)
+[![Good First Issues](https://img.shields.io/github/issues/RajjjAryan/career-copilot/good%20first%20issue?color=7057ff&label=good%20first%20issues)](https://github.com/RajjjAryan/career-copilot/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/RajjjAryan/career-copilot/blob/main/CONTRIBUTING.md)
+
 <p align="center">
   <em>Companies use AI to filter candidates. This gives candidates AI to <strong>choose</strong> companies.</em>
 </p>
@@ -247,9 +254,13 @@ Check out the [good first issues](https://github.com/RajjjAryan/career-copilot/i
 
 ## Contributors
 
+Thanks to these wonderful people for their contributions!
+
 <a href="https://github.com/RajjjAryan/career-copilot/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=RajjjAryan/career-copilot" />
 </a>
+
+Want to contribute? Check out our [Contributing Guide](CONTRIBUTING.md) and browse [good first issues](https://github.com/RajjjAryan/career-copilot/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
 
 ## Star History
 
