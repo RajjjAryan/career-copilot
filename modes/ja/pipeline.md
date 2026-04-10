@@ -9,7 +9,7 @@
 ## 前提条件
 
 ```
-view(path="modes/_shared.md")
+view(path="modes/ja/_shared.md")
 view(path="modes/_profile.md")
 view(path="cv.md")
 view(path="data/pipeline.md")
@@ -24,11 +24,17 @@ view(path="data/pipeline.md")
 1. **読み取り** `data/pipeline.md` → 「未処理」/「Pending」セクションの `- [ ]` アイテムをすべて検出
 2. **各未処理URLについて**：
    a. 次の `REPORT_NUM` を計算（`reports/` を読み、最大番号 + 1）
-   b. **求人票を抽出**：Playwright（`browser_navigate` + `browser_snapshot`）→ WebFetch → WebSearch
+   b. **求人票を抽出**：
+      - まず `web_fetch` で取得を試みる。内容が不完全・空・SPA由来で崩れている場合のみ Playwright（`browser_navigate` + `browser_snapshot`）に切り替える
+      - 求人の存続確認が必要な場合は `_shared.md` に従い Playwright を使う
+      - 上記いずれも失敗した場合 → WebSearch で二次ポータルを検索
    c. URLにアクセスできない場合 → `- [!]` とメモを付けて次へ進む
    d. **完全なAuto-Pipelineを実行**：`modes/auto-pipeline.md` の正規フローに従い、評価 → レポート `.md` → PDF → トラッカー
    e. **「未処理」から「処理済み」へ移動**：`- [x] #NNN | URL | 企業 | ロール | スコア/5 | PDF ✅/❌`
-3. **未処理URLが3件以上** の場合、`task` ツールで独立した求人を並列処理する（`modes/pipeline.md` の正規パターンに従う）。
+3. **未処理URLが3件以上** の場合の並列処理戦略：
+   a. `task` ツールによる並列ワーカーでは **WebFetch を優先**し、静的取得だけで処理できるURLを並列実行する
+   b. Playwright が必要なURL（SPA・動的描画）は**逐次処理キュー**に回す — 同時に2件以上の Playwright セッションを起動しない（`_shared.md` のルールを優先）
+   c. batch worker で Playwright MCP が使えない場合は `web_fetch` の結果で暫定評価し、レポートに `**Verification:** unconfirmed (batch mode)` を明記する
 4. **最後に** サマリーテーブルを出力：
 
 ```
@@ -39,11 +45,13 @@ view(path="data/pipeline.md")
 
 ```markdown
 ## 未処理
+
 - [ ] https://jobs.example.com/posting/123
 - [ ] https://boards.greenhouse.io/company/jobs/456 | Company株式会社 | シニアPM
 - [!] https://private.url/job — エラー：ログイン必要
 
 ## 処理済み
+
 - [x] #143 | https://jobs.example.com/posting/789 | Acme株式会社 | AI PM | 4.2/5 | PDF ✅
 - [x] #144 | https://boards.greenhouse.io/xyz/jobs/012 | BigCo | SA | 2.1/5 | PDF ❌
 ```
@@ -57,6 +65,7 @@ view(path="data/pipeline.md")
 3. **WebSearch（最終手段）：** 求人票をインデックスしている二次ポータルで検索。
 
 **特殊ケース：**
+
 - **LinkedIn**：ログインが必要な場合あり → `[!]` でマークし、候補者にテキストの貼り付けを依頼
 - **PDF**：URLがPDFを指している場合、Readツールで直接読み取り
 - **`local:` プレフィックス**：ローカルファイルを読み取る。例：`local:jds/linkedin-pm-ai.md` → `jds/linkedin-pm-ai.md` を読む

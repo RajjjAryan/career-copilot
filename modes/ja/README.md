@@ -47,12 +47,12 @@ language:
 
 この最初のイテレーションでは、最もインパクトの大きい4つのモードをカバーしています：
 
-| ファイル | 翻訳元 | 目的 |
-|---------|-------|------|
-| `_shared.md` | `modes/_shared.md`（EN） | 共有コンテキスト、アーキタイプ、グローバルルール、日本市場の特殊性 |
-| `kyujin.md` | `modes/evaluate.md`（EN） | 求人の完全評価（ブロック A-F） |
-| `oubo.md` | `modes/apply.md`（EN） | 応募フォーム入力のライブアシスタント |
-| `pipeline.md` | `modes/pipeline.md`（EN） | URL受信箱 / セカンドブレイン |
+| ファイル      | 翻訳元                    | 目的                                                               |
+| ------------- | ------------------------- | ------------------------------------------------------------------ |
+| `_shared.md`  | `modes/_shared.md`（EN）  | 共有コンテキスト、アーキタイプ、グローバルルール、日本市場の特殊性 |
+| `kyujin.md`   | `modes/evaluate.md`（EN） | 求人の完全評価（ブロック A-F）                                     |
+| `oubo.md`     | `modes/apply.md`（EN）    | 応募フォーム入力のライブアシスタント                               |
+| `pipeline.md` | `modes/pipeline.md`（EN） | URL受信箱 / セカンドブレイン                                       |
 
 その他のモード（`scan`、`batch`、`pdf`、`tracker`、`auto-pipeline`、`deep`、`contact`、`compare`、`project`、`training`）はこの段階では対象外です。EN版をそのまま使用します。これらの内容はツーリング、パス、設定コマンドが大部分を占めるため、言語に依存しません。
 
@@ -73,43 +73,43 @@ language:
 
 モードを修正・拡張する場合、トーンの一貫性を保つためにこの用語集に従ってください：
 
-| 英語 | 日本語（このコードベースで使用） |
-|------|-------------------------------|
-| Job posting | 求人票 / 求人 |
-| Application | 応募 / 候補 |
-| Cover letter | 送付状 / カバーレター |
-| Resume / CV | 履歴書 / 職務経歴書 |
-| Salary | 給与 / 年収 |
-| Compensation | 報酬 / パッケージ |
-| Skills | スキル / 技術力 |
-| Interview | 面接 / 面談 |
-| Hiring manager | 採用担当マネージャー |
-| Recruiter | リクルーター / 採用担当 |
-| AI | AI（そのまま使用） |
-| Requirements | 要件 / 必須条件 |
-| Career history | 職歴 / 経歴 |
-| Notice period | 退職予告期間 / 引継ぎ期間 |
-| Probation | 試用期間 |
-| Vacation | 有給休暇 / 年次有給休暇 |
-| Bonus | ボーナス / 賞与 |
-| Permanent employment | 正社員 |
-| Contract employee | 契約社員 |
-| Freelance / Contractor | 業務委託 / フリーランス |
-| Temp staff (dispatch) | 派遣社員 |
-| Overtime (fixed) | みなし残業 / 固定残業代 |
-| Retirement benefit | 退職金制度 |
-| Social insurance | 社会保険 |
-| Stock options | ストックオプション（SO） |
-| Annual income | 年収 |
-| Base salary | 基本給 |
-| Discretionary labor | 裁量労働制 |
-| Flex time | フレックスタイム |
-| Transfer/relocation | 転勤 |
-| Health insurance | 健康保険 |
-| Pension | 厚生年金 |
-| Employment insurance | 雇用保険 |
-| Commuting allowance | 通勤手当 |
-| Housing allowance | 住宅手当 |
+| 英語                   | 日本語（このコードベースで使用） |
+| ---------------------- | -------------------------------- |
+| Job posting            | 求人票 / 求人                    |
+| Application            | 応募 / 候補                      |
+| Cover letter           | 送付状 / カバーレター            |
+| Resume / CV            | 履歴書 / 職務経歴書              |
+| Salary                 | 給与 / 年収                      |
+| Compensation           | 報酬 / パッケージ                |
+| Skills                 | スキル / 技術力                  |
+| Interview              | 面接 / 面談                      |
+| Hiring manager         | 採用担当マネージャー             |
+| Recruiter              | リクルーター / 採用担当          |
+| AI                     | AI（そのまま使用）               |
+| Requirements           | 要件 / 必須条件                  |
+| Career history         | 職歴 / 経歴                      |
+| Notice period          | 退職予告期間 / 引継ぎ期間        |
+| Probation              | 試用期間                         |
+| Vacation               | 有給休暇 / 年次有給休暇          |
+| Bonus                  | ボーナス / 賞与                  |
+| Permanent employment   | 正社員                           |
+| Contract employee      | 契約社員                         |
+| Freelance / Contractor | 業務委託 / フリーランス          |
+| Temp staff (dispatch)  | 派遣社員                         |
+| Overtime (fixed)       | みなし残業 / 固定残業代          |
+| Retirement benefit     | 退職金制度                       |
+| Social insurance       | 社会保険                         |
+| Stock options          | ストックオプション（SO）         |
+| Annual income          | 年収                             |
+| Base salary            | 基本給                           |
+| Discretionary labor    | 裁量労働制                       |
+| Flex time              | フレックスタイム                 |
+| Transfer/relocation    | 転勤                             |
+| Health insurance       | 健康保険                         |
+| Pension                | 厚生年金                         |
+| Employment insurance   | 雇用保険                         |
+| Commuting allowance    | 通勤手当                         |
+| Housing allowance      | 住宅手当                         |
 
 ## コントリビューション
 
