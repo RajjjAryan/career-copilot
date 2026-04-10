@@ -1,0 +1,46 @@
+name: New Company Portal
+description: Add a company career page to the portal scanner
+title: "Portal: [Company Name]"
+labels: ["portals", "good first issue"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Adding company portals is one of the easiest ways to contribute!
+        Add entries to `templates/portals.example.yml`.
+
+  - type: input
+    id: company
+    attributes:
+      label: Company name
+      placeholder: "Stripe"
+    validations:
+      required: true
+
+  - type: input
+    id: url
+    attributes:
+      label: Career page URL
+      placeholder: "https://stripe.com/jobs/search"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: ats
+    attributes:
+      label: ATS platform (if known)
+      options:
+        - Greenhouse
+        - Lever
+        - Workday
+        - Ashby
+        - BambooHR
+        - SmartRecruiters
+        - Custom/Unknown
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Any filter parameters, regional variants, or special considerations?
+      placeholder: "Use ?department=engineering to filter for eng roles"

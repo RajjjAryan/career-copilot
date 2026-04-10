@@ -1,0 +1,50 @@
+name: New Workflow Mode
+description: Propose a new workflow mode for career-copilot
+title: "Mode: "
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Each mode is a self-contained markdown file in `modes/` that defines a workflow.
+        See existing modes for reference.
+
+  - type: input
+    id: mode_name
+    attributes:
+      label: Mode name
+      description: What would the mode file be called?
+      placeholder: "negotiate.md"
+    validations:
+      required: true
+
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Purpose
+      description: What job search task does this mode handle?
+      placeholder: Helps users negotiate salary after receiving an offer...
+    validations:
+      required: true
+
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Workflow steps
+      description: What steps should the mode follow?
+      placeholder: |
+        1. Read the offer details from the evaluation report
+        2. Research market compensation data
+        3. Generate counter-offer talking points
+        4. Draft negotiation email
+    validations:
+      required: true
+
+  - type: textarea
+    id: inputs_outputs
+    attributes:
+      label: Inputs & outputs
+      description: What data does it need, what does it produce?
+      placeholder: |
+        Inputs: evaluation report, profile.yml, comp research
+        Outputs: negotiation strategy document, email draft

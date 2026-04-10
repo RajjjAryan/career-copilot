@@ -1,29 +1,59 @@
 name: Bug Report
 description: Report a bug or unexpected behavior
+title: "Bug: "
 labels: ["bug"]
 body:
   - type: textarea
     id: description
     attributes:
       label: What happened?
-      description: Describe the bug and what you expected to happen
+      description: A clear description of the bug.
+      placeholder: When I run `node generate-pdf.mjs ...`, it crashes with...
     validations:
       required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
   - type: textarea
     id: steps
     attributes:
       label: Steps to reproduce
       description: How can we reproduce the issue?
-  - type: input
-    id: version
-    attributes:
-      label: Version
-      description: Check VERSION file or run `cat VERSION`
+      placeholder: |
+        1. Run `node generate-pdf.mjs input.html output.pdf`
+        2. See error...
+    validations:
+      required: true
+
   - type: dropdown
-    id: ai-tool
+    id: component
     attributes:
-      label: AI Tool
+      label: Component
       options:
-        - GitHub Copilot CLI
-        - Claude Code
+        - PDF Generation (generate-pdf.mjs)
+        - Pipeline Tracker (merge-tracker.mjs, verify-pipeline.mjs)
+        - Portal Scanner (check-liveness.mjs)
+        - Dashboard (Go TUI)
+        - Mode Files (modes/)
+        - Batch Processing (batch/)
+        - Doctor/Setup (doctor.mjs)
+        - Update System (update-system.mjs)
         - Other
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: |
+        - Node.js: v22.0.0
+        - OS: macOS 15 / Ubuntu 24.04
+        - career-copilot version: 1.0.0
+        - AI Tool: GitHub Copilot CLI / Claude Code / Other
+    validations:
+      required: true
