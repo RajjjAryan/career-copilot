@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * analyze-patterns.mjs — Rejection Pattern Detector for career-copilot
  *
