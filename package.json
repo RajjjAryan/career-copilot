@@ -22,7 +22,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/RajjjAryan/career-copilot.git"
   },
   "engines": {
     "node": ">=18"
