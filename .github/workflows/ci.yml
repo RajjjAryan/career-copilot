@@ -1,0 +1,112 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test Suite
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        node-version: [18, 20, 22]
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium
+
+      - name: Run test suite
+        run: node test-all.mjs
+
+  dashboard:
+    name: Dashboard Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Build dashboard
+        working-directory: dashboard
+        run: go build ./...
+
+      - name: Run Go vet
+        working-directory: dashboard
+        run: go vet ./...
+
+  lint:
+    name: Lint & Safety Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: No hardcoded paths
+        run: |
+          if grep -rn '/Users/\|/home/.*Desktop\|C:\\Users\\' \
+            --include='*.mjs' --include='*.js' --include='*.go' \
+            --include='*.md' --include='*.yml' --include='*.yaml' \
+            --exclude-dir=node_modules --exclude-dir=.git \
+            --exclude='*.lock' .; then
+            echo "::error::Found hardcoded user paths in source files"
+            exit 1
+          fi
+          echo "✅ No hardcoded paths found"
+
+      - name: No PII patterns
+        run: |
+          # Check for email patterns that aren't example/placeholder
+          if grep -rn '[a-zA-Z0-9._%+-]\+@[a-zA-Z0-9.-]\+\.[a-zA-Z]\{2,\}' \
+            --include='*.mjs' --include='*.js' --include='*.go' \
+            --exclude-dir=node_modules --exclude-dir=.git \
+            --exclude='*.lock' --exclude='ci.yml' . \
+            | grep -v 'example\|placeholder\|noreply\|@users\|test@\|user@'; then
+            echo "::warning::Possible PII (email addresses) found — please verify"
+          fi
+          echo "✅ PII check complete"
+
+      - name: Mode files have required structure
+        run: |
+          errors=0
+          for mode in modes/*.md; do
+            [ "$(basename "$mode")" = "_shared.md" ] && continue
+            [ "$(basename "$mode")" = "_profile.template.md" ] && continue
+            [ "$(basename "$mode")" = "_profile.md" ] && continue
+            if ! head -5 "$mode" | grep -q '^#'; then
+              echo "::error::$mode missing markdown heading"
+              errors=$((errors + 1))
+            fi
+          done
+          if [ $errors -gt 0 ]; then
+            echo "::error::$errors mode files have structural issues"
+            exit 1
+          fi
+          echo "✅ All mode files have required structure"
+
+      - name: Data contract validation
+        run: |
+          # Verify VERSION is valid semver
+          if ! grep -qE '^[0-9]+\.[0-9]+\.[0-9]+' VERSION; then
+            echo "::error::VERSION file is not valid semver"
+            exit 1
+          fi
+          echo "✅ VERSION is valid: $(cat VERSION)"
