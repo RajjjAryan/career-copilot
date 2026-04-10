@@ -5,7 +5,7 @@
  * Checks all prerequisites and prints a pass/fail checklist.
  */
 
-import { existsSync, mkdirSync, readdirSync } from 'fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -45,19 +45,40 @@ async function checkPlaywright() {
   try {
     const { chromium } = await import('playwright');
     const execPath = chromium.executablePath();
-    if (existsSync(execPath)) {
-      return { pass: true, label: 'Playwright chromium installed' };
+    if (!existsSync(execPath)) {
+      return {
+        pass: false,
+        label: 'Playwright chromium not installed',
+        fix: 'Run: npx playwright install chromium',
+      };
+    }
+    // Verify the browser can actually launch (catches missing system deps)
+    const browser = await chromium.launch({ headless: true });
+    await browser.close();
+    return { pass: true, label: 'Playwright chromium installed and functional' };
+  } catch (err) {
+    const msg = err.message || '';
+    if (msg.includes('Executable doesn\'t exist') || msg.includes('not installed')) {
+      return {
+        pass: false,
+        label: 'Playwright chromium not installed',
+        fix: 'Run: npx playwright install chromium',
+      };
+    }
+    if (msg.includes('library') || msg.includes('GLIBC') || msg.includes('libGL')) {
+      return {
+        pass: false,
+        label: 'Playwright chromium missing system dependencies',
+        fix: 'Run: npx playwright install-deps chromium',
+      };
     }
     return {
       pass: false,
-      label: 'Playwright chromium not installed',
-      fix: 'Run: npx playwright install chromium',
-    };
-  } catch {
-    return {
-      pass: false,
-      label: 'Playwright chromium not installed',
-      fix: 'Run: npx playwright install chromium',
+      label: `Playwright chromium error: ${msg.split('\n')[0]}`,
+      fix: [
+        'Run: npx playwright install chromium',
+        'If that fails: npx playwright install-deps chromium',
+      ],
     };
   }
 }
@@ -77,31 +98,76 @@ function checkCv() {
 }
 
 function checkProfile() {
-  if (existsSync(join(projectRoot, 'config', 'profile.yml'))) {
-    return { pass: true, label: 'config/profile.yml found' };
+  const profilePath = join(projectRoot, 'config', 'profile.yml');
+  if (!existsSync(profilePath)) {
+    return {
+      pass: false,
+      label: 'config/profile.yml not found',
+      fix: [
+        'Run: cp config/profile.example.yml config/profile.yml',
+        'Then edit it with your details',
+      ],
+    };
   }
-  return {
-    pass: false,
-    label: 'config/profile.yml not found',
-    fix: [
-      'Run: cp config/profile.example.yml config/profile.yml',
-      'Then edit it with your details',
-    ],
-  };
+  // Validate YAML syntax
+  try {
+    const content = readFileSync(profilePath, 'utf-8');
+    // Basic YAML structure check: must have key-value pairs, no tab indentation
+    if (content.includes('\t')) {
+      return {
+        pass: false,
+        label: 'config/profile.yml contains tabs (YAML requires spaces)',
+        fix: 'Replace all tabs with spaces in config/profile.yml',
+      };
+    }
+    const requiredFields = ['name', 'target_role'];
+    const missing = requiredFields.filter(f => !new RegExp(`^${f}\\s*:`, 'm').test(content));
+    if (missing.length > 0) {
+      return {
+        pass: false,
+        label: `config/profile.yml missing required fields: ${missing.join(', ')}`,
+        fix: 'See config/profile.example.yml for the expected format',
+      };
+    }
+    return { pass: true, label: 'config/profile.yml found and valid' };
+  } catch (err) {
+    return {
+      pass: false,
+      label: `config/profile.yml unreadable: ${err.message}`,
+      fix: 'Check file permissions on config/profile.yml',
+    };
+  }
 }
 
 function checkPortals() {
-  if (existsSync(join(projectRoot, 'portals.yml'))) {
-    return { pass: true, label: 'portals.yml found' };
+  const portalsPath = join(projectRoot, 'portals.yml');
+  if (!existsSync(portalsPath)) {
+    return {
+      pass: false,
+      label: 'portals.yml not found',
+      fix: [
+        'Run: cp templates/portals.example.yml portals.yml',
+        'Then customize with your target companies',
+      ],
+    };
   }
-  return {
-    pass: false,
-    label: 'portals.yml not found',
-    fix: [
-      'Run: cp templates/portals.example.yml portals.yml',
-      'Then customize with your target companies',
-    ],
-  };
+  try {
+    const content = readFileSync(portalsPath, 'utf-8');
+    if (content.includes('\t')) {
+      return {
+        pass: false,
+        label: 'portals.yml contains tabs (YAML requires spaces)',
+        fix: 'Replace all tabs with spaces in portals.yml',
+      };
+    }
+    return { pass: true, label: 'portals.yml found and valid' };
+  } catch (err) {
+    return {
+      pass: false,
+      label: `portals.yml unreadable: ${err.message}`,
+      fix: 'Check file permissions on portals.yml',
+    };
+  }
 }
 
 function checkFonts() {
@@ -186,7 +252,7 @@ async function main() {
     console.log(`Result: ${failures} issue${failures === 1 ? '' : 's'} found. Fix them and run \`npm run doctor\` again.`);
     process.exit(1);
   } else {
-    console.log('Result: All checks passed. You\'re ready to go! Run \`claude\` to start.');
+    console.log('Result: All checks passed. You\'re ready to go!');
     process.exit(0);
   }
 }
