@@ -53,7 +53,11 @@ AI-powered job search pipeline built on **GitHub Copilot CLI**. Evaluate offers,
 ### Setup
 
 ```bash
-# 1. Clone and install
+# Option A: One-liner setup
+git clone <your-repo-url>
+cd career-copilot && bash setup.sh
+
+# Option B: Manual setup
 git clone <your-repo-url>
 cd career-copilot && npm install
 npx playwright install chromium   # Required for PDF generation

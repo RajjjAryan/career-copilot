@@ -145,7 +145,13 @@ task(
 - Wait for all to complete before dispatching next batch of 3
 - Update `batch/batch-state.tsv` after each completion
 
-### Step 4 — Collect Results
+**Rate limiting:**
+- Wait **2 seconds** between dispatching each batch of workers to avoid overwhelming job board APIs
+- If a `web_fetch` or `browser_navigate` returns a 429 (rate limited), wait **10 seconds** then retry
+- If fetching from the same domain (e.g., multiple Greenhouse URLs), space requests **3 seconds** apart
+- Maximum **3 concurrent workers** — do not increase even if system resources allow it
+
+### Step 4 — Collect Results & Retry
 
 After each worker completes:
 
@@ -153,6 +159,14 @@ After each worker completes:
 2. Verify report and PDF were created
 3. Update `batch/batch-state.tsv` with status, score, paths
 4. Log any errors
+
+**Retry logic for failed items:**
+- After all items in the batch are processed, check `batch-state.tsv` for `failed` items
+- Retry failed items up to **2 additional times** (3 total attempts)
+- Increment the `retries` column in `batch-state.tsv` each attempt
+- Wait **5 seconds** before each retry attempt
+- If an item fails 3 times, mark it as `failed` permanently with the last error message
+- Do NOT retry items that failed due to: login required, page not found (404), or job listing removed
 
 ### Step 5 — Merge Tracker
 
@@ -166,19 +180,23 @@ This consolidates `batch/tracker-additions/*.tsv` into `data/applications.md`.
 
 ---
 
-## Error Handling
+## Error Handling & Retry Policy
 
-| Error | Recovery |
-|-------|----------|
-| URL inaccessible | Worker fails → conductor marks `failed`, continues |
-| JD behind login | Use `browser_navigate` to render page, extract JD from snapshot. If login required → `failed` |
-| Worker crashes | Mark `failed`, continue. Re-run batch to retry failed items |
-| PDF generation fails | Report .md saved. PDF marked as ❌ in tracker |
-| All workers fail | Check `npm run doctor` for setup issues |
+| Error | Recovery | Retryable? |
+|-------|----------|-----------|
+| URL inaccessible / timeout | Wait 5s, retry up to 2 more times | ✅ Yes |
+| Rate limited (429) | Wait 10s, retry | ✅ Yes |
+| JD behind login | Use `browser_navigate` first. If login wall persists → `failed` | ❌ No |
+| Page not found (404) | Mark `failed`, listing likely removed | ❌ No |
+| Worker crashes | Mark `failed`, retry in next pass | ✅ Yes |
+| PDF generation fails | Report .md saved. PDF marked as ❌ in tracker | ✅ Yes (PDF only) |
+| All workers fail | Check `npm run doctor` for setup issues | — |
 
 - **Individual failures do NOT block other items** — each URL is independent
 - **Resumability**: Running batch again skips completed items, retries failed ones
 - **Timeout**: If a worker exceeds 5 minutes, mark as `failed`
+- **Max retries**: 3 total attempts per item (1 initial + 2 retries)
+- **Backoff**: 5 second delay between retry attempts, 10 seconds after rate limit
 
 ---
 

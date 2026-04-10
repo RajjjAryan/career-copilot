@@ -752,3 +752,71 @@ tracked_companies:
     scan_query: 'site:jobs.ashbyhq.com/workos "Solutions Engineer" OR "Developer Success" OR "Engineer"'
     notes: "Developer tools and enterprise-ready auth/platform APIs."
     enabled: true
+
+  # -- Global tech (US-headquartered, worldwide hiring) --
+
+  - name: Stripe
+    careers_url: https://stripe.com/jobs
+    scan_method: websearch
+    scan_query: 'site:stripe.com/jobs "engineer" OR "architect" OR "AI"'
+    notes: "SF / Seattle / Dublin / Singapore. Payments infrastructure."
+    enabled: true
+
+  - name: Datadog
+    careers_url: https://careers.datadoghq.com
+    scan_method: websearch
+    scan_query: 'site:careers.datadoghq.com "engineer" OR "AI" OR "solutions"'
+    notes: "NYC / Paris / Remote. Observability platform, large ML/AI org."
+    enabled: true
+
+  - name: Cloudflare
+    careers_url: https://www.cloudflare.com/careers/jobs/
+    scan_method: websearch
+    scan_query: 'site:cloudflare.com/careers "engineer" OR "AI" OR "solutions architect"'
+    notes: "SF / Austin / London / Lisbon. Edge computing, AI inference at scale."
+    enabled: true
+
+  - name: Figma
+    careers_url: https://job-boards.greenhouse.io/figma
+    api: https://boards-api.greenhouse.io/v1/boards/figma/jobs
+    notes: "SF / NYC / London. Design tools, AI features (FigJam AI, auto-layout)."
+    enabled: true
+
+  - name: Notion
+    careers_url: https://job-boards.greenhouse.io/notion
+    api: https://boards-api.greenhouse.io/v1/boards/notion/jobs
+    notes: "SF / NYC. Productivity tools with AI (Notion AI), large eng org."
+    enabled: true
+
+  - name: Databricks
+    careers_url: https://job-boards.greenhouse.io/databricks
+    api: https://boards-api.greenhouse.io/v1/boards/databricks/jobs
+    notes: "SF / Amsterdam / London. Data + AI lakehouse, MLflow creators."
+    enabled: true
+
+  - name: Scale AI
+    careers_url: https://job-boards.greenhouse.io/scaleai
+    api: https://boards-api.greenhouse.io/v1/boards/scaleai/jobs
+    notes: "SF / NYC. AI data infrastructure, federal + enterprise AI."
+    enabled: true
+
+  - name: Supabase
+    careers_url: https://jobs.ashbyhq.com/supabase
+    scan_method: websearch
+    scan_query: 'site:jobs.ashbyhq.com/supabase'
+    notes: "Remote-first. Open source Firebase alternative, AI vector/embeddings features."
+    enabled: true
+
+  - name: Dagger
+    careers_url: https://jobs.ashbyhq.com/dagger
+    scan_method: websearch
+    scan_query: 'site:jobs.ashbyhq.com/dagger'
+    notes: "Remote. CI/CD engine as code, DevOps/platform engineering."
+    enabled: true
+
+  - name: Modal
+    careers_url: https://jobs.ashbyhq.com/modal
+    scan_method: websearch
+    scan_query: 'site:jobs.ashbyhq.com/modal'
+    notes: "SF / NYC. Serverless cloud for AI/ML workloads, GPU infrastructure."
+    enabled: true
