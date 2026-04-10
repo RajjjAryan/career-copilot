@@ -19,7 +19,7 @@ career-copilotにはコード上の「言語スイッチ」はありません。
 
 ### 方法 1 — セッションごとにコマンドで
 
-セッションの最初にClaudeに伝えてください：
+セッションの最初にCopilot CLIに伝えてください：
 
 > 「`modes/ja/` の日本語モードを使ってください。」
 
@@ -27,7 +27,7 @@ career-copilotにはコード上の「言語スイッチ」はありません。
 
 > 「評価と応募を日本語で — `modes/ja/_shared.md` と `modes/ja/kyujin.md` を使ってください。」
 
-Claudeは `modes/` の代わりにこのフォルダのファイルを読み込みます。
+Copilot CLIは `modes/` の代わりにこのフォルダのファイルを読み込みます。
 
 ### 方法 2 — 恒久的にプロファイルで
 
@@ -39,7 +39,7 @@ language:
   modes_dir: modes/ja
 ```
 
-最初のセッションでClaudeにこの設定を確認するよう伝えてください（「`profile.yml` を見て、`language.modes_dir` を設定したよ」）。以降、Claudeは自動的に日本語モードを使用します。
+最初のセッションでCopilot CLIにこの設定を確認するよう伝えてください（「`profile.yml` を見て、`language.modes_dir` を設定したよ」）。以降、Copilot CLIは自動的に日本語モードを使用します。
 
 > 注意：`language.modes_dir` フィールドは慣例であり、ハードコードされたスキーマではありません。メンテナーが構造を変更する場合、フィールド名は随時変更できます。
 
