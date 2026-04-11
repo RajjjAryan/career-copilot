@@ -35,7 +35,7 @@ const MIN_THRESHOLD = minThresholdIdx !== -1 ? parseInt(args[minThresholdIdx + 1
 function normalizeStatus(raw) {
   const clean = raw.replace(/\*\*/g, '').trim().toLowerCase()
     .replace(/\s+\d{4}-\d{2}-\d{2}.*$/, '').trim();
-  return ALIASES[clean] || clean;
+  return (ALIASES[clean] || clean).toLowerCase();
 }
 
 function classifyOutcome(status) {
