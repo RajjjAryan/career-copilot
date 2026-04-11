@@ -14,6 +14,8 @@
 import { readFileSync, writeFileSync, copyFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { ALIASES } from './lib/aliases.mjs';
+
 
 const CAREER_OPS = dirname(fileURLToPath(import.meta.url));
 // Support both layouts: data/applications.md (boilerplate) and applications.md (original)
@@ -71,13 +73,7 @@ function normalizeStatus(raw) {
   }
 
   // Spanish aliases → English canonicals
-  if (['evaluada'].includes(lower)) return { status: 'Evaluated' };
-  if (['aplicado', 'enviada', 'aplicada', 'applied', 'sent'].includes(lower)) return { status: 'Applied' };
-  if (['respondido'].includes(lower)) return { status: 'Responded' };
-  if (['entrevista'].includes(lower)) return { status: 'Interview' };
-  if (['oferta'].includes(lower)) return { status: 'Offer' };
-  if (['cerrada', 'descartada'].includes(lower)) return { status: 'Discarded' };
-  if (['no aplicar', 'no_aplicar', 'skip'].includes(lower)) return { status: 'SKIP' };
+  if (ALIASES[lower]) return { status: ALIASES[lower] };
 
   // Unknown — flag it
   return { status: null, unknown: true };
