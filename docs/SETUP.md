@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- [GitHub Copilot CLI](https://githubnext.com/projects/copilot-cli/) installed and configured
+- One supported AI CLI installed and configured (GitHub Copilot CLI, Claude Code, Gemini CLI, Cursor, or Windsurf)
 - Node.js 18+ (for PDF generation and utility scripts)
 
 ## Quick Start (5 steps)
@@ -68,9 +68,23 @@ Edit `portals.yml`:
 - Add companies you want to track in `tracked_companies`
 - Customize `search_queries` for your preferred job boards
 
-### 6. Start using
+### 6. Generate provider-specific instructions
 
-Open GitHub Copilot CLI in this directory. Then paste a job offer URL or description. The auto-pipeline will evaluate it, generate a report, create a tailored PDF, and track it.
+```bash
+npm run generate-instructions
+npm run detect-cli         # Optional: see detected provider + instruction file path
+```
+
+This generates:
+- `.github/copilot-instructions.md`
+- `CLAUDE.md`
+- `GEMINI.md`
+- `.cursor/rules/career-copilot.mdc`
+- `.windsurfrules`
+
+### 7. Start using
+
+Open your AI CLI in this directory. Then paste a job offer URL or description. The auto-pipeline will evaluate it, generate a report, create a tailored PDF, and track it.
 
 ## Available Actions
 
