@@ -27,7 +27,7 @@ const EXPIRED_PATTERNS = [
   /this (position|role|job) (is )?no longer/i,
   /this job (listing )?is closed/i,
   /job (listing )?not found/i,
-  /the page you are looking for doesn.t exist/i, // Workday /job/ 404
+  /the page you are looking for doesn\'t exist/i, // Workday /job/ 404
   /\d+\s+jobs?\s+found/i,           // Workday: landed on listing page ("663 JOBS FOUND") instead of a specific job
   /search for jobs page is loaded/i, // Workday SPA indicator for listing page
   /diese stelle (ist )?(nicht mehr|bereits) besetzt/i,
@@ -55,7 +55,31 @@ const MIN_CONTENT_CHARS = 300;
 
 const TIMEOUT_MS = parseInt(process.env.LIVENESS_TIMEOUT_MS, 10) || 30000;
 
+const CHECK_TIMEOUT_MS = parseInt(process.env.LIVENESS_CHECK_TIMEOUT_MS, 10) || 15000;
+
 async function checkUrl(page, url) {
+  try {
+    // Wrap entire check in a global timeout to prevent indefinite hangs
+    return await Promise.race([
+      checkUrlInner(page, url),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('global check timeout')), CHECK_TIMEOUT_MS)
+      ),
+    ]);
+  } catch (err) {
+    const msg = (err.message || '').split(/\r?\n/)[0];
+    // Distinguish recoverable errors from definitive dead links
+    if (/timeout|ETIMEDOUT|ECONNRESET|ECONNREFUSED|429|too many requests/i.test(msg)) {
+      return { result: 'uncertain', reason: `transient error: ${msg}` };
+    }
+    if (/ENOTFOUND|ERR_NAME_NOT_RESOLVED/i.test(msg)) {
+      return { result: 'expired', reason: `DNS resolution failed: ${msg}` };
+    }
+    return { result: 'uncertain', reason: `navigation error: ${msg}` };
+  }
+}
+
+async function checkUrlInner(page, url) {
   try {
     const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: TIMEOUT_MS });
 
@@ -97,7 +121,14 @@ async function checkUrl(page, url) {
     return { result: 'uncertain', reason: 'content present but no apply button found' };
 
   } catch (err) {
-    return { result: 'expired', reason: `navigation error: ${err.message.split('\n')[0]}` };
+    const msg = (err.message || '').split(/\r?\n/)[0];
+    if (/timeout|ETIMEDOUT|ECONNRESET|ECONNREFUSED|429|too many requests/i.test(msg)) {
+      return { result: 'uncertain', reason: `transient error: ${msg}` };
+    }
+    if (/ENOTFOUND|ERR_NAME_NOT_RESOLVED/i.test(msg)) {
+      return { result: 'expired', reason: `DNS resolution failed: ${msg}` };
+    }
+    return { result: 'uncertain', reason: `navigation error: ${msg}` };
   }
 }
 
@@ -113,7 +144,7 @@ async function main() {
   let urls;
   if (args[0] === '--file') {
     const text = await readFile(args[1], 'utf-8');
-    urls = text.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+    urls = text.split(/\r?\n/).map(l => l.trim()).filter(l => l && !l.startsWith('#'));
   } else {
     urls = args;
   }

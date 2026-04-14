@@ -9,9 +9,10 @@
  * Run: node career-copilot/dedup-tracker.mjs [--dry-run]
  */
 
-import { readFileSync, writeFileSync, copyFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, copyFileSync, renameSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { STATUS_RANK, normalizeCompany as _normalizeCompany, parseScore as _parseScore } from './lib/statuses.mjs';
 
 const CAREER_OPS = dirname(fileURLToPath(import.meta.url));
 // Support both layouts: data/applications.md (boilerplate) and applications.md (original)
@@ -20,38 +21,10 @@ const APPS_FILE = existsSync(join(CAREER_OPS, 'data/applications.md'))
   : join(CAREER_OPS, 'applications.md');
 const DRY_RUN = process.argv.includes('--dry-run');
 
-// Status advancement order (higher = more advanced in pipeline)
-// Aplicado > Rechazado because active application > terminal state
-const STATUS_RANK = {
-  // English canonicals (states.yml labels)
-  'skip': 0,
-  'discarded': 0,
-  'rejected': 1,
-  'evaluated': 2,
-  'applied': 3,
-  'responded': 4,
-  'interview': 5,
-  'offer': 6,
-  // Spanish aliases — kept for backwards compat with existing tracker data
-  'no_aplicar': 0,
-  'no aplicar': 0,
-  'descartado': 0,
-  'descartada': 0,
-  'rechazado': 1,  // Terminal — below active states
-  'rechazada': 1,
-  'evaluada': 2,
-  'aplicado': 3,
-  'respondido': 4,
-  'entrevista': 5,
-  'oferta': 6,
-};
+// Status rank imported from lib/statuses.mjs
 
 function normalizeCompany(name) {
-  return name.toLowerCase()
-    .replace(/[()]/g, '')
-    .replace(/\s+/g, ' ')
-    .replace(/[^a-z0-9 ]/g, '')
-    .trim();
+  return _normalizeCompany(name);
 }
 
 function normalizeRole(role) {
@@ -63,15 +36,21 @@ function normalizeRole(role) {
 }
 
 function roleMatch(a, b) {
-  const wordsA = normalizeRole(a).split(/\s+/).filter(w => w.length > 3);
-  const wordsB = normalizeRole(b).split(/\s+/).filter(w => w.length > 3);
+  const normA = normalizeRole(a);
+  const normB = normalizeRole(b);
+  const wordsA = normA.split(/\s+/).filter(w => w.length > 1);
+  const wordsB = normB.split(/\s+/).filter(w => w.length > 1);
+  if (wordsA.length === 0 || wordsB.length === 0) return false;
+  // For short titles (1-2 words), require exact normalized match
+  if (wordsA.length <= 2 || wordsB.length <= 2) {
+    return normA === normB;
+  }
   const overlap = wordsA.filter(w => wordsB.some(wb => wb.includes(w) || w.includes(wb)));
   return overlap.length >= 2;
 }
 
 function parseScore(s) {
-  const m = s.replace(/\*\*/g, '').match(/([\d.]+)/);
-  return m ? parseFloat(m[1]) : 0;
+  return _parseScore(s);
 }
 
 function parseAppLine(line) {
@@ -99,7 +78,7 @@ if (!existsSync(APPS_FILE)) {
   process.exit(0);
 }
 const content = readFileSync(APPS_FILE, 'utf-8');
-const lines = content.split('\n');
+const lines = content.split(/\r?\n/);
 
 // Parse all entries
 const entries = [];
@@ -197,7 +176,10 @@ console.log(`\n📊 ${removed} duplicates removed`);
 
 if (!DRY_RUN && removed > 0) {
   copyFileSync(APPS_FILE, APPS_FILE + '.bak');
-  writeFileSync(APPS_FILE, lines.join('\n'));
+  // Atomic write: write to temp file, then rename
+  const tmpFile = APPS_FILE + `.tmp.${process.pid}`;
+  writeFileSync(tmpFile, lines.join('\n'));
+  renameSync(tmpFile, APPS_FILE);
   console.log('✅ Written to applications.md (backup: applications.md.bak)');
 } else if (DRY_RUN) {
   console.log('(dry-run — no changes written)');

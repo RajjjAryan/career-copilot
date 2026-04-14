@@ -12,8 +12,8 @@ Before evaluating, read these files in order:
 ```
 view(path="modes/_shared.md")
 view(path="modes/_profile.md")
-view(path="data/cv.md")
-view(path="data/article-digest.md")
+view(path="cv.md")
+view(path="article-digest.md")
 ```
 
 ---
@@ -212,7 +212,7 @@ Save full report to `reports/{###}-{company-slug}-{YYYY-MM-DD}.md` using `create
 Append to `data/applications.md`:
 
 ```
-| {###} | {Company} | {Role} | {Score} | Evaluated | {YYYY-MM-DD} | reports/{filename} | — | {URL} |
+| {###} | {YYYY-MM-DD} | {Company} | {Role} | {Score}/5 | Evaluated | — | [{###}](reports/{filename}) | {URL} |
 ```
 
 ### 4. Present Summary

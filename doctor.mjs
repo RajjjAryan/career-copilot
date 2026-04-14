@@ -8,6 +8,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = __dirname;
@@ -120,14 +121,21 @@ function checkProfile() {
         fix: 'Replace all tabs with spaces in config/profile.yml',
       };
     }
-    const requiredFields = ['name', 'target_role'];
-    const missing = requiredFields.filter(f => !new RegExp(`^${f}\\s*:`, 'm').test(content));
+    const requiredFields = ['full_name', 'target_roles'];
+    const missing = requiredFields.filter(f => !new RegExp(`^\\s*${f}\\s*:`, 'm').test(content));
     if (missing.length > 0) {
-      return {
-        pass: false,
-        label: `config/profile.yml missing required fields: ${missing.join(', ')}`,
-        fix: 'See config/profile.example.yml for the expected format',
-      };
+      // Also check nested: full_name may be under candidate:
+      const nestedMissing = missing.filter(f => {
+        if (f === 'full_name') return !content.includes('full_name');
+        return true;
+      });
+      if (nestedMissing.length > 0) {
+        return {
+          pass: false,
+          label: `config/profile.yml missing required fields: ${nestedMissing.join(', ')}`,
+          fix: 'See config/profile.example.yml for the expected format',
+        };
+      }
     }
     return { pass: true, label: 'config/profile.yml found and valid' };
   } catch (err) {
@@ -198,6 +206,19 @@ function checkFonts() {
   return { pass: true, label: 'Fonts directory ready' };
 }
 
+function checkPythonDeps() {
+  try {
+    execSync('python3 -c "import pdfplumber"', { stdio: 'ignore' });
+    return { pass: true, label: 'Python pdfplumber installed' };
+  } catch {
+    return {
+      pass: false,
+      label: 'Python pdfplumber not installed',
+      fix: 'Run: pip3 install pdfplumber (or pip3 install -r requirements.txt)',
+    };
+  }
+}
+
 function checkAutoDir(name) {
   const dirPath = join(projectRoot, name);
   if (existsSync(dirPath)) {
@@ -227,6 +248,7 @@ async function main() {
     checkProfile(),
     checkPortals(),
     checkFonts(),
+    checkPythonDeps(),
     checkAutoDir('data'),
     checkAutoDir('output'),
     checkAutoDir('reports'),
@@ -258,6 +280,7 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error('doctor.mjs failed:', err.message);
+  const errLines = (err.message || '').split(/\r?\n/).slice(0, 3).join('\n');
+  console.error('doctor.mjs failed:', errLines);
   process.exit(1);
 });

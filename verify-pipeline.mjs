@@ -17,8 +17,7 @@
 import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { ALIASES } from './lib/aliases.mjs';
-
+import { CANONICAL_STATES, isCanonical } from './lib/statuses.mjs';
 
 const CAREER_OPS = dirname(fileURLToPath(import.meta.url));
 // Support both layouts: data/applications.md (boilerplate) and applications.md (original)
@@ -31,10 +30,7 @@ const STATES_FILE = existsSync(join(CAREER_OPS, 'templates/states.yml'))
   ? join(CAREER_OPS, 'templates/states.yml')
   : join(CAREER_OPS, 'states.yml');
 
-const CANONICAL_STATUSES = [
-  'evaluated', 'applied', 'responded', 'interview',
-  'offer', 'rejected', 'discarded', 'skip',
-];
+// Canonical statuses imported from lib/statuses.mjs
 
 let errors = 0;
 let warnings = 0;
@@ -50,7 +46,7 @@ if (!existsSync(APPS_FILE)) {
   process.exit(0);
 }
 const content = readFileSync(APPS_FILE, 'utf-8').replace(/^\uFEFF/, '');
-const lines = content.split('\n');
+const lines = content.split(/\r?\n/);
 
 const entries = [];
 for (const line of lines) {
@@ -71,11 +67,7 @@ console.log(`\n📊 Checking ${entries.length} entries in applications.md\n`);
 // --- Check 1: Canonical statuses ---
 let badStatuses = 0;
 for (const e of entries) {
-  const clean = e.status.replace(/\*\*/g, '').trim().toLowerCase();
-  // Strip trailing dates
-  const statusOnly = clean.replace(/\s+\d{4}-\d{2}-\d{2}.*$/, '').trim();
-
-  if (!CANONICAL_STATUSES.includes(statusOnly) && !ALIASES[statusOnly]) {
+  if (!isCanonical(e.status)) {
     error(`#${e.num}: Non-canonical status "${e.status}"`);
     badStatuses++;
   }
@@ -131,6 +123,12 @@ for (const e of entries) {
   if (!/^\d+\.?\d*\/5$/.test(s) && s !== 'N/A' && s !== 'DUP') {
     error(`#${e.num}: Invalid score format: "${e.score}"`);
     badScores++;
+  } else if (/^\d+\.?\d*\/5$/.test(s)) {
+    const val = parseFloat(s);
+    if (val < 0 || val > 5) {
+      error(`#${e.num}: Score out of range (0-5): "${e.score}"`);
+      badScores++;
+    }
   }
 }
 if (badScores === 0) ok('All scores valid');

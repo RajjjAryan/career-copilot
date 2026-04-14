@@ -14,10 +14,10 @@
  * Run: node career-copilot/merge-tracker.mjs [--dry-run] [--verify]
  */
 
-import { readFileSync, writeFileSync, readdirSync, mkdirSync, renameSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, readdirSync, mkdirSync, renameSync, existsSync, unlinkSync } from 'fs';
 import { join, basename, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { ALIASES } from './lib/aliases.mjs';
+import { CANONICAL_STATES, validateStatus, normalizeCompany as _normalizeCompany, parseScore as _parseScore } from './lib/statuses.mjs';
 
 const CAREER_OPS = dirname(fileURLToPath(import.meta.url));
 // Support both layouts: data/applications.md (boilerplate) and applications.md (original)
@@ -29,35 +29,52 @@ const MERGED_DIR = join(ADDITIONS_DIR, 'merged');
 const DRY_RUN = process.argv.includes('--dry-run');
 const VERIFY = process.argv.includes('--verify');
 
-// Canonical states and aliases
-const CANONICAL_STATES = ['Evaluated', 'Applied', 'Responded', 'Interview', 'Offer', 'Rejected', 'Discarded', 'SKIP'];
+const LOCK_FILE = APPS_FILE + '.lock';
+const LOCK_TIMEOUT_MS = 10000; // 10 seconds
 
-function validateStatus(status) {
-  const clean = status.replace(/\*\*/g, '').replace(/\s+\d{4}-\d{2}-\d{2}.*$/, '').trim();
-  const lower = clean.toLowerCase();
+function acquireLock() {
+  const start = Date.now();
+  while (existsSync(LOCK_FILE)) {
+    // Check if lock is stale (older than 30 seconds)
+    try {
+      const lockAge = Date.now() - parseInt(readFileSync(LOCK_FILE, 'utf-8'), 10);
+      if (lockAge > 30000) {
+        console.warn('⚠️  Removing stale lock file');
+        unlinkSync(LOCK_FILE);
+        break;
+      }
+    } catch { /* lock file may have been removed */ }
 
-  for (const valid of CANONICAL_STATES) {
-    if (valid.toLowerCase() === lower) return valid;
+    if (Date.now() - start > LOCK_TIMEOUT_MS) {
+      console.error('❌ Could not acquire lock on applications.md — another process may be running');
+      process.exit(1);
+    }
+    // Busy wait 100ms
+    const end = Date.now() + 100;
+    while (Date.now() < end) { /* spin */ }
   }
-
-  // Aliases
-
-  if (ALIASES[lower]) return ALIASES[lower];
-
-  // DUPLICADO/Repost → Discarded
-  if (/^(duplicado|dup|repost)/i.test(lower)) return 'Discarded';
-
-  console.warn(`⚠️  Non-canonical status "${status}" → defaulting to "Evaluated"`);
-  return 'Evaluated';
+  writeFileSync(LOCK_FILE, String(Date.now()));
+}
 }
 
-function normalizeCompany(name) {
-  return name.toLowerCase().replace(/[^a-z0-9]/g, '');
+function releaseLock() {
+  try { unlinkSync(LOCK_FILE); } catch { /* already removed */ }
 }
+
+// Canonical states imported from lib/statuses.mjs
+
+// Use shared normalizeCompany from lib/statuses.mjs
+const normalizeCompany = _normalizeCompany;
 
 function roleFuzzyMatch(a, b) {
-  const wordsA = a.toLowerCase().split(/\s+/).filter(w => w.length > 3);
-  const wordsB = b.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+  const normalize = s => s.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').trim();
+  const wordsA = normalize(a).split(/\s+/).filter(w => w.length > 1);
+  const wordsB = normalize(b).split(/\s+/).filter(w => w.length > 1);
+  if (wordsA.length === 0 || wordsB.length === 0) return false;
+  // For short titles (1-2 words), require exact normalized match
+  if (wordsA.length <= 2 || wordsB.length <= 2) {
+    return normalize(a) === normalize(b);
+  }
   const overlap = wordsA.filter(w => wordsB.some(wb => wb.includes(w) || w.includes(wb)));
   return overlap.length >= 2;
 }
@@ -67,10 +84,8 @@ function extractReportNum(reportStr) {
   return m ? parseInt(m[1]) : null;
 }
 
-function parseScore(s) {
-  const m = s.replace(/\*\*/g, '').match(/([\d.]+)/);
-  return m ? parseFloat(m[1]) : 0;
-}
+// Use shared parseScore from lib/statuses.mjs
+const parseScore = _parseScore;
 
 function parseAppLine(line) {
   const parts = line.split('|').map(s => s.trim());
@@ -175,7 +190,7 @@ if (!existsSync(APPS_FILE)) {
   process.exit(0);
 }
 const appContent = readFileSync(APPS_FILE, 'utf-8');
-const appLines = appContent.split('\n');
+const appLines = appContent.split(/\r?\n/);
 const existingApps = [];
 let maxNum = 0;
 
@@ -278,14 +293,23 @@ for (const file of tsvFiles) {
   }
 }
 
-// Insert new lines after the header (line index of first data row)
+// Append new lines at end of table (chronological order)
 if (newLines.length > 0) {
-  // Find header separator (|---|...) and insert after it
+  // Find the last table row (last line starting with |)
   let insertIdx = -1;
-  for (let i = 0; i < appLines.length; i++) {
-    if (appLines[i].includes('---') && appLines[i].startsWith('|')) {
+  for (let i = appLines.length - 1; i >= 0; i--) {
+    if (appLines[i].startsWith('|') && !appLines[i].includes('---')) {
       insertIdx = i + 1;
       break;
+    }
+  }
+  // Fallback: insert after header separator
+  if (insertIdx < 0) {
+    for (let i = 0; i < appLines.length; i++) {
+      if (appLines[i].includes('---') && appLines[i].startsWith('|')) {
+        insertIdx = i + 1;
+        break;
+      }
     }
   }
   if (insertIdx >= 0) {
@@ -295,12 +319,19 @@ if (newLines.length > 0) {
 
 // Write back
 if (!DRY_RUN) {
-  writeFileSync(APPS_FILE, appLines.join('\n'));
-
-  // Move processed files to merged/
-  if (!existsSync(MERGED_DIR)) mkdirSync(MERGED_DIR, { recursive: true });
-  for (const file of tsvFiles) {
-    renameSync(join(ADDITIONS_DIR, file), join(MERGED_DIR, file));
+  acquireLock();
+  try {
+    // Atomic write: write to temp file, then rename
+    const tmpFile = APPS_FILE + `.tmp.${process.pid}`;
+    writeFileSync(tmpFile, appLines.join('\n'));
+    renameSync(tmpFile, APPS_FILE);
+    // Move processed files to merged/
+    if (!existsSync(MERGED_DIR)) mkdirSync(MERGED_DIR, { recursive: true });
+    for (const file of tsvFiles) {
+      renameSync(join(ADDITIONS_DIR, file), join(MERGED_DIR, file));
+    }
+  } finally {
+    releaseLock();
   }
   console.log(`\n✅ Moved ${tsvFiles.length} TSVs to merged/`);
 }

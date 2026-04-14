@@ -13,6 +13,7 @@
 import { chromium } from 'playwright';
 import { resolve, dirname } from 'path';
 import { readFile } from 'fs/promises';
+import { existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -105,11 +106,18 @@ async function generatePDF() {
   console.log(`📁 Output: ${outputPath}`);
   console.log(`📏 Format: ${format.toUpperCase()}`);
 
+  // Validate fonts directory
+  const fontsDir = resolve(__dirname, 'fonts');
+  if (!existsSync(fontsDir)) {
+    console.error(`❌ Fonts directory not found: ${fontsDir}`);
+    console.error('   Run setup or ensure the fonts/ directory exists with font files.');
+    process.exit(1);
+  }
+
   // Read HTML to inject font paths as absolute file:// URLs
   let html = await readFile(inputPath, 'utf-8');
 
   // Resolve font paths relative to career-copilot/fonts/
-  const fontsDir = resolve(__dirname, 'fonts');
   html = html.replace(
     /url\(['"]?\.\/fonts\//g,
     `url('file://${fontsDir}/`
@@ -129,7 +137,15 @@ async function generatePDF() {
     console.log(`🧹 ATS normalization: ${totalReplacements} replacements (${breakdown})`);
   }
 
-  const browser = await chromium.launch({ headless: true });
+  let browser;
+  try {
+    browser = await chromium.launch({ headless: true });
+  } catch (err) {
+    console.error('❌ Playwright Chromium failed to launch.');
+    console.error('   Run: npx playwright install chromium');
+    console.error(`   Error: ${(err.message || '').split(/\r?\n/)[0]}`);
+    process.exit(1);
+  }
   try {
     const page = await browser.newPage();
 

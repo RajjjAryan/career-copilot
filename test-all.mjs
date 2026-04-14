@@ -14,11 +14,14 @@
 import { execSync } from 'child_process';
 import { readFileSync, existsSync, readdirSync } from 'fs';
 import { join, dirname } from 'path';
+import { tmpdir } from 'os';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;
 const QUICK = process.argv.includes('--quick');
+
+const SCRIPT_TIMEOUT = parseInt(process.env.CAREER_COPILOT_TIMEOUT_MS, 10) || 30000;
 
 let passed = 0;
 let failed = 0;
@@ -30,7 +33,7 @@ function warn(msg) { console.log(`  ⚠️  ${msg}`); warnings++; }
 
 function run(cmd, opts = {}) {
   try {
-    return execSync(cmd, { cwd: ROOT, encoding: 'utf-8', timeout: 30000, ...opts }).trim();
+    return execSync(cmd, { cwd: ROOT, encoding: 'utf-8', timeout: SCRIPT_TIMEOUT, ...opts }).trim();
   } catch (e) {
     return null;
   }
@@ -68,14 +71,24 @@ const scripts = [
   { name: 'update-system.mjs check', expectExit: 0 },
 ];
 
-for (const { name, allowFail } of scripts) {
-  const result = run(`node ${name} 2>&1`);
-  if (result !== null) {
-    pass(`${name} runs OK`);
-  } else if (allowFail) {
-    warn(`${name} exited with error (expected without user data)`);
-  } else {
-    fail(`${name} crashed`);
+for (const { name, expectExit, allowFail } of scripts) {
+  try {
+    const output = execSync(`node ${name} 2>&1`, { cwd: ROOT, encoding: 'utf-8', timeout: SCRIPT_TIMEOUT }).trim();
+    // Exit code 0 — always OK unless we expected a specific non-zero exit
+    if (expectExit !== undefined && expectExit !== 0 && !allowFail) {
+      fail(`${name} expected exit ${expectExit} but exited 0`);
+    } else {
+      pass(`${name} runs OK`);
+    }
+  } catch (e) {
+    const actualExit = e.status ?? 1;
+    if (expectExit !== undefined && actualExit === expectExit) {
+      pass(`${name} exited with expected code ${expectExit}`);
+    } else if (allowFail) {
+      warn(`${name} exited with error (expected without user data)`);
+    } else {
+      fail(`${name} crashed (exit code ${actualExit})`);
+    }
   }
 }
 
@@ -87,7 +100,7 @@ if (!QUICK) {
   if (!goAvailable) {
     warn('Go not installed — skipping dashboard build');
   } else {
-    const goBuild = run('cd dashboard && go build -o /tmp/career-dashboard-test . 2>&1');
+    const goBuild = run(`cd dashboard && go build -o ${join(tmpdir(), 'career-dashboard-test')} . 2>&1`);
     if (goBuild !== null) {
       pass('Dashboard compiles');
     } else {
@@ -185,10 +198,11 @@ if (systemMdFiles) {
     const cleanPath = filePath.replace('./', '');
     if (allowedFiles.some(a => cleanPath.includes(a))) continue;
     if (cleanPath.includes('dashboard/go.mod')) continue;
-    // Skip user data directories
+    // Skip user data directories and binary files
     if (cleanPath.startsWith('data/') || cleanPath.startsWith('reports/') ||
         cleanPath.startsWith('output/') || cleanPath.startsWith('jds/') ||
         cleanPath.startsWith('config/profile.yml')) continue;
+    if (/\.(woff2?|ttf|otf|eot|png|jpg|jpeg|gif|ico|pdf|zip|gz)$/i.test(cleanPath)) continue;
     try {
       const content = readFileSync(join(ROOT, cleanPath), 'utf-8');
       for (const { pattern: regex, label } of piiRegexPatterns) {

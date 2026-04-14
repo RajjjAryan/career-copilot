@@ -13,8 +13,8 @@ Read in order:
 ```
 view(path="modes/_shared.md")
 view(path="modes/_profile.md")
-view(path="data/cv.md")
-view(path="data/article-digest.md")
+view(path="cv.md")
+view(path="article-digest.md")
 ```
 
 ---
@@ -102,7 +102,7 @@ Execute PDF generation from `modes/pdf.md`:
 Append to `data/applications.md` with all columns populated:
 
 ```
-| {###} | {Company} | {Role} | {Score} | Evaluated | {YYYY-MM-DD} | reports/{filename} | output/{pdf-filename} | {URL} |
+| {###} | {YYYY-MM-DD} | {Company} | {Role} | {Score}/5 | Evaluated | — | [{###}](reports/{filename}) | {URL} |
 ```
 
 If Step 4 was executed, update status to "Applied" if user confirms submission.

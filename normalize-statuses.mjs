@@ -11,7 +11,7 @@
  * Run: node career-copilot/normalize-statuses.mjs [--dry-run]
  */
 
-import { readFileSync, writeFileSync, copyFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, copyFileSync, renameSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { ALIASES } from './lib/aliases.mjs';
@@ -85,7 +85,7 @@ if (!existsSync(APPS_FILE)) {
   process.exit(0);
 }
 const content = readFileSync(APPS_FILE, 'utf-8');
-const lines = content.split('\n');
+const lines = content.split(/\r?\n/);
 
 let changes = 0;
 let unknowns = [];
@@ -151,7 +151,10 @@ console.log(`\n📊 ${changes} statuses normalized`);
 if (!DRY_RUN && changes > 0) {
   // Backup first
   copyFileSync(APPS_FILE, APPS_FILE + '.bak');
-  writeFileSync(APPS_FILE, lines.join('\n'));
+  // Atomic write: write to temp file, then rename
+  const tmpFile = APPS_FILE + `.tmp.${process.pid}`;
+  writeFileSync(tmpFile, lines.join('\n'));
+  renameSync(tmpFile, APPS_FILE);
   console.log('✅ Written to applications.md (backup: applications.md.bak)');
 } else if (DRY_RUN) {
   console.log('(dry-run — no changes written)');

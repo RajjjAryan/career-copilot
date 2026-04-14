@@ -15,7 +15,7 @@
  * See DATA_CONTRACT.md for the full system/user layer definitions.
  */
 
-import { execSync } from 'child_process';
+import { execSync, execFileSync } from 'child_process';
 import { readFileSync, writeFileSync, existsSync, unlinkSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -71,7 +71,6 @@ const SYSTEM_PATHS = [
   'README.md',
   'LICENSE',
   'CITATION.cff',
-  '.github/',
   'package.json',
 ];
 
@@ -104,8 +103,10 @@ function compareVersions(a, b) {
   return 0;
 }
 
-function git(cmd) {
-  return execSync(`git ${cmd}`, { cwd: ROOT, encoding: 'utf-8', timeout: 30000 }).trim();
+const GIT_TIMEOUT = parseInt(process.env.CAREER_COPILOT_TIMEOUT_MS, 10) || 30000;
+
+function git(...args) {
+  return execFileSync('git', args, { cwd: ROOT, encoding: 'utf-8', timeout: GIT_TIMEOUT }).trim();
 }
 
 // ── CHECK ───────────────────────────────────────────────────────
@@ -175,7 +176,7 @@ async function apply() {
     // 1. Backup: create branch
     const backupBranch = `backup-pre-update-${local}`;
     try {
-      git(`branch ${backupBranch}`);
+      git('branch', backupBranch);
       console.log(`Backup branch created: ${backupBranch}`);
     } catch {
       console.log(`Backup branch already exists (${backupBranch}), continuing...`);
@@ -183,14 +184,14 @@ async function apply() {
 
     // 2. Fetch from canonical repo
     console.log('Fetching latest from upstream...');
-    git(`fetch ${CANONICAL_REPO} main`);
+    git('fetch', CANONICAL_REPO, 'main');
 
     // 3. Checkout system files only
     console.log('Updating system files...');
     const updated = [];
     for (const path of SYSTEM_PATHS) {
       try {
-        git(`checkout FETCH_HEAD -- ${path}`);
+        git('checkout', 'FETCH_HEAD', '--', path);
         updated.push(path);
       } catch {
         // File may not exist in remote (new additions), skip
@@ -200,7 +201,7 @@ async function apply() {
     // 4. Validate: check NO user files were touched
     let userFileTouched = false;
     try {
-      const status = git('status --porcelain');
+      const status = git('status', '--porcelain');
       for (const line of status.split('\n')) {
         if (!line.trim()) continue;
         const file = line.slice(3);
@@ -217,14 +218,14 @@ async function apply() {
 
     if (userFileTouched) {
       console.error('Aborting: user files were touched. Rolling back...');
-      git('checkout .');
+      git('checkout', '.');
       unlinkSync(lockFile);
       process.exit(1);
     }
 
     // 5. Install any new dependencies
     try {
-      execSync('npm install --silent', { cwd: ROOT, timeout: 60000 });
+      execSync('npm install --silent', { cwd: ROOT, timeout: GIT_TIMEOUT * 2 });
     } catch {
       console.log('npm install skipped (may need manual run)');
     }
@@ -232,8 +233,8 @@ async function apply() {
     // 6. Commit the update
     const remote = localVersion(); // Re-read after checkout updated VERSION
     try {
-      git('add .');
-      git(`commit -m "chore: auto-update system files to v${remote}"`);
+      git('add', '.');
+      git('commit', '-m', `chore: auto-update system files to v${remote}`);
     } catch {
       // Nothing to commit (already up to date)
     }
@@ -259,7 +260,7 @@ function rollback() {
 
   // Find most recent backup branch
   try {
-    const branches = git('branch --list "backup-pre-update-*"');
+    const branches = git('branch', '--list', 'backup-pre-update-*');
     const branchList = branches.split('\n').map(b => b.trim().replace('* ', '')).filter(Boolean);
 
     if (branchList.length === 0) {
@@ -273,14 +274,14 @@ function rollback() {
     // Checkout system files from backup branch
     for (const path of SYSTEM_PATHS) {
       try {
-        git(`checkout ${latest} -- ${path}`);
+        git('checkout', latest, '--', path);
       } catch {
         // File may not have existed in backup
       }
     }
 
-    git('add .');
-    git(`commit -m "chore: rollback system files from ${latest}"`);
+    git('add', '.');
+    git('commit', '-m', `chore: rollback system files from ${latest}`);
 
     console.log(`Rollback complete. System files restored from ${latest}.`);
     console.log('Your data (CV, profile, tracker, reports) was not affected.');
