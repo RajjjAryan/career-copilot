@@ -56,3 +56,4 @@ Thumbs.db
 /tmp/
 *.tmp
 marketing/
+__pycache__/
