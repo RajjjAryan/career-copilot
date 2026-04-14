@@ -17,7 +17,8 @@
     "update": "node update-system.mjs apply",
     "rollback": "node update-system.mjs rollback",
     "test": "node test-all.mjs",
-    "setup:cli": "node setup-cli.mjs"
+    "setup:cli": "node setup-cli.mjs",
+    "dashboard": "node dashboard/web/server.mjs"
   },
   "keywords": [
     "career",
@@ -40,6 +41,7 @@
     "node": ">=18"
   },
   "dependencies": {
+    "express": "^5.2.1",
     "playwright": "^1.45.0",
     "telegraf": "^4.16.3"
   }

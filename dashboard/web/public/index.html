@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Career-Copilot Dashboard</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1><span class="icon">🚀</span> Career-Copilot</h1>
+      <div class="header-stats" id="headerStats"></div>
+    </header>
+
+    <div class="main-content">
+      <div class="panel-area">
+        <div class="tabs" id="tabs">
+          <div class="tab active" data-tab="applications">Applications <span class="badge" id="appCount">0</span></div>
+          <div class="tab" data-tab="pipeline">Pipeline <span class="badge" id="pipeCount">0</span></div>
+          <div class="tab" data-tab="reports">Reports <span class="badge" id="reportCount">0</span></div>
+        </div>
+
+        <!-- Applications Tab -->
+        <div class="panel-content tab-panel" id="panel-applications">
+          <table class="app-table">
+            <thead>
+              <tr>
+                <th data-sort="num"># <span class="sort-arrow"></span></th>
+                <th data-sort="date">Date <span class="sort-arrow"></span></th>
+                <th data-sort="company">Company <span class="sort-arrow"></span></th>
+                <th>Role</th>
+                <th data-sort="score">Score <span class="sort-arrow"></span></th>
+                <th data-sort="status">Status <span class="sort-arrow"></span></th>
+                <th>PDF</th>
+                <th>Report</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody id="appTableBody"></tbody>
+          </table>
+          <div class="empty-state" id="appEmpty" style="display:none">
+            <div class="empty-icon">📋</div>
+            <p>No applications tracked yet</p>
+            <p>Paste a job URL in your AI agent to get started</p>
+          </div>
+        </div>
+
+        <!-- Pipeline Tab -->
+        <div class="panel-content tab-panel" id="panel-pipeline" style="display:none">
+          <div class="pipeline-section">
+            <h3>⏳ Pending Evaluation (<span id="pendingCount">0</span>)</h3>
+            <div id="pipelinePending"></div>
+          </div>
+          <div class="pipeline-section">
+            <h3>✅ Evaluated (<span id="evalCount">0</span>)</h3>
+            <div id="pipelineEvaluated"></div>
+          </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div class="panel-content tab-panel" id="panel-reports" style="display:none">
+          <div id="reportsList"></div>
+          <div id="reportViewer" style="display:none"></div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="sidebar-section">
+          <h3>📊 Overview</h3>
+          <div class="stats-grid" id="statsGrid"></div>
+        </div>
+
+        <div class="sidebar-section">
+          <h3>📈 Score Distribution</h3>
+          <div class="distribution" id="distChart"></div>
+        </div>
+
+        <div class="sidebar-section">
+          <h3>➕ Add to Pipeline</h3>
+          <form class="add-url-form" id="addUrlForm">
+            <input type="url" name="url" placeholder="Job posting URL..." required>
+            <input type="text" name="company" placeholder="Company (optional)">
+            <input type="text" name="role" placeholder="Role (optional)">
+            <input type="text" name="location" placeholder="Location (optional)">
+            <button type="submit" class="btn">Add to Pipeline</button>
+          </form>
+        </div>
+
+        <div class="sidebar-section">
+          <h3>⚡ Quick Commands</h3>
+          <div class="command-list">
+            <div class="command-item" data-cmd="process pipeline">
+              <span class="command-text">process pipeline</span>
+              <span class="command-copy">📋 copy</span>
+            </div>
+            <div class="command-item" data-cmd="scan portals">
+              <span class="command-text">scan portals</span>
+              <span class="command-copy">📋 copy</span>
+            </div>
+            <div class="command-item" data-cmd="compare my top 3">
+              <span class="command-text">compare my top 3</span>
+              <span class="command-copy">📋 copy</span>
+            </div>
+            <div class="command-item" data-cmd="analyze patterns">
+              <span class="command-text">analyze patterns</span>
+              <span class="command-copy">📋 copy</span>
+            </div>
+            <div class="command-item" data-cmd="tracker">
+              <span class="command-text">tracker</span>
+              <span class="command-copy">📋 copy</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
