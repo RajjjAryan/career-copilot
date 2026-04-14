@@ -18,7 +18,15 @@
     "rollback": "node update-system.mjs rollback",
     "test": "node test-all.mjs"
   },
-  "keywords": ["ai", "job-search", "copilot-cli", "career", "automation", "resume", "cv"],
+  "keywords": [
+    "ai",
+    "job-search",
+    "copilot-cli",
+    "career",
+    "automation",
+    "resume",
+    "cv"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -28,6 +36,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "playwright": "^1.45.0"
+    "playwright": "^1.45.0",
+    "telegraf": "^4.16.3"
   }
 }
