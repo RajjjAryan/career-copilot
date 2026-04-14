@@ -8,12 +8,7 @@
 
 ## Prerequisites
 
-```
-view(path="modes/_shared.md")
-view(path="modes/_profile.md")
-view(path="data/cv.md")
-view(path="data/pipeline.md")
-```
+Read the following files for context: `modes/_shared.md`, `modes/_profile.md` (if it exists), `cv.md`, `data/pipeline.md`.
 
 ---
 
@@ -38,9 +33,7 @@ view(path="data/pipeline.md")
 
 ### Step 1 — Read Pipeline
 
-```
-view(path="data/pipeline.md")
-```
+Read `data/pipeline.md`.
 
 Extract all `- [ ]` items from the "Pending" section. For each item, parse:
 - Company name
@@ -52,7 +45,7 @@ Extract all `- [ ]` items from the "Pending" section. For each item, parse:
 ### Step 2 — Count & Decide Strategy
 
 - **1–2 URLs**: Process sequentially in the current context
-- **3+ URLs**: Use `task` tool to process in parallel (up to 3 concurrent workers)
+- **3+ URLs**: If sub-agent dispatch is available, process in parallel (up to 3 concurrent workers). Otherwise, process sequentially.
 
 ### Step 3a — Sequential Processing (1–2 URLs)
 
@@ -60,7 +53,7 @@ For each pending URL:
 
 1. Extract the URL from the pipeline item
 2. Run the full auto-pipeline (as defined in `modes/auto-pipeline.md`):
-   - Fetch JD via `web_fetch`
+   - Fetch the JD (for static pages, use a simple HTTP fetch; for SPAs use browser automation if available)
    - Evaluate Blocks A–F
    - Save report
    - Generate PDF
@@ -70,42 +63,29 @@ For each pending URL:
    - Change `- [ ]` to `- [x]`
    - Add `Processed: {YYYY-MM-DD}` and `Score: {X.X}`
 
+Replace the pending line:
 ```
-edit(path="data/pipeline.md",
-  old_str="- [ ] [{Company} — {Role}]({URL}) | Found: {date} | Source: {source}",
-  new_str="- [x] [{Company} — {Role}]({URL}) | Found: {date} | Processed: {YYYY-MM-DD} | Score: {X.X}")
+- [ ] [{Company} — {Role}]({URL}) | Found: {date} | Source: {source}
+```
+with:
+```
+- [x] [{Company} — {Role}]({URL}) | Found: {date} | Processed: {YYYY-MM-DD} | Score: {X.X}
 ```
 
 ### Step 3b — Parallel Processing (3+ URLs)
 
-Dispatch workers using the `task` tool:
+If your tool supports sub-agent dispatch (e.g., Copilot CLI's `task()` tool), dispatch one worker per offer with full context. Otherwise, process each offer sequentially in the current session.
 
-```
-task(
-  agent_type="general-purpose",
-  name="pipeline-{company-slug}",
-  description="Process {company} from pipeline",
-  prompt="
-    Process this offer through the full auto-pipeline:
-
-    1. Read modes/_shared.md, modes/_profile.md, data/cv.md, data/article-digest.md
-    2. Fetch JD from: {url}
-    3. Run full evaluation (modes/evaluate.md) → save report
-    4. Generate PDF (modes/pdf.md) → save to output/
-    5. Output results as:
-       COMPANY: {company}
-       ROLE: {role}
-       SCORE: {X.X}
-       REPORT: {report-path}
-       PDF: {pdf-path}
-       TRACKER_LINE: | {###} | {Company} | {Role} | {Score} | Evaluated | {YYYY-MM-DD} | {report} | {pdf} | {url} |
-
-    URL: {url}
-    Company: {company}
-    Role: {role}
-  "
-)
-```
+Each worker should receive:
+- **Files to read**: `modes/_shared.md`, `modes/_profile.md`, `cv.md`, `article-digest.md`
+- **JD source**: the URL to fetch from
+- **Instructions**: Run the full evaluation pipeline from `modes/evaluate.md`, then generate a PDF via `modes/pdf.md`
+- **Expected outputs**:
+  - Company name, role, score
+  - Report path (saved to `reports/`)
+  - PDF path (saved to `output/`)
+  - Tracker line for `data/applications.md`
+- **Metadata**: URL, company, role
 
 Dispatch up to 3 workers simultaneously. After each completes:
 - Update `data/pipeline.md` (move item to Processed)

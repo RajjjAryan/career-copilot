@@ -11,17 +11,16 @@
 Before analyzing, read these files in order:
 
 ```
-view(path="modes/_shared.md")
-view(path="modes/_profile.md")
-view(path="data/applications.md")
-view(path="config/profile.yml")
+Read `modes/_shared.md`
+Read `modes/_profile.md`
+Read `data/applications.md`
+Read `config/profile.yml`
 ```
 
 Then read all report files:
 
 ```
-# List reports/ directory and read each .md file (skip .gitkeep)
-glob(pattern="reports/*.md")
+# List all .md files in reports/ directory (skip .gitkeep) and read each one
 ```
 
 ---
@@ -161,7 +160,7 @@ Based on recurring gaps from Step 5, recommend specific CV changes:
 
 Each recommendation must be concrete:
 - ❌ "Learn TypeScript" (too vague)
-- ✅ "Build a small MCP server in TypeScript and add to cv.md Projects section to close the TS + MCP gap seen in Cloudflare (#001) and similar roles"
+- ✅ "Build a small CLI tool in TypeScript and add to cv.md Projects section to close the TypeScript gap seen in Cloudflare (#001) and similar roles"
 
 ---
 

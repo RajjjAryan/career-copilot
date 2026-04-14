@@ -7,20 +7,13 @@
 
 ## Prerequisites
 
-Before evaluating, read these files in order:
-
-```
-view(path="modes/_shared.md")
-view(path="modes/_profile.md")
-view(path="cv.md")
-view(path="article-digest.md")
-```
+Before evaluating, read the following files for context: `modes/_shared.md`, `modes/_profile.md` (if it exists), `cv.md`, `article-digest.md`.
 
 ---
 
 ## Step 0 — JD Extraction & Archetype Detection
 
-1. **If URL provided**: use `web_fetch(url="{JD_URL}")` to extract the job description text
+1. **If URL provided**: fetch the URL (for static pages, use a simple HTTP fetch; for SPAs use browser automation if available) to extract the job description text
 2. **If text provided**: use directly
 3. **Detect archetype** from the JD using the archetype table in `_shared.md`
 4. **Detect JD language** — all output must be in the same language as the JD
@@ -112,9 +105,9 @@ Build a requirements-to-CV mapping table:
 ## D — Comp & Market (Score: X.X/5)
 ```
 
-1. Run `web_search("{role title} salary {location} {current year}")` for market data
-2. Run `web_search("{company name} engineering culture reviews")` for company intel
-3. Run `web_search("{company name} {role title} interview")` for process intel
+1. Search the web for: "{role title} salary {location} {current year}" for market data
+2. Search the web for: "{company name} engineering culture reviews" for company intel
+3. Search the web for: "{company name} {role title} interview" for process intel
 
 ```markdown
 ### Market Compensation
@@ -128,7 +121,7 @@ Build a requirements-to-CV mapping table:
 
 ### Company Intelligence
 
-- **Reputation**: {what web_search reveals}
+- **Reputation**: {what web research reveals}
 - **Funding/Stage**: {if applicable}
 - **Glassdoor rating**: {if found}
 - **Engineering blog**: {if found — indicates eng culture maturity}
@@ -205,7 +198,7 @@ Determine next report number by reading `reports/` directory:
 # Example: 007-acme-corp-2024-03-15.md
 ```
 
-Save full report to `reports/{###}-{company-slug}-{YYYY-MM-DD}.md` using `create`.
+Save full report to `reports/{###}-{company-slug}-{YYYY-MM-DD}.md`.
 
 ### 3. Register in Tracker
 

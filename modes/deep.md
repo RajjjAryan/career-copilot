@@ -9,14 +9,14 @@
 ## Prerequisites
 
 ```
-view(path="modes/_shared.md")
-view(path="modes/_profile.md")
-view(path="data/cv.md")
+Read `modes/_shared.md`
+Read `modes/_profile.md`
+Read `data/cv.md`
 ```
 
 If a report exists for this company, load it for context:
 ```
-view(path="reports/{matching-report}.md")
+Read `reports/{matching-report}.md`
 ```
 
 ---
@@ -30,9 +30,9 @@ For each axis, run targeted `web_search` queries. Cite all sources.
 ## Axis 1 — AI / Tech Strategy
 
 ```
-web_search("{company} AI strategy products {current year}")
-web_search("{company} engineering blog technology stack")
-web_search("{company} machine learning platform papers")
+Search the web for: `{company} AI strategy products {current year}`
+Search the web for: `{company} engineering blog technology stack`
+Search the web for: `{company} machine learning platform papers`
 ```
 
 Research and document:
@@ -49,9 +49,9 @@ Research and document:
 ## Axis 2 — Recent Moves (Last 6 Months)
 
 ```
-web_search("{company} news last 6 months {current year}")
-web_search("{company} funding acquisition launch {current year}")
-web_search("{company} key hires leadership changes {current year}")
+Search the web for: `{company} news last 6 months {current year}`
+Search the web for: `{company} funding acquisition launch {current year}`
+Search the web for: `{company} key hires leadership changes {current year}`
 ```
 
 Document:
@@ -68,9 +68,9 @@ Document:
 ## Axis 3 — Engineering Culture
 
 ```
-web_search("{company} engineering culture Glassdoor reviews")
-web_search("{company} developer experience deploy cadence")
-web_search("{company} remote work policy {current year}")
+Search the web for: `{company} engineering culture Glassdoor reviews`
+Search the web for: `{company} developer experience deploy cadence`
+Search the web for: `{company} remote work policy {current year}`
 ```
 
 Document:
@@ -88,8 +88,8 @@ Document:
 ## Axis 4 — Probable Challenges
 
 ```
-web_search("{company} engineering challenges scaling")
-web_search("{company} technical debt migration")
+Search the web for: `{company} engineering challenges scaling`
+Search the web for: `{company} technical debt migration`
 ```
 
 Infer probable challenges based on company stage, stack, and growth:
@@ -106,8 +106,8 @@ Infer probable challenges based on company stage, stack, and growth:
 ## Axis 5 — Competitors & Differentiation
 
 ```
-web_search("{company} competitors market position")
-web_search("{company} vs {likely competitor}")
+Search the web for: `{company} competitors market position`
+Search the web for: `{company} vs {likely competitor}`
 ```
 
 Document:
@@ -125,8 +125,8 @@ Document:
 This is the most important axis — it connects the research to **you**.
 
 ```
-view(path="data/cv.md")
-view(path="modes/_profile.md")
+Read `data/cv.md`
+Read `modes/_profile.md`
 ```
 
 Document:

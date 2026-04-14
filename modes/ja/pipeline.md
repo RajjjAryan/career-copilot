@@ -9,10 +9,7 @@
 ## 前提条件
 
 ```
-view(path="modes/ja/_shared.md")
-view(path="modes/_profile.md")
-view(path="cv.md")
-view(path="data/pipeline.md")
+以下のファイルを読み込んでください: `modes/ja/_shared.md`, `modes/_profile.md`（存在する場合）, `cv.md`, `article-digest.md`
 ```
 
 ---

@@ -9,16 +9,16 @@
 ## Prerequisites
 
 ```
-view(path="modes/_shared.md")
-view(path="modes/_profile.md")
-view(path="data/cv.md")
-view(path="data/article-digest.md")
-view(path="interview-prep/story-bank.md")
+Read `modes/_shared.md`
+Read `modes/_profile.md`
+Read `data/cv.md`
+Read `data/article-digest.md`
+Read `interview-prep/story-bank.md`
 ```
 
 If a report exists for this company, load it:
 ```
-view(path="reports/{matching-report}.md")
+Read `reports/{matching-report}.md`
 ```
 
 ---
@@ -28,11 +28,11 @@ view(path="reports/{matching-report}.md")
 Run targeted web searches to gather interview intelligence:
 
 ```
-web_search("{company} interview process {role type} Glassdoor")
-web_search("{company} interview questions {role type} Blind")
-web_search("{company} coding interview LeetCode {current year}")
-web_search("{company} engineering blog")
-web_search("{company} {role title} interview experience {current year}")
+Search the web for: "{company} interview process {role type} Glassdoor"
+Search the web for: "{company} interview questions {role type} Blind"
+Search the web for: "{company} coding interview LeetCode {current year}"
+Search the web for: "{company} engineering blog"
+Search the web for: "{company} {role title} interview experience {current year}"
 ```
 
 **CRITICAL**: NEVER fabricate interview questions or statistics. Every question must be:
@@ -213,7 +213,7 @@ Prioritized by frequency in interview reports:
 Save the complete prep guide:
 
 ```
-create(path="interview-prep/{company-slug}-{role-slug}.md", file_text="{full prep content}")
+Create file `interview-prep/{company-slug}-{role-slug}.md` with the full prep content
 ```
 
 ```markdown

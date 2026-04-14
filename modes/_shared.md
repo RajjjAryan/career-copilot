@@ -77,7 +77,7 @@ After detecting archetype, read `modes/_profile.md` for the user's specific fram
 1b. **First evaluation of each session:** Run `node cv-sync-check.mjs`. If warnings, notify user.
 2. Detect the role archetype and adapt framing per _profile.md
 3. Cite exact lines from CV when matching
-4. Use WebSearch for comp and company data
+4. Search the web for comp and company data
 5. Register in tracker after evaluating
 6. Generate content in the language of the JD (EN default)
 7. Be direct and actionable -- no fluff
@@ -90,13 +90,13 @@ After detecting archetype, read `modes/_profile.md` for the user's specific fram
 
 | Tool | Use |
 |------|-----|
-| WebSearch | Comp research, trends, company culture, LinkedIn contacts, fallback for JDs |
-| WebFetch | Fallback for extracting JDs from static pages |
-| Playwright | Verify offers (browser_navigate + browser_snapshot). **NEVER 2+ agents with Playwright in parallel.** |
+| Web search | Comp research, trends, company culture, LinkedIn contacts, fallback for JDs |
+| Web fetch | Fallback for extracting JDs from static pages |
+| Browser automation | Verify offers (navigate to the URL and read the page content). **NEVER 2+ agents with browser automation in parallel.** |
 | Read | cv.md, _profile.md, article-digest.md, cv-template.html |
 | Write | Temporary HTML for PDF, applications.md, reports .md |
 | Edit | Update tracker |
-| Canva MCP | Optional visual CV generation. Duplicate base design, edit text, export PDF. Requires `canva_resume_design_id` in profile.yml. |
+| Canva integration | Optional visual CV generation. Duplicate base design, edit text, export PDF. Requires `canva_resume_design_id` in profile.yml. |
 | Bash | `node generate-pdf.mjs` |
 
 ### Time-to-offer priority

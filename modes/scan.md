@@ -25,7 +25,7 @@ Leer `portals.yml` que contiene:
 
 ### Nivel 1 — Playwright directo (PRINCIPAL)
 
-**Para cada empresa en `tracked_companies`:** Navegar a su `careers_url` con Playwright (`browser_navigate` + `browser_snapshot`), leer TODOS los job listings visibles, y extraer título + URL de cada uno. Este es el método más fiable porque:
+**Para cada empresa en `tracked_companies`:** Navegar a su `careers_url` con automatización de navegador (Playwright si está disponible), leer TODOS los job listings visibles, y extraer título + URL de cada uno. Este es el método más fiable porque:
 - Ve la página en tiempo real (no resultados cacheados de Google)
 - Funciona con SPAs (Ashby, Lever, Workday)
 - Detecta ofertas nuevas al instante
@@ -56,8 +56,8 @@ Los niveles son aditivos — se ejecutan todos, los resultados se mezclan y dedu
 
 4. **Nivel 1 — Playwright scan** (secuencial — NUNCA Playwright en paralelo):
    Para cada empresa en `tracked_companies` con `enabled: true` y `careers_url` definida:
-   a. `browser_navigate` a la `careers_url`
-   b. `browser_snapshot` para leer todos los job listings
+   a. Navegar a la `careers_url` usando automatización de navegador (Playwright si está disponible)
+   b. Leer el contenido de la página para extraer todos los job listings
    c. Si la página tiene filtros/departamentos, navegar las secciones relevantes
    d. Para cada job listing extraer: `{title, url, company}`
    e. Si la página pagina resultados, navegar páginas adicionales
@@ -94,8 +94,8 @@ Los niveles son aditivos — se ejecutan todos, los resultados se mezclan y dedu
    Los resultados de WebSearch pueden estar desactualizados (Google cachea resultados durante semanas o meses). Para evitar evaluar ofertas expiradas, verificar con Playwright cada URL nueva que provenga del Nivel 3. Los Niveles 1 y 2 son inherentemente en tiempo real y no requieren esta verificación.
 
    Para cada URL nueva de Nivel 3 (secuencial — NUNCA Playwright en paralelo):
-   a. `browser_navigate` a la URL
-   b. `browser_snapshot` para leer el contenido
+   a. Navegar a la URL usando automatización de navegador (Playwright si está disponible)
+   b. Leer el contenido de la página
    c. Clasificar:
       - **Activa**: título del puesto visible + descripción del rol + botón Apply/Submit/Solicitar
       - **Expirada** (cualquiera de estas señales):
@@ -105,7 +105,7 @@ Los niveles son aditivos — se ejecutan todos, los resultados se mezclan y dedu
    d. Si expirada: registrar en `scan-history.tsv` con status `skipped_expired` y descartar
    e. Si activa: continuar al paso 8
 
-   **No interrumpir el scan entero si una URL falla.** Si `browser_navigate` da error (timeout, 403, etc.), marcar como `skipped_expired` y continuar con la siguiente.
+   **No interrumpir el scan entero si una URL falla.** Si la navegación da error (timeout, 403, etc.), marcar como `skipped_expired` y continuar con la siguiente.
 
 8. **Para cada oferta nueva verificada que pase filtros**:
    a. Añadir a `pipeline.md` sección "Pendientes": `- [ ] {url} | {company} | {title}`

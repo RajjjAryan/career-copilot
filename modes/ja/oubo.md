@@ -9,10 +9,7 @@
 ## 前提条件
 
 ```
-view(path="modes/ja/_shared.md")
-view(path="modes/_profile.md")
-view(path="cv.md")
-view(path="article-digest.md")
+以下のファイルを読み込んでください: `modes/ja/_shared.md`, `modes/_profile.md`（存在する場合）, `cv.md`, `article-digest.md`
 ```
 
 候補者がChromeで応募フォームを入力している際のインタラクティブモード。画面上の内容を読み取り、以前の求人評価のコンテキストを読み込み、フォームの各質問に合わせた回答を生成する。

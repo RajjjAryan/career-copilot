@@ -10,10 +10,7 @@
 評価の前に、以下のファイルをこの順番で読む：
 
 ```
-view(path="modes/ja/_shared.md")
-view(path="modes/_profile.md")
-view(path="cv.md")
-view(path="article-digest.md")
+以下のファイルを読み込んでください: `modes/ja/_shared.md`, `modes/_profile.md`（存在する場合）, `cv.md`, `article-digest.md`
 ```
 
 ---

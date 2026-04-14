@@ -1,6 +1,6 @@
-# Contributing to Career-Copilot (Copilot CLI Edition)
+# Contributing to Career-Copilot
 
-Thanks for your interest in contributing! This project uses GitHub Copilot CLI as the AI backbone.
+Thanks for your interest in contributing! This project works with any AI coding agent (GitHub Copilot CLI, Claude Code, Gemini CLI, Cursor, Windsurf, and more).
 
 ## Before Submitting a PR
 

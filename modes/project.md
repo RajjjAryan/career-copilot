@@ -9,9 +9,9 @@
 ## Prerequisites
 
 ```
-view(path="modes/_shared.md")
-view(path="modes/_profile.md")
-view(path="data/cv.md")
+Read `modes/_shared.md`
+Read `modes/_profile.md`
+Read `data/cv.md`
 ```
 
 ---
@@ -21,8 +21,8 @@ view(path="data/cv.md")
 If the project involves a specific technology or domain:
 
 ```
-web_search("{project domain} portfolio projects {target role}")
-web_search("{technology} demo projects GitHub {current year}")
+Search the web for: "{project domain} portfolio projects {target role}"
+Search the web for: "{technology} demo projects GitHub {current year}"
 ```
 
 ---
@@ -55,7 +55,7 @@ Is this project differentiated from the thousands of others?
 | 2 | Very common project — yet another todo app, weather app, etc. |
 | 1 | Copy-paste tutorial project — recruiters have seen 1000 of these |
 
-Use `web_search` to check how many similar projects exist on GitHub.
+Search the web to check how many similar projects exist on GitHub.
 
 ### Dimension 3 — Demo-ability (Weight: 20%)
 

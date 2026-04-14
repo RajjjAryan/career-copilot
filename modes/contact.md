@@ -9,14 +9,14 @@
 ## Prerequisites
 
 ```
-view(path="modes/_shared.md")
-view(path="modes/_profile.md")
-view(path="data/cv.md")
+Read `modes/_shared.md`
+Read `modes/_profile.md`
+Read `data/cv.md`
 ```
 
 If a report exists for this company, load it:
 ```
-view(path="reports/{matching-report}.md")
+Read `reports/{matching-report}.md`
 ```
 
 ---
@@ -26,9 +26,9 @@ view(path="reports/{matching-report}.md")
 Use `web_search` to find 3–5 potential contacts:
 
 ```
-web_search("{company name} {role area} hiring manager LinkedIn")
-web_search("{company name} engineering recruiter LinkedIn")
-web_search("{company name} {team/department} engineer LinkedIn")
+Search the web for: `{company name} {role area} hiring manager LinkedIn`
+Search the web for: `{company name} engineering recruiter LinkedIn`
+Search the web for: `{company name} {team/department} engineer LinkedIn`
 ```
 
 ### Target Priority

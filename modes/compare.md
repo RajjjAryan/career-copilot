@@ -9,15 +9,15 @@
 ## Prerequisites
 
 ```
-view(path="modes/_shared.md")
-view(path="modes/_profile.md")
+Read `modes/_shared.md`
+Read `modes/_profile.md`
 ```
 
 Then read each report being compared:
 
 ```
-view(path="reports/{report-file-1}.md")
-view(path="reports/{report-file-2}.md")
+Read `reports/{report-file-1}.md`
+Read `reports/{report-file-2}.md`
 # ... for each offer
 ```
 
@@ -35,7 +35,7 @@ view(path="reports/{report-file-2}.md")
 | 4 | **Estimated Comp** | 10% | How does comp compare to market + targets? | From Block D + `_profile.md` comp targets |
 | 5 | **Growth Trajectory** | 10% | Where does this role lead in 2–3 years? | Infer from company stage, role scope, team size |
 | 6 | **Remote Quality** | 5% | How well does remote policy match preferences? | From `_profile.md` location policy vs. JD |
-| 7 | **Company Reputation** | 5% | Brand value, stability, engineering culture | From Block D web_search results |
+| 7 | **Company Reputation** | 5% | Brand value, stability, engineering culture | From Block D web search results |
 | 8 | **Tech Stack Modernity** | 5% | Is the stack current, growing, or legacy? | From JD tech requirements |
 | 9 | **Speed to Offer** | 5% | How fast is the hiring process? | From interview process intel, company reviews |
 | 10 | **Cultural Signals** | 5% | Values alignment, diversity, work-life balance | From JD language, Glassdoor, reviews |
@@ -66,7 +66,7 @@ For each offer to compare:
 
 ### Step 2 — Score Each Dimension
 
-For each offer, score all 10 dimensions. Where data is available from the report, use it. For missing data, use `web_search` to fill gaps.
+For each offer, score all 10 dimensions. Where data is available from the report, use it. For missing data, search the web to fill gaps.
 
 ### Step 3 — Build Comparison Table
 

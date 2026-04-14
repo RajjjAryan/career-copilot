@@ -1,4 +1,4 @@
-# Career-Copilot (Copilot CLI Edition)
+# Career-Copilot
 
 [![GitHub stars](https://img.shields.io/github/stars/RajjjAryan/career-copilot?style=social)](https://github.com/RajjjAryan/career-copilot/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/RajjjAryan/career-copilot?style=social)](https://github.com/RajjjAryan/career-copilot/network)
@@ -13,6 +13,9 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Copilot_CLI-000?style=flat&logo=github&logoColor=white" alt="Copilot CLI">
+  <img src="https://img.shields.io/badge/Claude_Code-191919?style=flat&logo=anthropic&logoColor=white" alt="Claude Code">
+  <img src="https://img.shields.io/badge/Cursor-000?style=flat&logo=cursor&logoColor=white" alt="Cursor">
+  <img src="https://img.shields.io/badge/Gemini_CLI-4285F4?style=flat&logo=google&logoColor=white" alt="Gemini CLI">
   <img src="https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white" alt="Node.js">
   <img src="https://img.shields.io/badge/Playwright-2EAD33?style=flat&logo=playwright&logoColor=white" alt="Playwright">
   <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT">
@@ -20,7 +23,7 @@
 
 ---
 
-AI-powered job search pipeline built on **GitHub Copilot CLI**. Evaluate offers, generate tailored CVs, scan portals, track applications, and prepare for interviews — all from your terminal.
+AI-powered job search pipeline for **AI coding agents**. Works with GitHub Copilot CLI, Claude Code, Gemini CLI, Cursor, Windsurf, and any compatible AI tool. Evaluate offers, generate tailored CVs, scan portals, track applications, and prepare for interviews — all from your terminal.
 
 ## What It Does
 
@@ -54,7 +57,13 @@ AI-powered job search pipeline built on **GitHub Copilot CLI**. Evaluate offers,
 
 ### Prerequisites
 
-- [GitHub Copilot CLI](https://docs.github.com/en/copilot) installed and configured
+- An AI coding agent — any of:
+  - [GitHub Copilot CLI](https://docs.github.com/en/copilot)
+  - [Claude Code](https://docs.anthropic.com/en/docs/claude-code)
+  - [Gemini CLI](https://github.com/google-gemini/gemini-cli)
+  - [Cursor](https://cursor.com/)
+  - [Windsurf](https://codeium.com/windsurf)
+  - Or any AI tool that reads project instruction files
 - Node.js >= 18 (for PDF generation)
 
 ### Setup
@@ -80,12 +89,12 @@ cp templates/portals.example.yml portals.yml       # Customize companies
 # Create cv.md in the project root with your CV in markdown
 # See examples/cv-example.md for reference
 
-# 5. Start using — open Copilot CLI in this directory
+# 5. Start using — open your AI coding tool in this directory
 ```
 
 ### Usage
 
-Open the project in your terminal and start Copilot CLI. The AI agent reads `.github/copilot-instructions.md` and knows all the workflows. Just ask naturally:
+Open the project in your terminal and start your AI coding tool. The agent reads the project instruction file (`INSTRUCTIONS.md`) automatically. Just ask naturally:
 
 ```
 # Evaluate a job offer
@@ -143,7 +152,7 @@ You paste a job URL or description
 ```
 career-copilot/
 ├── .github/
-│   ├── copilot-instructions.md   # AI agent instructions (the brain)
+│   ├── copilot-instructions.md   # AI agent instructions (Copilot CLI)
 │   └── ISSUE_TEMPLATE/           # Bug report & feature request
 ├── modes/                         # 16 workflow definitions
 │   ├── _shared.md                # System rules, scoring, archetypes
@@ -184,6 +193,9 @@ career-copilot/
 ├── output/                        # Generated PDFs (gitignored)
 ├── jds/                          # Saved job descriptions (gitignored)
 ├── interview-prep/               # Interview prep files (gitignored)
+├── INSTRUCTIONS.md               # AI agent instructions (the brain)
+├── CLAUDE.md                     # Claude Code entry point
+├── GEMINI.md                     # Gemini CLI entry point
 ├── cv.md                         # Your canonical CV (create this)
 ├── generate-pdf.mjs              # HTML→PDF via Playwright
 ├── doctor.mjs                    # Setup validation
@@ -200,6 +212,19 @@ career-copilot/
 ├── LICENSE                       # MIT license
 └── package.json                  # Node.js dependencies & scripts
 ```
+
+## Supported AI Tools
+
+| Tool | Instruction File | Auto-Detected |
+|------|-----------------|---------------|
+| GitHub Copilot CLI | `.github/copilot-instructions.md` | ✅ |
+| Claude Code | `CLAUDE.md` | ✅ |
+| Cursor | `.cursorrules` | ✅ |
+| Windsurf | `.windsurfrules` | ✅ |
+| Gemini CLI | `GEMINI.md` | ✅ |
+| Other tools | Read `INSTRUCTIONS.md` manually | — |
+
+All entry-point files reference the canonical `INSTRUCTIONS.md` at the repository root.
 
 ## Pipeline Integrity Scripts
 

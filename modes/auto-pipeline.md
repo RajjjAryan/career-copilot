@@ -8,14 +8,7 @@
 
 ## Prerequisites
 
-Read in order:
-
-```
-view(path="modes/_shared.md")
-view(path="modes/_profile.md")
-view(path="cv.md")
-view(path="article-digest.md")
-```
+Read the following files for context: `modes/_shared.md`, `modes/_profile.md` (if it exists), `cv.md`, `article-digest.md`.
 
 ---
 
@@ -25,9 +18,9 @@ view(path="article-digest.md")
 
 - **If raw text**: use the pasted text directly — no fetch needed
 - **If URL**: follow this priority order to extract the JD:
-  1. **Playwright (preferred):** Most job portals (Lever, Ashby, Greenhouse, Workday) are SPAs. Use `browser_navigate` + `browser_snapshot` to render and read the JD.
-  2. **WebFetch (fallback):** For static pages (ZipRecruiter, WeLoveProduct, company career pages). Use `web_fetch(url="{URL}")`.
-  3. **WebSearch (last resort):** Search for role title + company on secondary portals that index JDs in static HTML.
+  1. **Browser automation (preferred):** Most job portals (Lever, Ashby, Greenhouse, Workday) are SPAs. Navigate to the URL in a browser and read the page content. Use browser automation (e.g. Playwright) if available; otherwise try a direct URL fetch.
+  2. **Direct fetch (fallback):** For static pages (ZipRecruiter, WeLoveProduct, company career pages), fetch the URL directly (for static pages, use a simple HTTP fetch; for SPAs use browser automation if available).
+  3. **Web search (last resort):** Search the web for the role title + company on secondary portals that index JDs in static HTML.
 - **Validate**: confirm you have company name, role title, and requirements list
 - **If no method works**: ask user to paste the JD text or share a screenshot
 
@@ -54,7 +47,7 @@ Report saved: reports/{###}-{company-slug}-{YYYY-MM-DD}.md
 
 Execute PDF generation from `modes/pdf.md`:
 
-1. Read `data/cv.md`
+1. Read `cv.md`
 2. Use JD from Step 0
 3. Detect language and paper format
 4. Apply archetype-specific framing from Step 1

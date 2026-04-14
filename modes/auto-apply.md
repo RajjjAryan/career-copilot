@@ -9,9 +9,9 @@
 ## Prerequisites
 
 ```
-view(path="modes/_shared.md")
-view(path="modes/_profile.md")
-view(path="config/profile.yml")
+Read `modes/_shared.md`
+Read `modes/_profile.md`
+Read `config/profile.yml`
 ```
 
 ---

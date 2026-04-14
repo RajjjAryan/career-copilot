@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- [GitHub Copilot CLI](https://githubnext.com/projects/copilot-cli/) installed and configured
+- An AI coding agent (GitHub Copilot CLI, Claude Code, Gemini CLI, Cursor, Windsurf, or any compatible tool)
 - Node.js 18+ (for PDF generation and utility scripts)
 
 ## Quick Start (5 steps)
@@ -30,6 +30,19 @@ If using VS Code / Copilot Agent Mode, this works automatically. For other MCP-c
         "command": "npx",
         "args": ["@playwright/mcp@latest"]
       }
+    }
+  }
+}
+```
+
+For Claude Desktop, add to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"]
     }
   }
 }
@@ -70,7 +83,22 @@ Edit `portals.yml`:
 
 ### 6. Start using
 
-Open GitHub Copilot CLI in this directory. Then paste a job offer URL or description. The auto-pipeline will evaluate it, generate a report, create a tailored PDF, and track it.
+Open your AI coding tool in this directory. Then paste a job offer URL or description. The auto-pipeline will evaluate it, generate a report, create a tailored PDF, and track it.
+
+### AI Tool Configuration
+
+Each supported tool reads its own instruction file automatically:
+
+| Tool | File | Setup |
+|------|------|-------|
+| GitHub Copilot CLI | `.github/copilot-instructions.md` | Works automatically |
+| Claude Code | `CLAUDE.md` | Works automatically |
+| Cursor | `.cursorrules` | Works automatically |
+| Windsurf | `.windsurfrules` | Works automatically |
+| Gemini CLI | `GEMINI.md` | Works automatically |
+| Other | `INSTRUCTIONS.md` | Read manually or configure your tool to read it |
+
+All files reference the canonical `INSTRUCTIONS.md` at the repository root.
 
 ## Available Actions
 

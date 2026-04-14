@@ -9,10 +9,10 @@
 ## Prerequisites
 
 ```
-view(path="modes/_shared.md")
-view(path="modes/_profile.md")
-view(path="data/cv.md")
-view(path="data/article-digest.md")
+Read `modes/_shared.md`
+Read `modes/_profile.md`
+Read `data/cv.md`
+Read `data/article-digest.md`
 ```
 
 ---
@@ -21,20 +21,20 @@ view(path="data/article-digest.md")
 
 Identify which offer the user is applying to:
 
-- **If URL provided**: `web_fetch(url="{URL}")` to get JD details
+- **If URL provided**: Fetch the URL to get JD details
 - **If company/role mentioned**: Search `data/applications.md` for a matching entry
 - **If ambiguous**: Ask user to clarify which offer
 
 ### Find Matching Report
 
 ```
-view(path="data/applications.md")
+Read `data/applications.md`
 ```
 
 Search for the company/role to find the report path. If a report exists:
 
 ```
-view(path="reports/{matching-report}.md")
+Read `reports/{matching-report}.md`
 ```
 
 If no report exists, run a quick evaluation first (Blocks A–C from `modes/evaluate.md`).
@@ -154,11 +154,9 @@ After user confirms they've submitted the application:
 
 1. **Update tracker status**:
 
-```
-edit(path="data/applications.md",
-  old_str="| {###} | {Company} | {Role} | {Score} | {CurrentStatus} |",
-  new_str="| {###} | {Company} | {Role} | {Score} | Applied |")
-```
+Update file `data/applications.md`:
+Change the status from `{CurrentStatus}` to `Applied` for the matching row:
+`| {###} | {Company} | {Role} | {Score} | Applied |`
 
 2. **Suggest next steps**:
    - Run `contact` mode for LinkedIn outreach to hiring manager

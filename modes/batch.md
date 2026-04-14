@@ -9,30 +9,26 @@
 ## Architecture
 
 ```
-Copilot CLI (Conductor)
+Conductor (main session)
   │
   │  Reads batch-input.tsv or pipeline.md URLs
-  │  Dispatches parallel sub-agents via `task` tool
+  │  Dispatches parallel workers (if sub-agents available)
   │
-  ├─ task("eval-acme")    → report .md + PDF + tracker-line
-  ├─ task("eval-stripe")  → report .md + PDF + tracker-line
-  ├─ task("eval-vercel")  → report .md + PDF + tracker-line
+  ├─ Worker 1 → report + PDF + tracker-line
+  ├─ Worker 2 → report + PDF + tracker-line
+  ├─ Worker 3 → report + PDF + tracker-line
   │     (up to 3 parallel)
   │
   └─ Merge: tracker-additions → applications.md + summary
 ```
 
-Each worker is a `task` sub-agent with full context. The conductor only orchestrates.
+Each worker processes one offer with full context. The conductor only orchestrates.
 
 ---
 
 ## Prerequisites
 
-```
-view(path="modes/_shared.md")
-view(path="modes/_profile.md")
-view(path="cv.md")
-```
+Read the following files for context: `modes/_shared.md`, `modes/_profile.md` (if it exists), `cv.md`.
 
 ---
 
@@ -85,60 +81,39 @@ Statuses: `pending`, `in_progress`, `completed`, `failed`, `skipped`
 
 ### Step 1 — Read Input & Resume State
 
-```
-view(path="batch/batch-input.tsv")
-view(path="batch/batch-state.tsv")   # if exists — skip completed items
-```
+Read `batch/batch-input.tsv` and, if it exists, `batch/batch-state.tsv` (skip completed items).
 
 ### Step 2 — Fetch JDs
 
 For each pending URL, fetch the job description:
 
 **For SPA-hosted pages (Ashby, Lever, Workday):**
-```
-browser_navigate(url="{url}")
-browser_snapshot()
-```
 
-Extract the JD text from the structured accessibility snapshot.
+Navigate to the URL in a browser and read the page content. Use browser automation (e.g. Playwright) if available; otherwise try a direct URL fetch.
+
+Extract the JD text from the page content.
 
 **For static pages or API-accessible URLs:**
-```
-web_fetch(url="{url}")
-```
 
-Save JD text to `/tmp/batch-jd-{id}.txt` for the worker.
+Fetch the URL directly (for static pages, use a simple HTTP fetch; for SPAs use browser automation if available).
+
+Save the extracted JD text for the worker to use during evaluation.
 
 ### Step 3 — Dispatch Workers
 
-For each pending URL, dispatch a sub-agent using the `task` tool:
+For each pending URL, dispatch a worker with the following context:
 
-```
-task(
-  agent_type="general-purpose",
-  mode="background",
-  name="eval-{company-slug}",
-  description="Evaluate {company}",
-  prompt="
-    You are a career-copilot batch worker evaluating a job offer.
+If your tool supports sub-agent dispatch (e.g., Copilot CLI's `task()` tool), dispatch one worker per offer with full context. Otherwise, process each offer sequentially in the current session.
 
-    ## Your task
-    1. Read these files: cv.md, modes/_shared.md, modes/_profile.md
-    2. Read the JD from: /tmp/batch-jd-{id}.txt (or fetch from {url})
-    3. Follow the FULL evaluation pipeline from batch/batch-prompt.md
-    4. Produce:
-       a. Report → reports/{###}-{company-slug}-{YYYY-MM-DD}.md
-       b. PDF → output/cv-{company-slug}-{YYYY-MM-DD}.pdf
-       c. Tracker line → batch/tracker-additions/{id}.tsv
-
-    Company: {company}
-    URL: {url}
-    Report number: {###}
-    Date: {YYYY-MM-DD}
-    Batch ID: {id}
-  "
-)
-```
+Each worker should receive:
+- **Files to read**: `cv.md`, `modes/_shared.md`, `modes/_profile.md`
+- **JD source**: the saved JD text for this item, or the URL to fetch it from
+- **Instructions**: Follow the full evaluation pipeline from `batch/batch-prompt.md`
+- **Expected outputs**:
+  - Report → `reports/{###}-{company-slug}-{YYYY-MM-DD}.md`
+  - PDF → `output/cv-{company-slug}-{YYYY-MM-DD}.pdf`
+  - Tracker line → `batch/tracker-additions/{id}.tsv`
+- **Metadata**: Company name, URL, report number, date, batch ID
 
 **Parallelism rules:**
 - Dispatch up to **3 workers in parallel** using multiple `task` calls in one response
@@ -147,7 +122,7 @@ task(
 
 **Rate limiting:**
 - Wait **2 seconds** between dispatching each batch of workers to avoid overwhelming job board APIs
-- If a `web_fetch` or `browser_navigate` returns a 429 (rate limited), wait **10 seconds** then retry
+- If a URL fetch returns a 429 (rate limited), wait **10 seconds** then retry
 - If fetching from the same domain (e.g., multiple Greenhouse URLs), space requests **3 seconds** apart
 - Maximum **3 concurrent workers** — do not increase even if system resources allow it
 
@@ -155,7 +130,7 @@ task(
 
 After each worker completes:
 
-1. Read the worker result with `read_agent`
+1. Read the worker result
 2. Verify report and PDF were created
 3. Update `batch/batch-state.tsv` with status, score, paths
 4. Log any errors
@@ -170,7 +145,7 @@ After each worker completes:
 
 ### Step 5 — Merge Tracker
 
-After all workers complete:
+After all workers complete, run:
 
 ```bash
 node merge-tracker.mjs
@@ -186,7 +161,7 @@ This consolidates `batch/tracker-additions/*.tsv` into `data/applications.md`.
 |-------|----------|-----------|
 | URL inaccessible / timeout | Wait 5s, retry up to 2 more times | ✅ Yes |
 | Rate limited (429) | Wait 10s, retry | ✅ Yes |
-| JD behind login | Use `browser_navigate` first. If login wall persists → `failed` | ❌ No |
+| JD behind login | Use browser automation first. If login wall persists → `failed` | ❌ No |
 | Page not found (404) | Mark `failed`, listing likely removed | ❌ No |
 | Worker crashes | Mark `failed`, retry in next pass | ✅ Yes |
 | PDF generation fails | Report .md saved. PDF marked as ❌ in tracker | ✅ Yes (PDF only) |

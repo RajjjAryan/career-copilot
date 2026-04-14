@@ -130,7 +130,7 @@ console.log('\n4. Data contract validation');
 
 // Check system files exist
 const systemFiles = [
-  '.github/copilot-instructions.md', 'VERSION', 'DATA_CONTRACT.md',
+  'INSTRUCTIONS.md', '.github/copilot-instructions.md', 'VERSION', 'DATA_CONTRACT.md',
   'modes/_shared.md', 'modes/_profile.template.md',
   'modes/evaluate.md', 'modes/pdf.md', 'modes/scan.md',
   'templates/states.yml', 'templates/cv-template.html',
@@ -181,7 +181,8 @@ const piiRegexPatterns = [
 const scanExtensions = ['md', 'yml', 'html', 'mjs', 'sh', 'go', 'json'];
 const excludeDirs = ['node_modules', '.git', 'dashboard/go.sum'];
 const allowedFiles = ['README.md', 'LICENSE', 'CITATION.cff', 'CONTRIBUTING.md',
-  'package.json', '.github/FUNDING.yml', '.github/copilot-instructions.md', 'go.mod', 'test-all.mjs',
+  'package.json', '.github/FUNDING.yml', '.github/copilot-instructions.md', 'INSTRUCTIONS.md',
+  'CLAUDE.md', 'GEMINI.md', 'go.mod', 'test-all.mjs',
   'config/profile.example.yml', 'config/profile.yml'];
 
 let leakFound = false;
@@ -243,7 +244,7 @@ if (!leakFound) {
 console.log('\n6. Absolute path check');
 
 const absPathResult = run(
-  `grep -rn "/Users/" --include="*.mjs" --include="*.sh" --include="*.md" --include="*.go" --include="*.yml" . 2>/dev/null | grep -v node_modules | grep -v ".git/" | grep -v README.md | grep -v LICENSE | grep -v go.sum | grep -v copilot-instructions.md | grep -v test-all.mjs | grep -v PULL_REQUEST_TEMPLATE | grep -v ci.yml`
+  `grep -rn "/Users/" --include="*.mjs" --include="*.sh" --include="*.md" --include="*.go" --include="*.yml" . 2>/dev/null | grep -v node_modules | grep -v ".git/" | grep -v README.md | grep -v LICENSE | grep -v go.sum | grep -v copilot-instructions.md | grep -v INSTRUCTIONS.md | grep -v test-all.mjs | grep -v PULL_REQUEST_TEMPLATE | grep -v ci.yml`
 );
 if (!absPathResult) {
   pass('No absolute paths in code files');
@@ -280,11 +281,11 @@ if (shared.includes('_profile.md')) {
   fail('_shared.md does NOT reference _profile.md');
 }
 
-// ── 8. COPILOT INSTRUCTIONS INTEGRITY ───────────────────────────
+// ── 8. INSTRUCTIONS INTEGRITY ───────────────────────────────────
 
-console.log('\n8. Copilot instructions integrity');
+console.log('\n8. Instructions integrity');
 
-const instructions = readFile('.github/copilot-instructions.md');
+const instructions = readFile('INSTRUCTIONS.md');
 const requiredSections = [
   'Data Contract', 'Update Check', 'Ethical Use',
   'Offer Verification', 'Canonical Application States', 'TSV Format',
@@ -299,9 +300,67 @@ for (const section of requiredSections) {
   }
 }
 
-// ── 9. VERSION FILE ─────────────────────────────────────────────
+// Verify INSTRUCTIONS.md is tool-agnostic (no API call syntax)
+const toolCallPatterns = [
+  /view\(path=/,
+  /web_search\(/,
+  /web_fetch\(url=/,
+  /browser_navigate\(/,
+  /browser_snapshot\(/,
+  /task\(agent_type=/,
+];
+for (const pat of toolCallPatterns) {
+  if (pat.test(instructions)) {
+    fail(`INSTRUCTIONS.md contains tool-specific syntax: ${pat.source}`);
+  } else {
+    pass(`INSTRUCTIONS.md clean of: ${pat.source}`);
+  }
+}
 
-console.log('\n9. Version file');
+// ── 9. MULTI-CLI ENTRY POINTS ───────────────────────────────────
+
+console.log('\n9. Multi-CLI entry points');
+
+const entryPoints = [
+  '.github/copilot-instructions.md',
+  'CLAUDE.md',
+  '.cursorrules',
+  '.windsurfrules',
+  'GEMINI.md',
+  'AGENTS.md',
+];
+
+for (const ep of entryPoints) {
+  if (fileExists(ep)) {
+    const content = readFile(ep);
+    if (content.includes('INSTRUCTIONS.md')) {
+      pass(`${ep} references INSTRUCTIONS.md`);
+    } else {
+      fail(`${ep} does not reference INSTRUCTIONS.md`);
+    }
+  } else {
+    fail(`Entry point missing: ${ep}`);
+  }
+}
+
+// Verify mode files are tool-agnostic
+const modeToolPatterns = [/view\(path=/, /web_search\(/, /web_fetch\(url=/, /browser_navigate\(/, /browser_snapshot\(/, /task\(agent_type=/];
+const modeFiles = readdirSync(join(ROOT, 'modes')).filter(f => f.endsWith('.md') && !f.startsWith('_profile'));
+let modeClean = true;
+for (const mf of modeFiles) {
+  const content = readFile(`modes/${mf}`);
+  for (const pat of modeToolPatterns) {
+    if (pat.test(content)) {
+      fail(`modes/${mf} contains tool-specific syntax: ${pat.source}`);
+      modeClean = false;
+    }
+  }
+}
+if (modeClean) pass('All mode files are tool-agnostic');
+
+// ── 10. VERSION FILE ────────────────────────────────────────────
+
+console.log('\n10. Version file');
 
 if (fileExists('VERSION')) {
   const version = readFile('VERSION').trim();

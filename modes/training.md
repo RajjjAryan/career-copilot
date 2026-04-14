@@ -9,9 +9,9 @@
 ## Prerequisites
 
 ```
-view(path="modes/_shared.md")
-view(path="modes/_profile.md")
-view(path="data/cv.md")
+Read `modes/_shared.md`
+Read `modes/_profile.md`
+Read `data/cv.md`
 ```
 
 ---
@@ -19,15 +19,15 @@ view(path="data/cv.md")
 ## Research Phase
 
 ```
-web_search("{course/cert name} review {current year}")
-web_search("{course/cert name} worth it {target role type}")
-web_search("{certification name} salary impact {current year}")
-web_search("{certification provider} reputation")
+Search the web for: "{course/cert name} review {current year}"
+Search the web for: "{course/cert name} worth it {target role type}"
+Search the web for: "{certification name} salary impact {current year}"
+Search the web for: "{certification provider} reputation"
 ```
 
 If URL provided:
 ```
-web_fetch(url="{course URL}")
+Fetch the URL: {course URL}
 ```
 
 ---
@@ -60,7 +60,7 @@ How much does this cert/course move the needle in hiring?
 | 2 | Negligible — recruiters don't care, but it fills a LinkedIn section |
 | 1 | Negative signal — suggests candidate needs validation for basic skills |
 
-Use `web_search` to check how often this cert appears in target JDs.
+Search the web to check how often this cert appears in target JDs.
 
 ### Dimension 3 — Time & Effort (Weight: 20%)
 

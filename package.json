@@ -1,7 +1,7 @@
 {
   "name": "career-copilot",
   "version": "1.0.0",
-  "description": "AI-powered job search pipeline built on GitHub Copilot CLI",
+  "description": "AI-powered career operations pipeline — evaluate offers, generate CVs, track applications. Works with any AI coding agent.",
   "type": "module",
   "scripts": {
     "doctor": "node doctor.mjs",
@@ -16,16 +16,20 @@
     "update:check": "node update-system.mjs check",
     "update": "node update-system.mjs apply",
     "rollback": "node update-system.mjs rollback",
-    "test": "node test-all.mjs"
+    "test": "node test-all.mjs",
+    "setup:cli": "node setup-cli.mjs"
   },
   "keywords": [
-    "ai",
-    "job-search",
-    "copilot-cli",
     "career",
-    "automation",
+    "job-search",
+    "ai-agent",
     "resume",
-    "cv"
+    "cv",
+    "copilot",
+    "claude",
+    "cursor",
+    "gemini",
+    "career-copilot"
   ],
   "license": "MIT",
   "repository": {

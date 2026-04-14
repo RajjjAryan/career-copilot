@@ -9,8 +9,8 @@
 ## Prerequisites
 
 ```
-view(path="modes/_shared.md")
-view(path="data/applications.md")
+Read `modes/_shared.md`
+Read `data/applications.md`
 ```
 
 ---
@@ -113,9 +113,9 @@ When user asks to update a status:
 3. Update to the new status:
 
 ```
-edit(path="data/applications.md",
-  old_str="| {###} | {Company} | {Role} | {Score} | {OldStatus} |",
-  new_str="| {###} | {Company} | {Role} | {Score} | {NewStatus} |")
+Update file `data/applications.md`:
+  Replace: "| {###} | {Company} | {Role} | {Score} | {OldStatus} |"
+  With:    "| {###} | {Company} | {Role} | {Score} | {NewStatus} |"
 ```
 
 4. Confirm the update
@@ -128,7 +128,7 @@ If user provides multiple updates:
 "Mark 003, 005, and 008 as Ghosted"
 ```
 
-Process each update sequentially with `edit`, then confirm all changes.
+Process each update sequentially, then confirm all changes.
 
 ---
 
