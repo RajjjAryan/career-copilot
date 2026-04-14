@@ -49,6 +49,19 @@ console.log('\n🧪 career-copilot test suite\n');
 console.log('1. Syntax checks');
 
 const mjsFiles = readdirSync(ROOT).filter(f => f.endsWith('.mjs'));
+// Also check lib/ and lib/adapters/ subdirectories
+const libDir = join(ROOT, 'lib');
+if (existsSync(libDir)) {
+  for (const f of readdirSync(libDir).filter(f => f.endsWith('.mjs'))) {
+    mjsFiles.push(`lib/${f}`);
+  }
+  const adaptersDir = join(libDir, 'adapters');
+  if (existsSync(adaptersDir)) {
+    for (const f of readdirSync(adaptersDir).filter(f => f.endsWith('.mjs'))) {
+      mjsFiles.push(`lib/adapters/${f}`);
+    }
+  }
+}
 for (const f of mjsFiles) {
   const result = run(`node --check ${f}`);
   if (result !== null) {
@@ -248,7 +261,7 @@ const expectedModes = [
   '_shared.md', '_profile.template.md', 'evaluate.md', 'pdf.md', 'scan.md',
   'batch.md', 'apply.md', 'auto-pipeline.md', 'contact.md', 'deep.md',
   'compare.md', 'pipeline.md', 'project.md', 'tracker.md', 'training.md',
-  'interview-prep.md', 'patterns.md',
+  'interview-prep.md', 'patterns.md', 'auto-apply.md',
 ];
 
 for (const mode of expectedModes) {

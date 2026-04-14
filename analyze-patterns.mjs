@@ -32,7 +32,6 @@ const MIN_THRESHOLD = minThresholdIdx !== -1 ? parseInt(args[minThresholdIdx + 1
 function normalizeStatus(raw) {
   return validateStatus(raw).toLowerCase();
 }
-}
 
 function classifyOutcome(status) {
   const s = normalizeStatus(status);

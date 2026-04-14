@@ -55,7 +55,6 @@ function acquireLock() {
   }
   writeFileSync(LOCK_FILE, String(Date.now()));
 }
-}
 
 function releaseLock() {
   try { unlinkSync(LOCK_FILE); } catch { /* already removed */ }

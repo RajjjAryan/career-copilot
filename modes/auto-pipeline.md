@@ -97,15 +97,46 @@ Execute PDF generation from `modes/pdf.md`:
 
 **If score < 4.5**: Skip this step, note in summary that application drafting was skipped due to score.
 
+### Step 4.5 — Auto-Apply Attempt (Conditional)
+
+**Only if**:
+1. Score >= `auto_apply.min_score` from `config/profile.yml` (default 4.0)
+2. `auto_apply.enabled` is not `false` in `config/profile.yml`
+3. A source URL is available (not a direct text paste)
+4. A tailored PDF was generated in Step 3
+
+**Flow**:
+1. Detect platform from source URL using `lib/platform-detect.mjs`
+2. If automatable (Greenhouse, Lever):
+   - Call `autoApply()` from `lib/apply-engine.mjs` with resume PDF and profile
+   - If successful: set status to `Applied`, note = `✅ Auto-applied ({platform})`
+   - If failed: set note = `🔴 Auto-apply failed ({reason}) — apply manually`
+3. If manual-only platform:
+   - Set note = `🔴 Manual apply needed ({platform} — {reason})`
+4. Present result to user before proceeding to Step 5
+
+**Skip conditions** (proceed directly to Step 5):
+- No source URL available (pasted JD text)
+- Score below threshold
+- Auto-apply disabled in profile
+- No PDF generated (Step 3 failed)
+
 ### Step 5 — Update Tracker
 
 Append to `data/applications.md` with all columns populated:
 
 ```
-| {###} | {YYYY-MM-DD} | {Company} | {Role} | {Score}/5 | Evaluated | — | [{###}](reports/{filename}) | {URL} |
+| {###} | {YYYY-MM-DD} | {Company} | {Role} | {Score}/5 | {Status} | {PDF} | [{###}](reports/{filename}) | {Notes} |
 ```
 
-If Step 4 was executed, update status to "Applied" if user confirms submission.
+**Status determination:**
+- If Step 4.5 auto-applied successfully → `Applied`
+- If Step 4 was executed and user confirmed manual submission → `Applied`
+- Otherwise → `Evaluated`
+
+**Notes field:**
+- Include auto-apply result if Step 4.5 ran (e.g., `✅ Auto-applied (Greenhouse)` or `🔴 Manual apply needed (Ashby)`)
+- Include source URL if available
 
 ---
 
@@ -117,7 +148,8 @@ If any step fails, **continue with remaining steps**:
 - Step 1 fails → abort (no evaluation = no downstream)
 - Step 2 fails → log error, continue to Step 3
 - Step 3 fails → log error, continue to Step 4
-- Step 4 fails → log error, continue to Step 5
+- Step 4 fails → log error, continue to Step 4.5
+- Step 4.5 fails → log error, flag as manual apply, continue to Step 5
 - Step 5 fails → log error, present manual tracker line for user to add
 
 Always present a summary showing which steps succeeded and which failed.
@@ -137,6 +169,7 @@ Always present a summary showing which steps succeeded and which failed.
 | Save Report | ✅ | reports/{filename} |
 | Generate PDF | ✅/❌ | output/{pdf-filename} |
 | Application Draft | ✅/⏭️ | {drafted / skipped (score < 4.5)} |
+| Auto-Apply | ✅/🔴/⏭️ | {auto-applied / manual needed / skipped} |
 | Update Tracker | ✅ | Entry #{###} added |
 
 **Archetype**: {detected}

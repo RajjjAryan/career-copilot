@@ -233,6 +233,7 @@ When the user sends a message, match their intent to the appropriate mode file. 
 | "Process pipeline" / "process my URLs" | URL inbox processing | `modes/pipeline.md` |
 | "Batch process" / "evaluate all" / "process batch" | Parallel batch processing | `modes/batch.md` |
 | "Analyze patterns" / "rejection patterns" / "improve targeting" | Rejection pattern analysis | `modes/patterns.md` |
+| "Auto-apply" / "submit application" / "apply to this" | Automated submission | `modes/auto-apply.md` |
 
 ### Routing Rules
 

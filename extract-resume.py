@@ -142,7 +142,13 @@ def extract_resume(pdf_path):
 
         # Content line
         if current_section:
-            is_bullet = tl["text"].startswith("•") or tl["text"].startswith("\u2022")
+            BULLET_CHARS = {
+                "•", "\u2022", "▪", "\u25AA", "◾", "\u25FE", "⚬", "\u26AC",
+                "∘", "\u2218", "○", "\u25CB", "►", "\u25BA", "▸", "\u25B8",
+                "‣", "\u2023", "⁃", "\u2043", "–", "\u2013", "—", "\u2014",
+            }
+            first_char = tl["text"][0] if tl["text"] else ""
+            is_bullet = first_char in BULLET_CHARS
             current_section["lines"].append({
                 "text": tl["text"],
                 "is_bold": tl["is_bold"],
@@ -217,7 +223,7 @@ def extract_resume(pdf_path):
         merged = []
         for line in lines:
             if line["is_bullet"]:
-                merged.append({**line, "text": line["text"].lstrip("•\u2022 ")})
+                merged.append({**line, "text": line["text"].lstrip("•\u2022▪◾⚬∘○►▸‣⁃–— ")})
             elif line["is_bold"]:
                 # Bold lines are new entries (company names, skill categories)
                 merged.append(line)

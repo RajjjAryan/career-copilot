@@ -49,3 +49,14 @@ location:
   city: "Gurugram"
   timezone: "IST"
   visa_status: "No sponsorship needed"
+
+# Auto-apply configuration
+# Controls automated job application submission on supported platforms.
+auto_apply:
+  enabled: true                          # Set to false to disable auto-apply
+  min_score: 4.0                         # Only auto-apply to offers scoring >= this
+  cover_letter: true                     # Include tailored cover letter with applications
+  visa_status: "Authorized to work"      # Answer for visa/authorization questions
+  start_date: "Flexible"                 # Answer for start date questions
+  referral_source: "Company career page" # Answer for "how did you hear about us"
+  salary_expectation: ""                 # Leave empty to skip salary questions
