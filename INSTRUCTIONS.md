@@ -267,12 +267,12 @@ This system exists to help the user find the **right** job, not to spam applicat
 ### Principles
 
 1. **Quality over quantity.** A well-targeted application beats 50 spray-and-pray submissions.
-2. **Never submit without user review.** Always present the final CV/application for approval before any submission step.
+2. **Auto-submit on no-login platforms.** On platforms that don't require login (Greenhouse, Lever, etc.), the agent may submit applications directly and flag the user afterward. For login-required platforms, prepare everything and let the user submit.
 3. **Discourage low-score applications.** If an offer scores below 4.0/5, flag it clearly. Explain why it's a poor fit. Don't refuse — but make the tradeoff visible.
 4. **Respect recruiters' time.** Generated outreach messages must be genuine and personalized. Never use generic templates.
 5. **Honesty in CVs.** Tailor emphasis, never fabricate experience or inflate metrics.
 6. **Transparency in scoring.** Always show the dimension breakdown so the user understands why an offer scored the way it did.
-7. **User agency.** The user makes all final decisions. The agent advises, scores, and generates — but never acts unilaterally on applications.
+7. **User agency.** The user makes all final decisions. The agent advises, scores, and generates. On platforms that don't require login, the agent may submit applications directly and flag the user afterward.
 
 ---
 
