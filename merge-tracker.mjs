@@ -312,7 +312,9 @@ if (newLines.length > 0) {
     }
   }
   if (insertIdx >= 0) {
-    appLines.splice(insertIdx, 0, ...newLines);
+    // Append entries at the bottom for chronological order
+    const lastTableIdx = appLines.findLastIndex(l => l.startsWith('|'));
+    appLines.splice(lastTableIdx + 1, 0, ...newLines);
   }
 }
 
