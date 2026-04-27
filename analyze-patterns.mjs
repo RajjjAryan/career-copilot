@@ -14,7 +14,7 @@
 import { readFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { validateStatus } from './lib/statuses.mjs';
+import { normalizeStatus as _normalizeStatus } from './lib/status.mjs';
 
 const CAREER_OPS = dirname(fileURLToPath(import.meta.url));
 const APPS_FILE = existsSync(join(CAREER_OPS, 'data/applications.md'))
@@ -28,9 +28,9 @@ const summaryMode = args.includes('--summary');
 const minThresholdIdx = args.indexOf('--min-threshold');
 const MIN_THRESHOLD = minThresholdIdx !== -1 ? parseInt(args[minThresholdIdx + 1]) || 5 : 5;
 
-// --- Status normalization (shared from lib/statuses.mjs) ---
+// --- Status normalization (shared from lib/status.mjs) ---
 function normalizeStatus(raw) {
-  return validateStatus(raw).toLowerCase();
+  return (_normalizeStatus(raw) || 'Evaluated').toLowerCase();
 }
 
 function classifyOutcome(status) {

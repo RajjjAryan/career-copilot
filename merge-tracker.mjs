@@ -27,7 +27,8 @@ Options:
 import { readFileSync, writeFileSync, readdirSync, mkdirSync, renameSync, existsSync, unlinkSync } from 'fs';
 import { join, basename, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { CANONICAL_STATES, validateStatus, normalizeCompany as _normalizeCompany, parseScore as _parseScore } from './lib/statuses.mjs';
+import { normalizeStatus } from './lib/status.mjs';
+import { normalizeCompany as _normalizeCompany, parseScore as _parseScore } from './lib/statuses.mjs';
 
 const CAREER_OPS = dirname(fileURLToPath(import.meta.url));
 // Support both layouts: data/applications.md (boilerplate) and applications.md (original)
@@ -70,7 +71,7 @@ function releaseLock() {
   try { unlinkSync(LOCK_FILE); } catch { /* already removed */ }
 }
 
-// Canonical states imported from lib/statuses.mjs
+function validateStatus(s) { return normalizeStatus(s) || 'Evaluated'; }
 
 // Use shared normalizeCompany from lib/statuses.mjs
 const normalizeCompany = _normalizeCompany;

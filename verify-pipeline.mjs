@@ -17,7 +17,9 @@
 import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { CANONICAL_STATES, isCanonical } from './lib/statuses.mjs';
+import { getCanonicalStatuses, isCanonical } from './lib/status.mjs';
+
+const CANONICAL_STATES = getCanonicalStatuses();
 
 if (process.argv.includes('--help') || process.argv.includes('-h')) {
   console.log(`Usage: node verify-pipeline.mjs

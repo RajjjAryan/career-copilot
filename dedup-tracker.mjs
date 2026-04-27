@@ -12,7 +12,8 @@
 import { readFileSync, writeFileSync, copyFileSync, renameSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { STATUS_RANK, normalizeCompany as _normalizeCompany, parseScore as _parseScore } from './lib/statuses.mjs';
+import { STATUS_RANK } from './lib/status.mjs';
+import { normalizeCompany as _normalizeCompany, parseScore as _parseScore } from './lib/statuses.mjs';
 
 const CAREER_OPS = dirname(fileURLToPath(import.meta.url));
 // Support both layouts: data/applications.md (boilerplate) and applications.md (original)
