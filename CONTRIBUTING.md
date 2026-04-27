@@ -49,7 +49,7 @@ PRs without a corresponding issue may be closed if they don't align with the pro
 ## What we do NOT accept
 
 - **PRs that scrape platforms prohibiting automated access** (LinkedIn, etc.). We actively reject these to respect third-party ToS.
-- **PRs that enable auto-submitting applications** without human review. career-copilot is a decision-support tool, not a spam bot.
+- **PRs that enable mass-spamming applications** to hundreds of roles without evaluation. career-copilot is a quality-over-quantity tool.
 - **PRs that add external API dependencies** without prior discussion in an issue.
 - **PRs containing personal data** (real CVs, emails, phone numbers). Use `examples/` with fictional data instead.
 

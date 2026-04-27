@@ -265,7 +265,7 @@ See [docs/CUSTOMIZATION.md](docs/CUSTOMIZATION.md) for details.
 **career-copilot is a local, open-source tool — NOT a hosted service.** By using this software, you acknowledge:
 
 1. **You control your data.** Your CV, contact info, and personal data stay on your machine and are sent directly to the AI provider you choose. We do not collect any data.
-2. **You control the AI.** The default prompts instruct the AI not to auto-submit applications. Always review AI-generated content before submitting.
+2. **You control the AI.** The tool can auto-submit applications on no-login platforms (Greenhouse, Lever) and flags you afterward. For login-required platforms, it prepares everything for you to submit.
 3. **You comply with third-party ToS.** Use this tool in accordance with the Terms of Service of career portals you interact with.
 4. **No guarantees.** Evaluations are recommendations, not truth. AI models may hallucinate.
 
