@@ -13,6 +13,13 @@ import { execSync } from 'child_process';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = __dirname;
 
+if (process.argv.includes('--help') || process.argv.includes('-h')) {
+  console.log(`Usage: node doctor.mjs
+Validates all prerequisites for career-copilot.
+`);
+  process.exit(0);
+}
+
 // ANSI colors (only on TTY)
 const isTTY = process.stdout.isTTY;
 const green = (s) => isTTY ? `\x1b[32m${s}\x1b[0m` : s;

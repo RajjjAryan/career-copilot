@@ -14,6 +14,16 @@
  * Run: node career-copilot/merge-tracker.mjs [--dry-run] [--verify]
  */
 
+if (process.argv.includes('--help') || process.argv.includes('-h')) {
+  console.log(`Usage: node merge-tracker.mjs [--dry-run] [--verify]
+Merge batch tracker TSV additions into applications.md.
+Options:
+  --dry-run   Show what would change without writing
+  --verify    Run verify-pipeline.mjs after merge
+`);
+  process.exit(0);
+}
+
 import { readFileSync, writeFileSync, readdirSync, mkdirSync, renameSync, existsSync, unlinkSync } from 'fs';
 import { join, basename, dirname } from 'path';
 import { fileURLToPath } from 'url';

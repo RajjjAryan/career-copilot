@@ -20,7 +20,7 @@
  *   /stats        — Score distribution + pipeline analytics
  */
 
-import { Telegraf, Markup } from 'telegraf';
+import { Telegraf } from 'telegraf';
 import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -44,7 +44,17 @@ const bot = new Telegraf(TOKEN);
 
 function parseReport(filename) {
   const path = join(REPORTS_DIR, filename);
-  const content = readFileSync(path, 'utf-8');
+  let content;
+  try {
+    content = readFileSync(path, 'utf-8');
+  } catch (err) {
+    console.error(`Failed to read report ${filename}: ${err.message}`);
+    return {
+      filename, company: '', role: '', location: '', url: '',
+      score: 0, scoreRaw: '', verdict: '',
+      num: filename.match(/^(\d+)/)?.[1] || '???',
+    };
+  }
   const lines = content.split('\n');
 
   const extract = (key) => {
@@ -177,7 +187,7 @@ bot.command('top', (ctx) => {
   ctx.replyWithMarkdown(msg, { disable_web_page_preview: true });
 });
 
-bot.command('report', (ctx) => {
+bot.command('report', async (ctx) => {
   const num = ctx.message.text.split(' ')[1];
   if (!num) {
     return ctx.reply('Usage: /report 007\nSend the 3-digit report number.');
@@ -192,12 +202,12 @@ bot.command('report', (ctx) => {
   const content = readFileSync(join(REPORTS_DIR, reports[0]), 'utf-8');
   // Telegram has 4096 char limit
   if (content.length > 4000) {
-    const chunks = content.match(/[\s\S]{1,4000}/g);
-    chunks.forEach((chunk, i) => {
-      ctx.replyWithMarkdown(chunk).catch(() => ctx.reply(chunk));
-    });
+    const chunks = content.match(/[\s\S]{1,4000}/g) || [content];
+    for (const chunk of chunks) {
+      await ctx.replyWithMarkdown(chunk).catch(() => ctx.reply(chunk));
+    }
   } else {
-    ctx.replyWithMarkdown(content).catch(() => ctx.reply(content));
+    await ctx.replyWithMarkdown(content).catch(() => ctx.reply(content));
   }
 });
 
@@ -232,10 +242,14 @@ bot.command('sendresume', async (ctx) => {
   }
 
   for (const pdf of pdfs) {
-    await ctx.replyWithDocument({
-      source: join(OUTPUT_DIR, pdf),
-      filename: pdf,
-    });
+    try {
+      await ctx.replyWithDocument({
+        source: join(OUTPUT_DIR, pdf),
+        filename: pdf,
+      });
+    } catch (err) {
+      await ctx.reply(`Failed to send ${pdf}: ${err.message}`);
+    }
   }
 });
 

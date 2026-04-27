@@ -19,6 +19,13 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { CANONICAL_STATES, isCanonical } from './lib/statuses.mjs';
 
+if (process.argv.includes('--help') || process.argv.includes('-h')) {
+  console.log(`Usage: node verify-pipeline.mjs
+Health check for tracker integrity (statuses, duplicates, scores, links).
+`);
+  process.exit(0);
+}
+
 const CAREER_OPS = dirname(fileURLToPath(import.meta.url));
 // Support both layouts: data/applications.md (boilerplate) and applications.md (original)
 const APPS_FILE = existsSync(join(CAREER_OPS, 'data/applications.md'))

@@ -63,6 +63,18 @@ function parseArgs() {
     process.exit(1);
   }
 
+  // Validate input file exists
+  if (!existsSync(opts.inputPdf)) {
+    console.error(`❌ Input file not found: ${opts.inputPdf}`);
+    process.exit(1);
+  }
+
+  // Validate JD file exists if specified
+  if (opts.jdFile && !existsSync(opts.jdFile)) {
+    console.error(`❌ JD file not found: ${opts.jdFile}`);
+    process.exit(1);
+  }
+
   return opts;
 }
 

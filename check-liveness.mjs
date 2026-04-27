@@ -17,6 +17,16 @@
 import { chromium } from 'playwright';
 import { readFile } from 'fs/promises';
 
+if (process.argv.includes('--help') || process.argv.includes('-h')) {
+  console.log(`Usage: node check-liveness.mjs [file]
+Check if job posting URLs are still active.
+Options:
+  LIVENESS_TIMEOUT_MS    Navigation timeout in ms (default: 30000)
+  LIVENESS_CHECK_TIMEOUT_MS  Per-URL check timeout (default: 15000)
+`);
+  process.exit(0);
+}
+
 const EXPIRED_PATTERNS = [
   /job (is )?no longer available/i,
   /job.*no longer open/i,           // Greenhouse: "The job you are looking for is no longer open."
@@ -132,6 +142,16 @@ async function checkUrlInner(page, url) {
   }
 }
 
+async function checkUrlWithRetry(page, url, maxRetries = 1) {
+  let result = await checkUrl(page, url);
+  if (result.result === 'uncertain' && maxRetries > 0) {
+    // Wait 2s then retry
+    await new Promise(r => setTimeout(r, 2000));
+    result = await checkUrl(page, url);
+  }
+  return result;
+}
+
 async function main() {
   const args = process.argv.slice(2);
 
@@ -159,7 +179,7 @@ async function main() {
 
     // Sequential — project rule: never Playwright in parallel
     for (const url of urls) {
-      const { result, reason } = await checkUrl(page, url);
+      const { result, reason } = await checkUrlWithRetry(page, url);
       const icon = { active: '✅', expired: '❌', uncertain: '⚠️' }[result];
       console.log(`${icon} ${result.padEnd(10)} ${url}`);
       if (result !== 'active') console.log(`           ${reason}`);
