@@ -92,7 +92,7 @@ if (resumePath && !existsSync(resumePath)) {
   process.exit(1);
 }
 
-const timeout = (parseInt(args.timeout) || 180) * 1000;
+const timeout = (parseInt(args.timeout) || 300) * 1000;
 
 // ── Collect jobs to apply ──────────────────────────────────────────────
 let jobs = []; // [{ boardToken, jobId }]
