@@ -21,12 +21,14 @@ function loadProfile() {
   for (const line of raw.split('\n')) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith('#')) continue;
-    if (/^candidate\s*:/.test(trimmed)) { section = 'candidate'; continue; }
-    if (/^auto_apply\s*:/.test(trimmed)) { section = 'auto_apply'; continue; }
-    if (/^location\s*:/.test(trimmed)) { section = 'location'; continue; }
+    // Section headers must start at column 0
+    if (/^candidate\s*:/.test(line)) { section = 'candidate'; continue; }
+    if (/^auto_apply\s*:/.test(line)) { section = 'auto_apply'; continue; }
+    if (/^location\s*:/.test(line)) { section = 'location'; continue; }
     if (/^\S/.test(line)) { section = null; continue; }
-    if (!section) continue;
-    const m = trimmed.match(/^(\w[\w_]*):\s*(.+)/);
+    if (!section || !profile[section]) continue;
+    // Only match single-indent key: value (2-space indent, not deeper)
+    const m = line.match(/^  (\w[\w_]*):\s*(.+)/);
     if (m) profile[section][m[1]] = m[2].replace(/^["']|["']$/g, '');
   }
   return profile;
@@ -102,18 +104,11 @@ if (args.csv) {
     process.exit(1);
   }
   const lines = readFileSync(csvPath, 'utf8').split('\n');
-  const header = lines[0].split(',');
-  const urlIdx = header.indexOf('apply_url');
-  if (urlIdx < 0) {
-    console.error('❌ CSV must have an apply_url column');
-    process.exit(1);
-  }
   const top = parseInt(args.top) || 5;
   for (const line of lines.slice(1, top + 1)) {
     if (!line.trim()) continue;
-    const cols = line.split(',');
-    const applyUrl = cols[urlIdx]?.trim();
-    const m = applyUrl?.match(/greenhouse\.io\/(\w+)\/jobs\/(\d+)/);
+    // Extract Greenhouse URL directly with regex (handles quoted CSV fields)
+    const m = line.match(/greenhouse\.io\/(\w+)\/jobs\/(\d+)/);
     if (m) jobs.push({ boardToken: m[1], jobId: m[2] });
   }
 } else if (args.board && args.jobs) {
