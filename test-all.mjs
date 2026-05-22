@@ -31,6 +31,49 @@ function pass(msg) { console.log(`  ✅ ${msg}`); passed++; }
 function fail(msg) { console.log(`  ❌ ${msg}`); failed++; }
 function warn(msg) { console.log(`  ⚠️  ${msg}`); warnings++; }
 
+function scriptExitResult({ expectExit, allowFail }, exitCode) {
+  if (expectExit !== undefined) {
+    return exitCode === expectExit ? 'pass' : 'fail';
+  }
+  if (exitCode === 0) {
+    return 'pass';
+  }
+  return allowFail ? 'warn' : 'fail';
+}
+
+function recordScriptExit({ name, expectExit, allowFail }, exitCode) {
+  const result = scriptExitResult({ expectExit, allowFail }, exitCode);
+  if (result === 'pass') {
+    if (exitCode === 0) {
+      pass(`${name} runs OK`);
+    } else {
+      pass(`${name} exited with expected code ${expectExit}`);
+    }
+  } else if (result === 'warn') {
+    warn(`${name} exited with error (expected without user data)`);
+  } else {
+    fail(`${name} exited with ${exitCode}, expected ${expectExit ?? 0}`);
+  }
+}
+
+if (process.argv.includes('--self-test-expect-exit')) {
+  const cases = [
+    [{ expectExit: 1, allowFail: true }, 1, 'pass'],
+    [{ expectExit: 1, allowFail: true }, 0, 'fail'],
+    [{ expectExit: 0 }, 1, 'fail'],
+    [{ allowFail: true }, 1, 'warn'],
+  ];
+  for (const [script, exitCode, expected] of cases) {
+    const actual = scriptExitResult(script, exitCode);
+    if (actual !== expected) {
+      console.error(`expected ${expected}, got ${actual} for exit ${exitCode}`);
+      process.exit(1);
+    }
+  }
+  console.log('expectExit self-test passed');
+  process.exit(0);
+}
+
 function run(cmd, opts = {}) {
   try {
     return execSync(cmd, { cwd: ROOT, encoding: 'utf-8', timeout: SCRIPT_TIMEOUT, ...opts }).trim();
@@ -86,22 +129,11 @@ const scripts = [
 
 for (const { name, expectExit, allowFail } of scripts) {
   try {
-    const output = execSync(`node ${name} 2>&1`, { cwd: ROOT, encoding: 'utf-8', timeout: SCRIPT_TIMEOUT }).trim();
-    // Exit code 0 — always OK unless we expected a specific non-zero exit
-    if (expectExit !== undefined && expectExit !== 0 && !allowFail) {
-      fail(`${name} expected exit ${expectExit} but exited 0`);
-    } else {
-      pass(`${name} runs OK`);
-    }
+    execSync(`node ${name} 2>&1`, { cwd: ROOT, encoding: 'utf-8', timeout: SCRIPT_TIMEOUT });
+    recordScriptExit({ name, expectExit, allowFail }, 0);
   } catch (e) {
     const actualExit = e.status ?? 1;
-    if (expectExit !== undefined && actualExit === expectExit) {
-      pass(`${name} exited with expected code ${expectExit}`);
-    } else if (allowFail) {
-      warn(`${name} exited with error (expected without user data)`);
-    } else {
-      fail(`${name} crashed (exit code ${actualExit})`);
-    }
+    recordScriptExit({ name, expectExit, allowFail }, actualExit);
   }
 }
 
