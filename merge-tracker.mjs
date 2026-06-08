@@ -27,8 +27,9 @@ Options:
 import { readFileSync, writeFileSync, readdirSync, mkdirSync, renameSync, existsSync, unlinkSync } from 'fs';
 import { join, basename, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { parseScore } from './lib/score.mjs';
 import { normalizeStatus } from './lib/status.mjs';
-import { normalizeCompany as _normalizeCompany, parseScore as _parseScore } from './lib/statuses.mjs';
+import { normalizeCompany as _normalizeCompany } from './lib/statuses.mjs';
 
 const CAREER_OPS = dirname(fileURLToPath(import.meta.url));
 // Support both layouts: data/applications.md (boilerplate) and applications.md (original)
@@ -93,9 +94,6 @@ function extractReportNum(reportStr) {
   const m = reportStr.match(/\[(\d+)\]/);
   return m ? parseInt(m[1]) : null;
 }
-
-// Use shared parseScore from lib/statuses.mjs
-const parseScore = _parseScore;
 
 function parseAppLine(line) {
   const parts = line.split('|').map(s => s.trim());

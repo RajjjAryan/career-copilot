@@ -13,7 +13,8 @@ import { readFileSync, writeFileSync, copyFileSync, renameSync, existsSync } fro
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { STATUS_RANK } from './lib/status.mjs';
-import { normalizeCompany as _normalizeCompany, parseScore as _parseScore } from './lib/statuses.mjs';
+import { parseScore } from './lib/score.mjs';
+import { normalizeCompany as _normalizeCompany } from './lib/statuses.mjs';
 
 const CAREER_OPS = dirname(fileURLToPath(import.meta.url));
 // Support both layouts: data/applications.md (boilerplate) and applications.md (original)
@@ -48,10 +49,6 @@ function roleMatch(a, b) {
   }
   const overlap = wordsA.filter(w => wordsB.some(wb => wb.includes(w) || w.includes(wb)));
   return overlap.length >= 2;
-}
-
-function parseScore(s) {
-  return _parseScore(s);
 }
 
 function parseAppLine(line) {
