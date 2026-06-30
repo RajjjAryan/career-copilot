@@ -16,6 +16,7 @@ import { readFileSync, existsSync, readdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { tmpdir } from 'os';
 import { fileURLToPath } from 'url';
+import { evaluateScriptExit } from './lib/script-exit.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;
@@ -76,33 +77,46 @@ for (const f of mjsFiles) {
 console.log('\n2. Script execution (graceful on empty data)');
 
 const scripts = [
-  { name: 'cv-sync-check.mjs', expectExit: 1, allowFail: true }, // fails without cv.md (normal in repo)
+  { name: 'cv-sync-check.mjs', allowFail: true }, // exits 1 without user data, 0 in configured workspaces
+  { name: 'doctor.mjs', allowFail: true }, // fails until user-layer setup files exist
+  { name: 'analyze-patterns.mjs --summary', allowFail: true },
+  { name: 'analytics.mjs --json', expectExit: 0 },
   { name: 'verify-pipeline.mjs', expectExit: 0 },
   { name: 'normalize-statuses.mjs', expectExit: 0 },
   { name: 'dedup-tracker.mjs', expectExit: 0 },
   { name: 'merge-tracker.mjs', expectExit: 0 },
+  { name: 'check-liveness.mjs --help', expectExit: 0 },
+  { name: 'generate-pdf.mjs --help', expectExit: 0 },
+  { name: 'import-cv.mjs --help', expectExit: 0 },
   { name: 'update-system.mjs check', expectExit: 0 },
 ];
 
 for (const { name, expectExit, allowFail } of scripts) {
+  let actualExit = 0;
   try {
-    const output = execSync(`node ${name} 2>&1`, { cwd: ROOT, encoding: 'utf-8', timeout: SCRIPT_TIMEOUT }).trim();
-    // Exit code 0 — always OK unless we expected a specific non-zero exit
-    if (expectExit !== undefined && expectExit !== 0 && !allowFail) {
-      fail(`${name} expected exit ${expectExit} but exited 0`);
-    } else {
-      pass(`${name} runs OK`);
-    }
+    execSync(`node ${name} 2>&1`, { cwd: ROOT, encoding: 'utf-8', timeout: SCRIPT_TIMEOUT }).trim();
   } catch (e) {
-    const actualExit = e.status ?? 1;
-    if (expectExit !== undefined && actualExit === expectExit) {
-      pass(`${name} exited with expected code ${expectExit}`);
-    } else if (allowFail) {
-      warn(`${name} exited with error (expected without user data)`);
-    } else {
-      fail(`${name} crashed (exit code ${actualExit})`);
-    }
+    actualExit = e.status ?? 1;
   }
+
+  const result = evaluateScriptExit({ name, expectExit, allowFail }, actualExit);
+  if (result.level === 'pass') {
+    pass(result.message);
+  } else if (result.level === 'warn') {
+    warn(result.message);
+  } else {
+    fail(result.message);
+  }
+}
+
+// ── 2B. UNIT TESTS ─────────────────────────────────────────────
+
+console.log('\n2B. Unit tests');
+const unitResult = run('node --test tests/*.test.mjs');
+if (unitResult !== null) {
+  pass('Unit tests pass');
+} else {
+  fail('Unit tests failed');
 }
 
 // ── 3. DASHBOARD BUILD ──────────────────────────────────────────
@@ -146,7 +160,7 @@ for (const f of systemFiles) {
 
 // Check user files are NOT tracked (gitignored)
 const userFiles = [
-  'config/profile.yml', 'modes/_profile.md', 'portals.yml',
+  'config/profile.yml', 'modes/_profile.md', 'portals.yml', 'feeds.yml',
 ];
 for (const f of userFiles) {
   const tracked = run(`git ls-files ${f}`);

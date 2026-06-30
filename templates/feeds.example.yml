@@ -1,0 +1,23 @@
+feeds:
+  - name: "Y Combinator Jobs"
+    url: "https://news.ycombinator.com/jobs.rss"
+    enabled: true
+    positive:
+      - backend
+      - golang
+      - distributed
+      - platform
+    negative:
+      - frontend
+      - intern
+
+  - name: "RemoteOK"
+    url: "https://remoteok.com/remote-dev-jobs.rss"
+    enabled: false
+    positive:
+      - backend
+      - go
+      - infrastructure
+    negative:
+      - wordpress
+      - php

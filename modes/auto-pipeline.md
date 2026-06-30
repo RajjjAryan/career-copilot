@@ -8,7 +8,7 @@
 
 ## Prerequisites
 
-Read the following files for context: `modes/_shared.md`, `modes/_profile.md` (if it exists), `cv.md`, `article-digest.md`.
+Read the following files for context: `modes/_shared.md`, the active profile (`config/profile.yml` by default, or `config/profiles/{name}.yml` when `CAREER_PROFILE` is set), `modes/_profile.md` (if it exists), `cv.md`, `article-digest.md`.
 
 ---
 

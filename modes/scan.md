@@ -105,7 +105,7 @@ Los niveles son aditivos — se ejecutan todos, los resultados se mezclan y dedu
    d. Si expirada: registrar en `scan-history.tsv` con status `skipped_expired` y descartar
    e. Si activa: continuar al paso 8
 
-   **No interrumpir el scan entero si una URL falla.** Si la navegación da error (timeout, 403, etc.), marcar como `skipped_expired` y continuar con la siguiente.
+   **No interrumpir el scan entero si una URL falla.** Si la navegación da error (timeout, 403, etc.), marcar como `skipped_uncertain` y continuar con la siguiente.
 
 8. **Para cada oferta nueva verificada que pase filtros**:
    a. Añadir a `pipeline.md` sección "Pendientes": `- [ ] {url} | {company} | {title}`
@@ -114,6 +114,7 @@ Los niveles son aditivos — se ejecutan todos, los resultados se mezclan y dedu
 9. **Ofertas filtradas por título**: registrar en `scan-history.tsv` con status `skipped_title`
 10. **Ofertas duplicadas**: registrar con status `skipped_dup`
 11. **Ofertas expiradas (Nivel 3)**: registrar con status `skipped_expired`
+12. **Ofertas no verificadas por error transitorio**: registrar con status `skipped_uncertain`
 
 ## Extracción de título y empresa de WebSearch results
 

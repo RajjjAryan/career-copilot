@@ -1,0 +1,44 @@
+en:
+  summary: "Professional Summary"
+  competencies: "Core Competencies"
+  experience: "Experience"
+  projects: "Projects"
+  education: "Education"
+  certifications: "Certifications"
+  skills: "Skills"
+
+de:
+  summary: "Kurzprofil"
+  competencies: "Kernkompetenzen"
+  experience: "Berufserfahrung"
+  projects: "Projekte"
+  education: "Ausbildung"
+  certifications: "Zertifizierungen"
+  skills: "Kenntnisse"
+
+fr:
+  summary: "Profil Professionnel"
+  competencies: "Competences Cles"
+  experience: "Experience"
+  projects: "Projets"
+  education: "Formation"
+  certifications: "Certifications"
+  skills: "Competences"
+
+pt:
+  summary: "Resumo Profissional"
+  competencies: "Competencias Principais"
+  experience: "Experiencia"
+  projects: "Projetos"
+  education: "Formacao"
+  certifications: "Certificacoes"
+  skills: "Competencias"
+
+hi:
+  summary: "पेशेवर सारांश"
+  competencies: "मुख्य क्षमताएं"
+  experience: "अनुभव"
+  projects: "प्रोजेक्ट"
+  education: "शिक्षा"
+  certifications: "प्रमाणपत्र"
+  skills: "कौशल"

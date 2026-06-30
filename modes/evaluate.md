@@ -7,7 +7,7 @@
 
 ## Prerequisites
 
-Before evaluating, read the following files for context: `modes/_shared.md`, `modes/_profile.md` (if it exists), `cv.md`, `article-digest.md`.
+Before evaluating, read the following files for context: `modes/_shared.md`, the active profile (`config/profile.yml` by default, or `config/profiles/{name}.yml` when `CAREER_PROFILE` is set), `modes/_profile.md` (if it exists), `cv.md`, `article-digest.md`.
 
 ---
 
@@ -108,6 +108,7 @@ Build a requirements-to-CV mapping table:
 1. Search the web for: "{role title} salary {location} {current year}" for market data
 2. Search the web for: "{company name} engineering culture reviews" for company intel
 3. Search the web for: "{company name} {role title} interview" for process intel
+4. If the offer includes startup equity, run the equity workflow in `modes/equity.md` before final compensation scoring
 
 ```markdown
 ### Market Compensation

@@ -13,7 +13,7 @@ import { readFileSync, writeFileSync, copyFileSync, renameSync, existsSync } fro
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { STATUS_RANK } from './lib/status.mjs';
-import { normalizeCompany as _normalizeCompany, parseScore as _parseScore } from './lib/statuses.mjs';
+import { normalizeCompany, parseScore, parseAppLine, roleFuzzyMatch } from './lib/parsing.mjs';
 
 const CAREER_OPS = dirname(fileURLToPath(import.meta.url));
 // Support both layouts: data/applications.md (boilerplate) and applications.md (original)
@@ -22,55 +22,8 @@ const APPS_FILE = existsSync(join(CAREER_OPS, 'data/applications.md'))
   : join(CAREER_OPS, 'applications.md');
 const DRY_RUN = process.argv.includes('--dry-run');
 
-// Status rank imported from lib/statuses.mjs
-
-function normalizeCompany(name) {
-  return _normalizeCompany(name);
-}
-
-function normalizeRole(role) {
-  return role.toLowerCase()
-    .replace(/[()]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .replace(/[^a-z0-9 /]/g, '')
-    .trim();
-}
-
 function roleMatch(a, b) {
-  const normA = normalizeRole(a);
-  const normB = normalizeRole(b);
-  const wordsA = normA.split(/\s+/).filter(w => w.length > 1);
-  const wordsB = normB.split(/\s+/).filter(w => w.length > 1);
-  if (wordsA.length === 0 || wordsB.length === 0) return false;
-  // For short titles (1-2 words), require exact normalized match
-  if (wordsA.length <= 2 || wordsB.length <= 2) {
-    return normA === normB;
-  }
-  const overlap = wordsA.filter(w => wordsB.some(wb => wb.includes(w) || w.includes(wb)));
-  return overlap.length >= 2;
-}
-
-function parseScore(s) {
-  return _parseScore(s);
-}
-
-function parseAppLine(line) {
-  const parts = line.split('|').map(s => s.trim());
-  if (parts.length < 9) return null;
-  const num = parseInt(parts[1]);
-  if (isNaN(num)) return null;
-  return {
-    num,
-    date: parts[2],
-    company: parts[3],
-    role: parts[4],
-    score: parts[5],
-    status: parts[6],
-    pdf: parts[7],
-    report: parts[8],
-    notes: parts[9] || '',
-    raw: line,
-  };
+  return roleFuzzyMatch(a, b);
 }
 
 // Read

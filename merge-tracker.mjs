@@ -28,7 +28,7 @@ import { readFileSync, writeFileSync, readdirSync, mkdirSync, renameSync, exists
 import { join, basename, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeStatus } from './lib/status.mjs';
-import { normalizeCompany as _normalizeCompany, parseScore as _parseScore } from './lib/statuses.mjs';
+import { normalizeCompany, parseScore, parseAppLine, roleFuzzyMatch } from './lib/parsing.mjs';
 
 const CAREER_OPS = dirname(fileURLToPath(import.meta.url));
 // Support both layouts: data/applications.md (boilerplate) and applications.md (original)
@@ -73,40 +73,9 @@ function releaseLock() {
 
 function validateStatus(s) { return normalizeStatus(s) || 'Evaluated'; }
 
-// Use shared normalizeCompany from lib/statuses.mjs
-const normalizeCompany = _normalizeCompany;
-
-function roleFuzzyMatch(a, b) {
-  const normalize = s => s.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').trim();
-  const wordsA = normalize(a).split(/\s+/).filter(w => w.length > 1);
-  const wordsB = normalize(b).split(/\s+/).filter(w => w.length > 1);
-  if (wordsA.length === 0 || wordsB.length === 0) return false;
-  // For short titles (1-2 words), require exact normalized match
-  if (wordsA.length <= 2 || wordsB.length <= 2) {
-    return normalize(a) === normalize(b);
-  }
-  const overlap = wordsA.filter(w => wordsB.some(wb => wb.includes(w) || w.includes(wb)));
-  return overlap.length >= 2;
-}
-
 function extractReportNum(reportStr) {
   const m = reportStr.match(/\[(\d+)\]/);
   return m ? parseInt(m[1]) : null;
-}
-
-// Use shared parseScore from lib/statuses.mjs
-const parseScore = _parseScore;
-
-function parseAppLine(line) {
-  const parts = line.split('|').map(s => s.trim());
-  if (parts.length < 9) return null;
-  const num = parseInt(parts[1]);
-  if (isNaN(num) || num === 0) return null;
-  return {
-    num, date: parts[2], company: parts[3], role: parts[4],
-    score: parts[5], status: parts[6], pdf: parts[7], report: parts[8],
-    notes: parts[9] || '', raw: line,
-  };
 }
 
 /**

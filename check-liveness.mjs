@@ -16,6 +16,7 @@
 
 import { chromium } from 'playwright';
 import { readFile } from 'fs/promises';
+import { classifyNavigationError } from './lib/liveness.mjs';
 
 if (process.argv.includes('--help') || process.argv.includes('-h')) {
   console.log(`Usage: node check-liveness.mjs [file]
@@ -77,15 +78,7 @@ async function checkUrl(page, url) {
       ),
     ]);
   } catch (err) {
-    const msg = (err.message || '').split(/\r?\n/)[0];
-    // Distinguish recoverable errors from definitive dead links
-    if (/timeout|ETIMEDOUT|ECONNRESET|ECONNREFUSED|429|too many requests/i.test(msg)) {
-      return { result: 'uncertain', reason: `transient error: ${msg}` };
-    }
-    if (/ENOTFOUND|ERR_NAME_NOT_RESOLVED/i.test(msg)) {
-      return { result: 'expired', reason: `DNS resolution failed: ${msg}` };
-    }
-    return { result: 'uncertain', reason: `navigation error: ${msg}` };
+    return classifyNavigationError(err.message || '');
   }
 }
 
@@ -131,14 +124,7 @@ async function checkUrlInner(page, url) {
     return { result: 'uncertain', reason: 'content present but no apply button found' };
 
   } catch (err) {
-    const msg = (err.message || '').split(/\r?\n/)[0];
-    if (/timeout|ETIMEDOUT|ECONNRESET|ECONNREFUSED|429|too many requests/i.test(msg)) {
-      return { result: 'uncertain', reason: `transient error: ${msg}` };
-    }
-    if (/ENOTFOUND|ERR_NAME_NOT_RESOLVED/i.test(msg)) {
-      return { result: 'expired', reason: `DNS resolution failed: ${msg}` };
-    }
-    return { result: 'uncertain', reason: `navigation error: ${msg}` };
+    return classifyNavigationError(err.message || '');
   }
 }
 

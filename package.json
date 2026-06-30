@@ -10,6 +10,9 @@
     "dedup": "node dedup-tracker.mjs",
     "merge": "node merge-tracker.mjs",
     "pdf": "node generate-pdf.mjs",
+    "analytics": "node analytics.mjs",
+    "feed-scan": "node feed-scan.mjs",
+    "import-cv": "node import-cv.mjs",
     "patterns": "node analyze-patterns.mjs",
     "sync-check": "node cv-sync-check.mjs",
     "liveness": "node check-liveness.mjs",
@@ -42,7 +45,10 @@
   },
   "dependencies": {
     "express": "^5.2.1",
+    "fast-xml-parser": "^5.9.3",
+    "pdf-parse": "^1.1.1",
     "playwright": "^1.45.0",
-    "telegraf": "^4.16.3"
+    "telegraf": "^4.16.3",
+    "yaml": "^2.9.0"
   }
 }
