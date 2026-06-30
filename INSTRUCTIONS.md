@@ -42,6 +42,7 @@ These files belong to the user. The agent must **never overwrite, delete, or aut
 | `modes/_profile.md` | User-specific customizations to mode behavior |
 | `article-digest.md` | Published articles, talks, proof points with URLs |
 | `portals.yml` | Job portal URLs and scanning configuration |
+| `feeds.yml` | RSS/Atom job feed URLs and scanning configuration |
 | `data/*` | `applications.md`, `pipeline.md`, `scan-history.tsv` — user-owned tracking data |
 | `reports/*` | Generated evaluation reports (user reviews and archives) |
 | `output/*` | Generated PDF resumes |
@@ -93,6 +94,7 @@ These files define system behavior. They can be updated, improved, or extended b
 | `data/pipeline.md` | Markdown | URL inbox — pending and processed JD links | Agent-managed |
 | `data/scan-history.tsv` | TSV | Log of portal scans with timestamps | Append-only |
 | `portals.yml` | YAML | Company career page URLs for scanner | User-managed |
+| `feeds.yml` | YAML | RSS/Atom feed URLs for feed scanner | User-managed |
 | `templates/cv-template.html` | HTML/CSS | ATS-optimized CV layout with Space Grotesk + DM Sans fonts | System |
 | `templates/states.yml` | YAML | Canonical application statuses (Evaluated → SKIP) | System |
 | `generate-pdf.mjs` | Node.js ESM | Playwright-based HTML→PDF with ATS normalization | System |
@@ -228,8 +230,12 @@ When the user sends a message, match their intent to the appropriate mode file. 
 | "Evaluate course" / "evaluate cert" / "is this training worth it" | Training ROI analysis | `modes/training.md` |
 | "Evaluate project" / "portfolio project" | Project impact scoring | `modes/project.md` |
 | "Application status" / "tracker" / "dashboard" | Status dashboard | `modes/tracker.md` |
+| "Analytics" / "response rate" / "conversion rate" | Pipeline analytics | `modes/analytics.md` |
+| "Negotiate" / "counter offer" / "salary negotiation" | Offer negotiation | `modes/negotiate.md` |
+| "Equity" / "stock options" / "startup offer" | Startup equity analysis | `modes/equity.md` |
 | "Fill application" / "apply to" | Application form assistant | `modes/apply.md` |
 | "Scan portals" / "check for new jobs" | Portal scanner | `modes/scan.md` |
+| "Scan feeds" / "RSS" / "Atom" | Feed scanner | `modes/feed-scan.md` |
 | "Process pipeline" / "process my URLs" | URL inbox processing | `modes/pipeline.md` |
 | "Batch process" / "evaluate all" / "process batch" | Parallel batch processing | `modes/batch.md` |
 | "Analyze patterns" / "rejection patterns" / "improve targeting" | Rejection pattern analysis | `modes/patterns.md` |
@@ -581,7 +587,7 @@ Every time a new session begins, before processing any user request:
 
 1. **Run update check** — `node update-system.mjs check` silently. Notify user only if an update is available (see §4).
 2. **Check onboarding status** — verify `cv.md`, `config/profile.yml`, `modes/_profile.md`, `portals.yml` exist.
-3. **Read profile** — load `config/profile.yml` to understand user context.
+3. **Read profile** — load `config/profile.yml`, or `config/profiles/{CAREER_PROFILE}.yml` when the `CAREER_PROFILE` environment variable selects a named profile.
 4. **Read shared rules** — load `modes/_shared.md` for scoring and archetype definitions.
 5. **Read user overrides** — load `modes/_profile.md` if it exists.
 6. **Check tracker** — glance at `data/applications.md` to know the current report count and recent activity.

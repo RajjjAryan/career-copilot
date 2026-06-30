@@ -12,6 +12,10 @@
 </p>
 
 <p align="center">
+  <a href="docs/demo.cast">Demo recording</a> · compatible with asciinema players · source tape can be regenerated with VHS
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/Copilot_CLI-000?style=flat&logo=github&logoColor=white" alt="Copilot CLI">
   <img src="https://img.shields.io/badge/Claude_Code-191919?style=flat&logo=anthropic&logoColor=white" alt="Claude Code">
   <img src="https://img.shields.io/badge/Cursor-000?style=flat&logo=cursor&logoColor=white" alt="Cursor">
@@ -49,9 +53,21 @@ AI-powered job search pipeline for **AI coding agents**. Works with GitHub Copil
 | **Interview Story Bank** | Accumulates STAR+Reflection stories across evaluations |
 | **ATS PDF Generation** | Keyword-injected CVs with Space Grotesk + DM Sans design |
 | **Portal Scanner** | 45+ companies pre-configured across Greenhouse, Ashby, Lever, Wellfound |
+| **Feed Scanner** | RSS/Atom job discovery with keyword filters and pipeline deduplication |
 | **Batch Processing** | Parallel evaluation with `task` tool sub-agents |
 | **Pipeline Integrity** | Automated merge, dedup, status normalization, health checks |
+| **Analytics & Negotiation** | Funnel metrics, response rates, startup equity analysis, and offer negotiation workflows |
 | **Human-in-the-Loop** | AI evaluates and recommends, you decide and act |
+
+## Demo
+
+The lightweight terminal recording lives at [docs/demo.cast](docs/demo.cast) and can be played with an asciinema-compatible player:
+
+```bash
+asciinema play docs/demo.cast
+```
+
+For a GIF, install [VHS](https://github.com/charmbracelet/vhs) and record the same flow from the commands in the cast: paste a job URL, generate an evaluation, create a PDF, and update the tracker.
 
 ## Quick Start
 
@@ -236,6 +252,9 @@ npm run dedup        # Remove duplicate entries
 npm run normalize    # Normalize status aliases
 npm run sync-check   # Config consistency check
 npm run liveness     # Check if job URLs are still active
+npm run analytics    # Show pipeline conversion metrics
+npm run feed-scan    # Scan RSS/Atom job feeds
+npm run import-cv -- ./resume.pdf  # Convert a PDF resume to cv.md
 npm test             # Run full test suite
 ```
 

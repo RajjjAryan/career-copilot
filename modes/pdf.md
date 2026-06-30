@@ -6,6 +6,8 @@
 2. Pide al usuario el JD si no está en contexto (texto o URL)
 3. Extrae 15-20 keywords del JD
 4. Detecta idioma del JD → idioma del CV (EN default)
+   - Carga etiquetas de sección desde `templates/cv-i18n.yml`
+   - Idiomas soportados: `en`, `de`, `fr`, `pt`, `hi`
 5. Detecta ubicación empresa → formato papel:
    - US/Canada → `letter`
    - Resto del mundo → `a4`
@@ -89,6 +91,8 @@ Usar el template en `cv-template.html`. Reemplazar los placeholders `{{...}}` co
 | `{{CERTIFICATIONS}}` | HTML de certificaciones |
 | `{{SECTION_SKILLS}}` | Skills / Competencias |
 | `{{SKILLS}}` | HTML de skills |
+
+Para idiomas no ingleses, usa `templates/cv-i18n.yml` como fuente de etiquetas. Si falta una etiqueta, usa el valor `en` como fallback.
 
 ## Canva CV Generation (optional)
 

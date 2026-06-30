@@ -9,6 +9,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
+import { validateProfileYaml } from './lib/profile-validation.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = __dirname;
@@ -80,9 +81,10 @@ async function checkPlaywright() {
         fix: 'Run: npx playwright install-deps chromium',
       };
     }
+    const summary = msg.split('\n').slice(0, 3).join(' | ');
     return {
       pass: false,
-      label: `Playwright chromium error: ${msg.split('\n')[0]}`,
+      label: `Playwright chromium error: ${summary}`,
       fix: [
         'Run: npx playwright install chromium',
         'If that fails: npx playwright install-deps chromium',
@@ -119,32 +121,8 @@ function checkProfile() {
   }
   // Validate YAML syntax
   try {
-    const content = readFileSync(profilePath, 'utf-8');
-    // Basic YAML structure check: must have key-value pairs, no tab indentation
-    if (content.includes('\t')) {
-      return {
-        pass: false,
-        label: 'config/profile.yml contains tabs (YAML requires spaces)',
-        fix: 'Replace all tabs with spaces in config/profile.yml',
-      };
-    }
-    const requiredFields = ['full_name', 'target_roles'];
-    const missing = requiredFields.filter(f => !new RegExp(`^\\s*${f}\\s*:`, 'm').test(content));
-    if (missing.length > 0) {
-      // Also check nested: full_name may be under candidate:
-      const nestedMissing = missing.filter(f => {
-        if (f === 'full_name') return !content.includes('full_name');
-        return true;
-      });
-      if (nestedMissing.length > 0) {
-        return {
-          pass: false,
-          label: `config/profile.yml missing required fields: ${nestedMissing.join(', ')}`,
-          fix: 'See config/profile.example.yml for the expected format',
-        };
-      }
-    }
-    return { pass: true, label: 'config/profile.yml found and valid' };
+    const result = validateProfileYaml(readFileSync(profilePath, 'utf-8'));
+    return { pass: result.ok, label: result.label, fix: result.fix };
   } catch (err) {
     return {
       pass: false,

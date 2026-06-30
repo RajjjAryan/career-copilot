@@ -13,8 +13,8 @@
 import { chromium } from 'playwright';
 import { resolve, dirname } from 'path';
 import { readFile } from 'fs/promises';
-import { existsSync } from 'fs';
 import { fileURLToPath } from 'url';
+import { validateFontsDir } from './lib/pdf-validation.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -74,6 +74,11 @@ function normalizeTextForATS(html) {
 async function generatePDF() {
   const args = process.argv.slice(2);
 
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log('Usage: node generate-pdf.mjs <input.html> <output.pdf> [--format=letter|a4]');
+    process.exit(0);
+  }
+
   // Parse arguments
   let inputPath, outputPath, format = 'a4';
 
@@ -108,9 +113,10 @@ async function generatePDF() {
 
   // Validate fonts directory
   const fontsDir = resolve(__dirname, 'fonts');
-  if (!existsSync(fontsDir)) {
-    console.error(`❌ Fonts directory not found: ${fontsDir}`);
-    console.error('   Run setup or ensure the fonts/ directory exists with font files.');
+  const fonts = validateFontsDir(fontsDir);
+  if (!fonts.ok) {
+    console.error(`❌ ${fonts.message}`);
+    console.error('   Run setup or ensure fonts/ contains the bundled WOFF2 files.');
     process.exit(1);
   }
 

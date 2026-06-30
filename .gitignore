@@ -26,6 +26,7 @@ batch/batch-input.tsv
 config/profile.yml
 modes/_profile.md
 portals.yml
+feeds.yml
 cv.md
 article-digest.md
 

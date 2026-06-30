@@ -18,6 +18,7 @@ import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { getCanonicalStatuses, isCanonical } from './lib/status.mjs';
+import { normalizeCompany, normalizeRole, isValidScore } from './lib/parsing.mjs';
 
 const CANONICAL_STATES = getCanonicalStatuses();
 
@@ -99,10 +100,9 @@ if (badStatuses === 0) ok('All statuses are canonical');
 const companyRoleMap = new Map();
 let dupes = 0;
 for (const e of entries) {
-  const key = e.company.toLowerCase().replace(/[^a-z0-9]/g, '') + '::' +
-    e.role.toLowerCase().replace(/[^a-z0-9 ]/g, '');
-  if (!companyRoleMap.has(key)) companyRoleMap.set(key, []);
-  companyRoleMap.get(key).push(e);
+  const normalizedKey = normalizeCompany(e.company) + '::' + normalizeRole(e.role).value;
+  if (!companyRoleMap.has(normalizedKey)) companyRoleMap.set(normalizedKey, []);
+  companyRoleMap.get(normalizedKey).push(e);
 }
 for (const [key, group] of companyRoleMap) {
   if (group.length > 1) {
@@ -129,15 +129,9 @@ if (brokenReports === 0) ok('All report links valid');
 let badScores = 0;
 for (const e of entries) {
   const s = e.score.replace(/\*\*/g, '').trim();
-  if (!/^\d+\.?\d*\/5$/.test(s) && s !== 'N/A' && s !== 'DUP') {
+  if (!isValidScore(s)) {
     error(`#${e.num}: Invalid score format: "${e.score}"`);
     badScores++;
-  } else if (/^\d+\.?\d*\/5$/.test(s)) {
-    const val = parseFloat(s);
-    if (val < 0 || val > 5) {
-      error(`#${e.num}: Score out of range (0-5): "${e.score}"`);
-      badScores++;
-    }
   }
 }
 if (badScores === 0) ok('All scores valid');

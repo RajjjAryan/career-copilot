@@ -1,0 +1,9 @@
+{"version":2,"width":96,"height":24,"timestamp":1782864000,"env":{"SHELL":"/bin/zsh","TERM":"xterm-256color"}}
+[0.2,"o","$ career-copilot\n"]
+[0.6,"o","> Evaluate this job: https://jobs.example.com/senior-backend-engineer\n"]
+[1.2,"o","Reading cv.md, config/profile.yml, modes/_profile.md, and job description...\n"]
+[2.0,"o","Score: 4.3/5 - Good backend/platform fit\n"]
+[2.4,"o","Report saved: reports/007-example-senior-backend-2026-07-01.md\n"]
+[3.2,"o","$ node generate-pdf.mjs output/007-example.html output/007-example.pdf --format=a4\n"]
+[4.0,"o","PDF generated: output/007-example.pdf\n"]
+[4.4,"o","Tracker updated: #007 Example - Senior Backend Engineer\n"]

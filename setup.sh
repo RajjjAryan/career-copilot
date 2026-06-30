@@ -5,6 +5,27 @@ set -euo pipefail
 # One command: curl -sL <repo-url>/setup.sh | bash
 # Or locally:  bash setup.sh
 
+RESUME_INPUT=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --resume)
+      if [ "$#" -lt 2 ]; then
+        echo "ERROR: --resume requires a PDF path or URL" >&2
+        exit 1
+      fi
+      RESUME_INPUT="${2:-}"
+      shift 2
+      ;;
+    --resume=*)
+      RESUME_INPUT="${1#--resume=}"
+      shift
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
+
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
@@ -88,8 +109,24 @@ else
 fi
 
 if [ ! -f cv.md ]; then
-  warn "cv.md not found — create it with your CV in markdown format"
-  info "  See examples/ for reference CV formats"
+  if [ -n "$RESUME_INPUT" ]; then
+    node import-cv.mjs "$RESUME_INPUT"
+    pass "cv.md imported from PDF"
+  elif [ -t 0 ]; then
+    info "  Do you have a PDF resume path or URL to import? Press Enter to skip."
+    read -r -p "  PDF resume: " RESUME_INPUT
+    if [ -n "$RESUME_INPUT" ]; then
+      node import-cv.mjs "$RESUME_INPUT"
+      pass "cv.md imported from PDF"
+    else
+      warn "cv.md not found — create it with your CV in markdown format"
+      info "  See examples/ for reference CV formats"
+    fi
+  else
+    warn "cv.md not found — create it with your CV in markdown format"
+    info "  Or run: node import-cv.mjs ./resume.pdf"
+    info "  See examples/ for reference CV formats"
+  fi
 else
   pass "cv.md exists"
 fi

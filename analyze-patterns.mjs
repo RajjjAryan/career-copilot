@@ -15,6 +15,7 @@ import { readFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { normalizeStatus as _normalizeStatus } from './lib/status.mjs';
+import { parseScore } from './lib/parsing.mjs';
 
 const CAREER_OPS = dirname(fileURLToPath(import.meta.url));
 const APPS_FILE = existsSync(join(CAREER_OPS, 'data/applications.md'))
@@ -207,7 +208,7 @@ function analyze() {
     const reportPath = reportMatch ? join(CAREER_OPS, reportMatch[1]) : null;
     const reportData = reportPath ? parseReport(reportPath) : null;
     const outcome = classifyOutcome(e.status);
-    const score = parseFloat(e.score) || 0;
+    const score = parseScore(e.score);
 
     // Fallback: if report didn't have Remote field, try the notes column
     const remoteSource = reportData?.remote || e.notes || '';
