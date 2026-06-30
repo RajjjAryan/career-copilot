@@ -11,8 +11,8 @@
 ```
 Read `modes/_shared.md`
 Read `modes/_profile.md`
-Read `data/cv.md`
-Read `data/article-digest.md`
+Read `cv.md`
+Read `article-digest.md`
 Read `interview-prep/story-bank.md`
 ```
 

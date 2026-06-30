@@ -16,6 +16,12 @@
 </p>
 
 <p align="center">
+  <a href="docs/demo.cast">
+    <img src="docs/assets/demo-preview.svg" alt="Career-Copilot terminal demo preview" width="860">
+  </a>
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/Copilot_CLI-000?style=flat&logo=github&logoColor=white" alt="Copilot CLI">
   <img src="https://img.shields.io/badge/Claude_Code-191919?style=flat&logo=anthropic&logoColor=white" alt="Claude Code">
   <img src="https://img.shields.io/badge/Cursor-000?style=flat&logo=cursor&logoColor=white" alt="Cursor">
@@ -61,13 +67,13 @@ AI-powered job search pipeline for **AI coding agents**. Works with GitHub Copil
 
 ## Demo
 
-The lightweight terminal recording lives at [docs/demo.cast](docs/demo.cast) and can be played with an asciinema-compatible player:
+The preview above is a GitHub-renderable snapshot of the shipped terminal flow. The lightweight recording lives at [docs/demo.cast](docs/demo.cast) and can be played with an asciinema-compatible player:
 
 ```bash
 asciinema play docs/demo.cast
 ```
 
-For a GIF, install [VHS](https://github.com/charmbracelet/vhs) and record the same flow from the commands in the cast: paste a job URL, generate an evaluation, create a PDF, and update the tracker.
+For launch assets, use [docs/assets/social-preview.svg](docs/assets/social-preview.svg) and the checklist in [docs/LAUNCH.md](docs/LAUNCH.md). For a GIF, install [VHS](https://github.com/charmbracelet/vhs) and record the same flow from the commands in the cast: paste a job URL, generate an evaluation, create a PDF, and update the tracker.
 
 ## Quick Start
 
@@ -84,13 +90,19 @@ For a GIF, install [VHS](https://github.com/charmbracelet/vhs) and record the sa
 
 ### Setup
 
+Choose the path that matches how you want to use the project:
+
+- **Template repository**: best for a private personal copy on GitHub before adding `cv.md` or `config/profile.yml`.
+- **Private fork**: best if you want to pull upstream changes while keeping personal data out of public commits.
+- **Local clone**: best for trying the project without publishing any personal configuration.
+
 ```bash
 # Option A: One-liner setup
-git clone <your-repo-url>
+git clone https://github.com/RajjjAryan/career-copilot.git
 cd career-copilot && bash setup.sh
 
 # Option B: Manual setup
-git clone <your-repo-url>
+git clone https://github.com/RajjjAryan/career-copilot.git
 cd career-copilot && npm install
 npx playwright install chromium   # Required for PDF generation
 
@@ -107,6 +119,8 @@ cp templates/portals.example.yml portals.yml       # Customize companies
 
 # 5. Start using — open your AI coding tool in this directory
 ```
+
+For the full setup path, including privacy boundaries and AI-tool configuration, see [docs/SETUP.md](docs/SETUP.md).
 
 ### Usage
 
@@ -170,7 +184,7 @@ career-copilot/
 ├── .github/
 │   ├── copilot-instructions.md   # AI agent instructions (Copilot CLI)
 │   └── ISSUE_TEMPLATE/           # Bug report & feature request
-├── modes/                         # 16 workflow definitions
+├── modes/                         # Workflow definitions and localized variants
 │   ├── _shared.md                # System rules, scoring, archetypes
 │   ├── _profile.template.md      # User customization template
 │   ├── evaluate.md               # Single offer evaluation (A-F)
@@ -178,28 +192,39 @@ career-copilot/
 │   ├── pdf.md                    # ATS-optimized PDF generation
 │   ├── compare.md                # Multi-offer comparison
 │   ├── scan.md                   # Portal scanner
+│   ├── feed-scan.md              # RSS/Atom feed discovery
 │   ├── batch.md                  # Batch processing
 │   ├── pipeline.md               # URL inbox processing
 │   ├── tracker.md                # Application status dashboard
+│   ├── analytics.md              # Funnel metrics and response analysis
 │   ├── apply.md                  # Application form assistant
+│   ├── auto-apply.md             # Human-reviewed application workflow
 │   ├── contact.md                # LinkedIn outreach
 │   ├── deep.md                   # Deep company research
 │   ├── interview-prep.md         # Interview intelligence
+│   ├── negotiate.md              # Offer negotiation prep
+│   ├── equity.md                 # Startup equity analysis
+│   ├── patterns.md               # Outcome and role-fit pattern analysis
 │   ├── training.md               # Course/cert evaluation
-│   └── project.md                # Portfolio project evaluation
+│   ├── project.md                # Portfolio project evaluation
+│   └── hi/, de/, fr/, pt/        # Localized mode packs
 ├── config/
 │   └── profile.example.yml       # Profile template
 ├── templates/
 │   ├── cv-template.html          # ATS-optimized CV template
+│   ├── cv-i18n.yml               # Localized CV section labels
 │   ├── states.yml                # Canonical application statuses
-│   └── portals.example.yml       # Portal scanner config (45+ companies)
+│   ├── portals.example.yml       # Portal scanner config (45+ companies)
+│   └── feeds.example.yml         # RSS/Atom feed scanner config
 ├── fonts/                         # Space Grotesk + DM Sans (.woff2)
 ├── batch/
 │   └── batch-prompt.md           # Self-contained batch worker prompt
 ├── docs/
 │   ├── ARCHITECTURE.md           # System architecture with diagrams
 │   ├── SETUP.md                  # Full setup guide
-│   └── CUSTOMIZATION.md          # Customization guide
+│   ├── CUSTOMIZATION.md          # Customization guide
+│   ├── LAUNCH.md                 # Launch and sharing checklist
+│   └── assets/                   # Demo preview and social card source
 ├── examples/
 │   ├── cv-example.md             # Sample CV
 │   ├── sample-report.md          # Sample evaluation report
@@ -214,6 +239,10 @@ career-copilot/
 ├── GEMINI.md                     # Gemini CLI entry point
 ├── cv.md                         # Your canonical CV (create this)
 ├── generate-pdf.mjs              # HTML→PDF via Playwright
+├── import-cv.mjs                 # Import an existing PDF/DOCX/text CV
+├── feed-scan.mjs                 # Scan configured RSS/Atom feeds
+├── analytics.mjs                 # Application funnel analytics
+├── analyze-patterns.mjs          # Pattern analysis across reports
 ├── doctor.mjs                    # Setup validation
 ├── verify-pipeline.mjs           # Pipeline health check
 ├── merge-tracker.mjs             # Merge batch tracker additions

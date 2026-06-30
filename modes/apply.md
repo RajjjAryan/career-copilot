@@ -11,8 +11,8 @@
 ```
 Read `modes/_shared.md`
 Read `modes/_profile.md`
-Read `data/cv.md`
-Read `data/article-digest.md`
+Read `cv.md`
+Read `article-digest.md`
 ```
 
 ---
@@ -46,9 +46,9 @@ If no report exists, run a quick evaluation first (Blocks A–C from `modes/eval
 Gather all context needed for personalized answers:
 
 1. **Report**: Full evaluation (archetype, score, match table, comp data, company intel)
-2. **CV**: `data/cv.md` — all experience, metrics, achievements
+2. **CV**: `cv.md` — all experience, metrics, achievements
 3. **Profile**: `modes/_profile.md` — exit narrative, cross-cutting advantage, targets
-4. **Articles**: `data/article-digest.md` — published work for credibility signals
+4. **Articles**: `article-digest.md` — published work for credibility signals
 
 ---
 
