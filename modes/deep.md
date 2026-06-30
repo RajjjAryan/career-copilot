@@ -11,7 +11,7 @@
 ```
 Read `modes/_shared.md`
 Read `modes/_profile.md`
-Read `data/cv.md`
+Read `cv.md`
 ```
 
 If a report exists for this company, load it for context:
@@ -125,7 +125,7 @@ Document:
 This is the most important axis — it connects the research to **you**.
 
 ```
-Read `data/cv.md`
+Read `cv.md`
 Read `modes/_profile.md`
 ```
 

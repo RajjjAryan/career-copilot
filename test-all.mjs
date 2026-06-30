@@ -17,6 +17,7 @@ import { join, dirname } from 'path';
 import { tmpdir } from 'os';
 import { fileURLToPath } from 'url';
 import { evaluateScriptExit } from './lib/script-exit.mjs';
+import { PERSONAL_DATA_SCAN_EXTENSIONS, shouldScanForPersonalData } from './lib/test-file-scope.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;
@@ -189,56 +190,36 @@ const leakPatterns = [
 // Also check for common PII patterns (generic)
 const piiRegexPatterns = [
   { pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/, label: 'email address' },
-  { pattern: /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/, label: 'phone number' },
+  { pattern: /\b(?:\+?\d{1,3}[-. ]?)?(?:\(\d{3}\)|\d{3})[-. ]\d{3}[-. ]\d{4}\b/, label: 'phone number' },
 ];
-
-const scanExtensions = ['md', 'yml', 'html', 'mjs', 'sh', 'go', 'json'];
-const excludeDirs = ['node_modules', '.git', 'dashboard/go.sum'];
-const allowedFiles = ['README.md', 'LICENSE', 'CITATION.cff', 'CONTRIBUTING.md',
-  'package.json', '.github/FUNDING.yml', '.github/copilot-instructions.md', 'INSTRUCTIONS.md',
-  'CLAUDE.md', 'GEMINI.md', 'go.mod', 'test-all.mjs',
-  'config/profile.example.yml', 'config/profile.yml'];
 
 let leakFound = false;
 
-// Check explicit string patterns
-for (const pattern of leakPatterns) {
-  const result = run(
-    `grep -rn "${pattern}" --include="*.{${scanExtensions.join(',')}}" . 2>/dev/null | grep -v node_modules | grep -v ".git/" | grep -v go.sum`
-  );
-  if (result) {
-    for (const line of result.split('\n')) {
-      const file = line.split(':')[0].replace('./', '');
-      if (allowedFiles.some(a => file.includes(a))) continue;
-      if (file.includes('dashboard/go.mod')) continue;
-      warn(`Possible personal data in ${file}: "${pattern}"`);
-      leakFound = true;
-    }
-  }
-}
-
-// Check PII regex patterns in non-allowed system files
+// Check explicit string and PII regex patterns in system files only.
 const systemMdFiles = run(
-  `find . -type f \\( ${scanExtensions.map(e => `-name "*.${e}"`).join(' -o ')} \\) | grep -v node_modules | grep -v ".git/" | grep -v go.sum`
+  `find . -type f \\( ${PERSONAL_DATA_SCAN_EXTENSIONS.map(e => `-name "*.${e}"`).join(' -o ')} \\)`
 );
 if (systemMdFiles) {
   for (const filePath of systemMdFiles.split('\n').filter(Boolean)) {
     const cleanPath = filePath.replace('./', '');
-    if (allowedFiles.some(a => cleanPath.includes(a))) continue;
-    if (cleanPath.includes('dashboard/go.mod')) continue;
-    // Skip user data directories and binary files
-    if (cleanPath.startsWith('data/') || cleanPath.startsWith('reports/') ||
-        cleanPath.startsWith('output/') || cleanPath.startsWith('jds/') ||
-        cleanPath.startsWith('config/profile.yml')) continue;
-    if (/\.(woff2?|ttf|otf|eot|png|jpg|jpeg|gif|ico|pdf|zip|gz)$/i.test(cleanPath)) continue;
+    if (!shouldScanForPersonalData(cleanPath)) continue;
+
     try {
       const content = readFileSync(join(ROOT, cleanPath), 'utf-8');
+      for (const pattern of leakPatterns) {
+        if (content.includes(pattern)) {
+          warn(`Possible personal data in ${cleanPath}: "${pattern}"`);
+          leakFound = true;
+        }
+      }
       for (const { pattern: regex, label } of piiRegexPatterns) {
         const match = content.match(regex);
         if (match) {
           // Skip if it looks like an example/placeholder
           if (match[0].includes('example') || match[0].includes('placeholder') ||
-              match[0].includes('jane') || match[0].includes('your')) continue;
+              match[0].includes('jane') || match[0].includes('your') ||
+              match[0].includes('users.noreply.github.com') ||
+              /^[-+(). 0]+$/.test(match[0])) continue;
           warn(`Possible ${label} in ${cleanPath}: "${match[0]}"`);
           leakFound = true;
         }

@@ -7,14 +7,22 @@
 
 ## Quick Start (5 steps)
 
-### 1. Clone and install
+### 1. Choose an install path
+
+- **Template repository**: create a private copy before adding personal files.
+- **Private fork**: keep a link to upstream while keeping your own `cv.md`, profile, and tracker data private.
+- **Local clone**: try the workflow on your machine without publishing configuration.
+
+The following commands use a local clone:
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/RajjjAryan/career-copilot.git
 cd career-copilot
 npm install
 npx playwright install chromium   # Required for PDF generation + browser tools
 ```
+
+Personal files such as `cv.md`, `config/profile.yml`, `modes/_profile.md`, `portals.yml`, `feeds.yml`, and `article-digest.md` are gitignored by default.
 
 ### 1b. Playwright MCP (recommended)
 

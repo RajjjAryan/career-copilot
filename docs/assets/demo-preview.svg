@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+  <title id="title">Career-Copilot terminal demo preview</title>
+  <desc id="desc">A terminal-style preview showing job evaluation, PDF generation, and tracker update.</desc>
+  <rect width="960" height="540" rx="0" fill="#f7f8f5"/>
+  <rect x="42" y="42" width="876" height="456" rx="8" fill="#111417"/>
+  <rect x="42" y="42" width="876" height="42" rx="8" fill="#252a2f"/>
+  <circle cx="70" cy="63" r="7" fill="#ff6159"/>
+  <circle cx="94" cy="63" r="7" fill="#ffbd2e"/>
+  <circle cx="118" cy="63" r="7" fill="#28c840"/>
+  <text x="480" y="69" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#cfd6dd">career-copilot</text>
+
+  <text x="72" y="122" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" fill="#f3f7f0">$ career-copilot</text>
+  <text x="72" y="160" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" fill="#8bd17c">&gt; Evaluate this job: https://jobs.example.com/senior-backend-engineer</text>
+  <text x="72" y="204" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" fill="#d7dde3">Reading cv.md, config/profile.yml, modes/_profile.md, and JD...</text>
+
+  <rect x="72" y="236" width="816" height="86" rx="6" fill="#1c2227" stroke="#3d484f"/>
+  <text x="96" y="272" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20" font-weight="700" fill="#ffffff">Score: 4.3/5</text>
+  <text x="248" y="272" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" fill="#9cd67b">Good backend/platform fit</text>
+  <text x="96" y="302" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16" fill="#cfd6dd">Matched: distributed systems, reliability, developer platforms, product ownership</text>
+
+  <text x="72" y="362" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" fill="#d7dde3">Report saved: reports/007-example-senior-backend-2026-07-01.md</text>
+  <text x="72" y="402" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" fill="#d7dde3">$ node generate-pdf.mjs output/007-example.html output/007-example.pdf --format=a4</text>
+  <text x="72" y="442" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" fill="#d7dde3">PDF generated: output/007-example.pdf</text>
+  <text x="72" y="472" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" fill="#f5c26b">Tracker updated: #007 Example - Senior Backend Engineer</text>
+</svg>
