@@ -16,6 +16,15 @@ de:
   certifications: "Zertifizierungen"
   skills: "Kenntnisse"
 
+es:
+  summary: "Resumen Profesional"
+  competencies: "Competencias Clave"
+  experience: "Experiencia Profesional"
+  projects: "Proyectos"
+  education: "Formacion"
+  certifications: "Certificaciones"
+  skills: "Habilidades"
+
 fr:
   summary: "Profil Professionnel"
   competencies: "Competences Cles"
@@ -42,3 +51,12 @@ hi:
   education: "शिक्षा"
   certifications: "प्रमाणपत्र"
   skills: "कौशल"
+
+ja:
+  summary: "職務要約"
+  competencies: "主要スキル"
+  experience: "職務経歴"
+  projects: "プロジェクト"
+  education: "学歴"
+  certifications: "資格"
+  skills: "スキル"

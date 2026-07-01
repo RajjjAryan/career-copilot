@@ -1,5 +1,8 @@
 # Dependencies
 node_modules/
+.venv/
+venv/
+env/
 
 # Output (generated, user-specific)
 output/*

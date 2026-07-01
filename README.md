@@ -207,7 +207,7 @@ career-copilot/
 │   ├── patterns.md               # Outcome and role-fit pattern analysis
 │   ├── training.md               # Course/cert evaluation
 │   ├── project.md                # Portfolio project evaluation
-│   └── hi/, de/, fr/, pt/        # Localized mode packs
+│   └── de/, es/, fr/, hi/, ja/, pt/ # Localized mode packs
 ├── config/
 │   └── profile.example.yml       # Profile template
 ├── templates/

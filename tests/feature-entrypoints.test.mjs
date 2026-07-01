@@ -28,7 +28,7 @@ test('PDF import and feed support have scripts, templates, and npm commands', ()
 
 test('CV i18n template exists and documents supported locales', () => {
   const content = readFileSync(path('templates', 'cv-i18n.yml'), 'utf-8');
-  for (const locale of ['en:', 'de:', 'fr:', 'pt:', 'hi:']) {
+  for (const locale of ['en:', 'de:', 'es:', 'fr:', 'hi:', 'ja:', 'pt:']) {
     assert.match(content, new RegExp(`^${locale}`, 'm'));
   }
 });
