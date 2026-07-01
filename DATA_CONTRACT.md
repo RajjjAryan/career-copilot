@@ -13,11 +13,14 @@ These files belong to the user. The AI agent reads them for context but **never 
 | `modes/_profile.md` | Personal profile overrides (created from template) |
 | `article-digest.md` | Proof points from portfolio projects/articles |
 | `portals.yml` | Scanner configuration (copied from template) |
+| `feeds.yml` | RSS/Atom feed scanner configuration (copied from template) |
 | `data/applications.md` | Application tracker (modified only via merge-tracker) |
 | `data/pipeline.md` | URL inbox for pending evaluations |
+| `jds/*` | Saved private job descriptions |
 | `reports/*` | Evaluation reports (generated, then user-owned) |
 | `output/*` | Generated PDFs (generated, then user-owned) |
 | `interview-prep/*` | Story bank and interview prep files |
+| `batch/tracker-additions/*` | Temporary tracker rows generated before merge |
 
 ## System Layer — safe for automated updates
 
@@ -26,13 +29,23 @@ These files are part of the pipeline infrastructure. They can be updated by cont
 | File | Purpose |
 |------|---------|
 | `.github/copilot-instructions.md` | Main agent instruction set |
+| `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.cursorrules`, `.windsurfrules` | AI tool entry points |
+| `.github/`, `.vscode/mcp.json` | GitHub metadata, templates, CI, and MCP configuration |
 | `modes/_shared.md` | Shared scoring rules, archetypes, tool references |
 | `modes/*.md` (except `_profile.md`) | Skill mode definitions |
+| `modes/{de,es,fr,hi,ja,pt}/` | Localized mode packs |
 | `templates/cv-template.html` | ATS-optimized CV HTML template |
 | `templates/states.yml` | Canonical application statuses |
 | `templates/portals.example.yml` | Portal scanner template |
+| `templates/feeds.example.yml` | Feed scanner template |
+| `templates/cv-i18n.yml` | Localized CV section labels |
 | `config/profile.example.yml` | Profile template |
 | `*.mjs` scripts | Utility scripts |
+| `lib/**` | Shared script modules and adapters |
+| `tests/**` | Regression and contract tests |
+| `dashboard/**` | Terminal and web dashboard source |
+| `examples/*` | Safe sample inputs and reports |
+| `docs/assets/*`, named docs in `docs/` | System documentation and launch assets |
 | `batch/batch-prompt.md` | Self-contained batch worker prompt |
 | `generate-pdf.mjs` | HTML → PDF generation |
 
